@@ -1,38 +1,61 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+#define XSIZE 500  //---------------(?)--------------
+#define YSIZE 500
+
+typedef struct {
+	int		id;
+	char	username[20];
+	int		high_score;
+}player;
+
 typedef struct {
 	int		id;				
 	int		score;
 	int		lives;			//ship is a one shot kill, but has several lives
 	int		x;				//ship x,y position
 	int		y;
+	player	owner;
 
 	//powerups (only player specific)
 	bool	shield;			//If shield is true, lives won't go down.
 	bool	drunk;			//If true, controls are inverted.
-	bool	turbo;			//Player will move faster.
+	bool	turbo;			//Player will move faster. -------(?)-------
+	int		laser_shots;	//kills all invaders in sight
 	//add more
-}playership;
+}ship;
 
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
 	int		hp;				//ship hit points
 	int		bombrate;		//bomb drop rate
-	bool	randpath;		//true for random trajectory, false for zig-zag
+	bool	rand_path;		//true for random trajectory, false for zig-zag
 }invader;
 
 typedef struct {
+	int		x;				//ship x,y position
+	int		y;
+	int		hp;
+}barriers;
+
+typedef struct {
+	int		x;				//ship x,y position
+	int		y;
 	int		speed;
 }invaderbomb;
 
 typedef struct {
+	int		x;				//ship x,y position
+	int		y;
 	int		speed;
-}shipshot;
+}ship_shot;
 
 typedef struct {
-	int		matrix[20][20];
+	int		matrix[XSIZE][YSIZE];
+	int		invader_speed;	//invader speed multiplier
+	int		ship_shot_spd;	//Ship shot speed multiplier
 }map;
 
 

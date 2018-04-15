@@ -18,9 +18,22 @@ typedef struct {
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
-	int		bombs;			//number of bombs available to drop
-	bool randpath;			//true for random trajectory, false for zig-zag
+	int		hp;				//ship hit points
+	int		bombrate;		//bomb drop rate
+	bool	randpath;		//true for random trajectory, false for zig-zag
 }invader;
+
+typedef struct {
+	int		speed;
+}invaderbomb;
+
+typedef struct {
+	int		speed;
+}shipshot;
+
+typedef struct {
+	int		matrix[20][20];
+}map;
 
 
 

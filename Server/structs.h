@@ -1,12 +1,12 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-#define XSIZE 500  //---------------(?)--------------
-#define YSIZE 500
+#define XSIZE 80  //---------------(?)--------------
+#define YSIZE 25
 
 typedef struct {
 	int		id;
-	char	username[20];
+	TCHAR	username[20];
 	int		high_score;
 }player;
 
@@ -19,9 +19,9 @@ typedef struct {
 	player	owner;
 
 	//powerups (only player specific)
-	bool	shield;			//If shield is true, lives won't go down.
-	bool	drunk;			//If true, controls are inverted.
-	bool	turbo;			//Player will move faster. -------(?)-------
+	int		shield;			//If shield is true, lives won't go down.
+	int		drunk;			//If true, controls are inverted.
+	int		turbo;			//Player will move faster. -------(?)-------
 	int		laser_shots;	//kills all invaders in sight
 	//add more
 }ship;
@@ -31,7 +31,7 @@ typedef struct {
 	int		y;
 	int		hp;				//ship hit points
 	int		bombrate;		//bomb drop rate
-	bool	rand_path;		//true for random trajectory, false for zig-zag
+	int		rand_path;		//true for random trajectory, false for zig-zag
 }invader;
 
 typedef struct {

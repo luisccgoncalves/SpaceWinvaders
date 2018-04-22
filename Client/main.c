@@ -37,7 +37,6 @@ void clrscr() {
 			_tprintf(TEXT(" "));
 		}
 	}
-
 }
 
 void hidecursor() {

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
+#include "../DLL/dll.h"
 
 int _tmain(int argc, LPTSTR argv[]) {
 
@@ -12,6 +13,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 #endif
 
 	_tprintf(TEXT("I'm a gateway!\n"));
+	//Usar a variável da Dll
+	_tprintf(TEXT("Valor da variável da DLL: %d\n"), nDLL);
 	_gettchar();
 
 	return 0;

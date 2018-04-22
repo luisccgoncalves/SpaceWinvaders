@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
+#include "../DLL/dll.h"
 
 int boot_gateway() {
 
@@ -35,6 +36,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	_tprintf(TEXT("Waiting for connection...\t[TBI]\n"));
+	_tprintf(TEXT("Reading value from dll: %d\n"),nDLL);
 
 
 

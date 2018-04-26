@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
+#include "structs.h"
 #include "../DLL/dll.h"
 
 int _tmain(int argc, LPTSTR argv[]) {
@@ -12,12 +13,35 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_setmode(_fileno(stdout), _O_WTEXT);
 	#endif
 
-	_tprintf(TEXT("Paging file...\t\t\t[TBI]\n"));
+	HANDLE hSMem; //handle para memória partilhada
+	char * pSMem; //Ponteiro para o primeiro byte da memória
+	char * RHead; //Ponteiro que vai percorrendo a memória, para fazer a leitura
+	LARGE_INTEGER SMemSize;
 
-	_tprintf(TEXT("Waiting for connection...\t[TBI]\n"));
-	_tprintf(TEXT("Reading value from dll: %d\n"),nDLL);
+	SMemSize.QuadPart = sizeof(char);
+	//Criar um objecto para o mapeamento para cada ficheiro aberto
+	hSMem = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, SMemSize.HighPart, SMemSize.LowPart, SMName);
 
+	if (hSMem == NULL) {
+		_tprintf(TEXT("[Erro]Criar objectos mapeamentos(%d)\n"), GetLastError());
+		return -1;
+	}
+
+	//Mapear efectivamente o ficheiro em memória
+	pSMem = (char *)MapViewOfFile(hSMem, FILE_MAP_ALL_ACCESS, 0, 0, SMemSize.QuadPart);
+	if (pSMem == NULL) {
+		_tprintf(TEXT("[Erro]Mapear para memória(%d)\n"), GetLastError());
+		return -1;
+	}
+
+	RHead = pSMem;
+
+	*pSMem = 'T';
+
+	_tprintf(TEXT("This was put in shared memory -> %c\n"), *pSMem);
 	_gettchar();
+	UnmapViewOfFile(pSMem);
+	CloseHandle(hSMem);
 
 	return 0;
 }

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
+#include "../Server/structs.h"
 #include "../DLL/dll.h"
 
 int _tmain(int argc, LPTSTR argv[]) {
@@ -12,9 +13,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_setmode(_fileno(stdout), _O_WTEXT);
 #endif
 
-	_tprintf(TEXT("I'm a gateway!\n"));
-	//Usar a variável da Dll
-	_tprintf(TEXT("Valor da variável da DLL: %d\n"), nDLL);
+	HANDLE hSMem;
+	char *pSMem;
+	LARGE_INTEGER SMemSize;
+	SMemSize.QuadPart = sizeof(char);
+
+	hSMem = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, SMName);
+
+	pSMem = (char *)MapViewOfFile(hSMem, FILE_MAP_ALL_ACCESS, 0, 0, SMemSize.QuadPart);
+
+	_tprintf(TEXT("This was read from memory -> %c\n"), *pSMem);
+
 	_gettchar();
 
 	return 0;

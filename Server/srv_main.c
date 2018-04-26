@@ -16,8 +16,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE			hSMem;		//Handle to shared memory
 	char			*pSMem;		//Pointer to shared memory's first byte
 	LARGE_INTEGER	SMemSize;	//Stores the size of the mapped file
+	HANDLE			hCanBootNow;
 
 	SMemSize.QuadPart = sizeof(char); //This should be in structs.h or dll
+
+	hCanBootNow = CreateEvent(NULL,FALSE,FALSE,TEXT("LetsBoot"));
 
 	//Maps a file in memory 
 	hSMem = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, SMemSize.HighPart, SMemSize.LowPart, SMName);
@@ -32,6 +35,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Mapping memory (%d)\n"), GetLastError());
 		return -1;
 	}
+
+	SetEvent(hCanBootNow);
 
 	*pSMem = 'T';  //Puts the letter T in the shared memory
 

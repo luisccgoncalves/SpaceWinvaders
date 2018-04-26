@@ -16,8 +16,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE			hSMem;		//Handle to shared memory
 	char			*pSMem;		//Pointer to shared memory's first byte
 	LARGE_INTEGER	SMemSize;	//Stores the size of the mapped file
+	HANDLE			hCanBootNow;
 
 	SMemSize.QuadPart = sizeof(char); //This should be in structs.h or dll
+
+	//hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, (LPTSTR)TEXT("LetsBoot"));
+	hCanBootNow = CreateEvent(NULL, FALSE, FALSE, TEXT("LetsBoot"));
+
+
+	_tprintf(TEXT("Detecting if server is running.\n"));
+	WaitForSingleObject(hCanBootNow, 5000);
 
 	//Opens a mapped file by the server
 	hSMem = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, SMName);

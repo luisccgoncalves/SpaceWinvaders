@@ -103,7 +103,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 		_tprintf(TEXT("Â"));
 		gotoxy(d_ship.x, d_ship.y);
-		k_stroke= _getch();
+		k_stroke= _gettch();
 
 		switch (k_stroke) {
 		case 'w':

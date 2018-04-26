@@ -13,18 +13,32 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_setmode(_fileno(stdout), _O_WTEXT);
 #endif
 
-	HANDLE hSMem;
-	char *pSMem;
-	LARGE_INTEGER SMemSize;
-	SMemSize.QuadPart = sizeof(char);
+	HANDLE			hSMem;		//Handle to shared memory
+	char			*pSMem;		//Pointer to shared memory's first byte
+	LARGE_INTEGER	SMemSize;	//Stores the size of the mapped file
 
+	SMemSize.QuadPart = sizeof(char); //This should be in structs.h or dll
+
+	//Opens a mapped file by the server
 	hSMem = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, SMName);
+	if (hSMem == NULL) {
+		_tprintf(TEXT("[Error] Opening file mapping (%d)\nIs the server running?\n"), GetLastError());
+		return -1;
+	}
 
+	//Creates a view of the desired part
 	pSMem = (char *)MapViewOfFile(hSMem, FILE_MAP_ALL_ACCESS, 0, 0, SMemSize.QuadPart);
+	if (pSMem == NULL) {
+		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
+		return -1;
+	}
 
+	//Reads the value from memory
 	_tprintf(TEXT("This was read from memory -> %c\n"), *pSMem);
 
 	_gettchar();
+	UnmapViewOfFile(pSMem);
+	CloseHandle(hSMem);
 
 	return 0;
 }

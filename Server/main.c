@@ -13,30 +13,27 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_setmode(_fileno(stdout), _O_WTEXT);
 	#endif
 
-	HANDLE hSMem; //handle para memória partilhada
-	char * pSMem; //Ponteiro para o primeiro byte da memória
-	char * RHead; //Ponteiro que vai percorrendo a memória, para fazer a leitura
-	LARGE_INTEGER SMemSize;
+	HANDLE			hSMem;		//Handle to shared memory
+	char			*pSMem;		//Pointer to shared memory's first byte
+	LARGE_INTEGER	SMemSize;	//Stores the size of the mapped file
 
-	SMemSize.QuadPart = sizeof(char);
-	//Criar um objecto para o mapeamento para cada ficheiro aberto
+	SMemSize.QuadPart = sizeof(char); //This should be in structs.h or dll
+
+	//Maps a file in memory 
 	hSMem = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, SMemSize.HighPart, SMemSize.LowPart, SMName);
-
 	if (hSMem == NULL) {
-		_tprintf(TEXT("[Erro]Criar objectos mapeamentos(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	//Mapear efectivamente o ficheiro em memória
+	//Creates a view of the desired part
 	pSMem = (char *)MapViewOfFile(hSMem, FILE_MAP_ALL_ACCESS, 0, 0, SMemSize.QuadPart);
 	if (pSMem == NULL) {
-		_tprintf(TEXT("[Erro]Mapear para memória(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] Mapping memory (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	RHead = pSMem;
-
-	*pSMem = 'T';
+	*pSMem = 'T';  //Puts the letter T in the shared memory
 
 	_tprintf(TEXT("This was put in shared memory -> %c\n"), *pSMem);
 	_gettchar();

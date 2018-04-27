@@ -6,6 +6,17 @@
 #include "../Server/structs.h"
 #include "../DLL/dll.h"
 
+/**/ //TO DLL
+// Thread to read from memmory
+typedef struct {
+	HANDLE			hNewMessage;		//Shared Memory handle
+	HANDLE			hSMem;				//Handle to shared memory
+	LARGE_INTEGER	SMemSize;			//Stores the size of the mapped file
+	char			*pSMem;				//Pointer to shared memory's first byte
+	int				ThreadMustGoOn;		//Flag for thread shutdown
+} SMCtrl_Thread;
+/**/
+
 int _tmain(int argc, LPTSTR argv[]) {
 
 #ifdef UNICODE
@@ -44,7 +55,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Reads the value from memory
-	while (1) {
+	while (1) {//thread
 		//clean the screen
 		WaitForSingleObject(hNewMessage, INFINITE);
 		_tprintf(TEXT("This was read from memory -> %c\n"), *pSMem);

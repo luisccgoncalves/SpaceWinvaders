@@ -6,8 +6,7 @@
 #include "structs.h"
 #include "../DLL/dll.h"
 
-/**/
-
+/**/ //TO DLL
 // Thread to read from memmory
 typedef struct {
 	HANDLE			hNewMessage;		//Shared Memory handle
@@ -16,6 +15,8 @@ typedef struct {
 	char			*pSMem;				//Pointer to shared memory's first byte
 	int				ThreadMustGoOn;		//Flag for thread shutdown
 } SMCtrl_Thread;
+/**/
+
 
 int _tmain(int argc, LPTSTR argv[]) {
 

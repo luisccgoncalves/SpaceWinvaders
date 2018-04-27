@@ -45,8 +45,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	//Reads the value from memory
 	while (1) {
-		//clean the scrren
-		WaitForSingleObject(hNewMessage, 5000);
+		//clean the screen
+		WaitForSingleObject(hNewMessage, INFINITE);
 		_tprintf(TEXT("This was read from memory -> %c\n"), *pSMem);
 	}
 	_gettchar();

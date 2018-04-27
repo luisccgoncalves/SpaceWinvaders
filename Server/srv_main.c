@@ -58,7 +58,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	SetEvent(hCanBootNow);
 
 	*cThread.pSMem = 'T';  //Puts the letter T in the shared memory
-
 	_tprintf(TEXT("This was put in shared memory -> %c\n"), *cThread.pSMem);
 	
 	SetEvent(cThread.hNewMessage);

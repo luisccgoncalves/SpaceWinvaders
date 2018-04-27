@@ -17,6 +17,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	char			*pSMem;		//Pointer to shared memory's first byte
 	LARGE_INTEGER	SMemSize;	//Stores the size of the mapped file
 	HANDLE			hCanBootNow;
+	HANDLE			hCanBootNow;
 
 	SMemSize.QuadPart = sizeof(char); //This should be in structs.h or dll
 

@@ -9,7 +9,7 @@
 /**/ //TO DLL
 // Thread to read from memmory
 typedef struct {
-	HANDLE			hNewMessage;		//Shared Memory handle
+	HANDLE			hNewMessage;		//Handle to event. Warns gateway about updates in shared memory
 	HANDLE			hSMem;				//Handle to shared memory
 	LARGE_INTEGER	SMemSize;			//Stores the size of the mapped file
 	invader			*pSMem;				//Pointer to shared memory's first byte

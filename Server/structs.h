@@ -16,8 +16,6 @@ typedef struct {
 	int		lives;			//ship is a one shot kill, but has several lives
 	int		x;				//ship x,y position
 	int		y;
-	int		x_init;			//ship x,y initial position
-	int		y_init;			//needed for relative coordinates
 	player	owner;
 
 	//powerups (only player specific)
@@ -31,6 +29,8 @@ typedef struct {
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
+	int		x_init;			//ship x,y initial position
+	int		y_init;			//needed for relative coordinates
 	int		hp;				//ship hit points
 	int		bombrate;		//bomb drop rate
 	int		rand_path;		//true for random trajectory, false for zig-zag

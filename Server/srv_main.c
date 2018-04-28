@@ -12,7 +12,7 @@ typedef struct {
 	HANDLE			hNewMessage;		//Shared Memory handle
 	HANDLE			hSMem;				//Handle to shared memory
 	LARGE_INTEGER	SMemSize;			//Stores the size of the mapped file
-	char			*pSMem;				//Pointer to shared memory's first byte
+	invader			*pSMem;				//Pointer to shared memory's first byte
 	int				ThreadMustGoOn;		//Flag for thread shutdown
 } SMCtrl_Thread;
 /**/
@@ -30,7 +30,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	//startThread;
 	
-	cThread.SMemSize.QuadPart = sizeof(char); //This should be in structs.h or dll
+	cThread.SMemSize.QuadPart = sizeof(invader); //This should be in structs.h or dll
 
 	hCanBootNow = CreateEvent(NULL,FALSE,FALSE,TEXT("LetsBoot"));
 	cThread.hNewMessage = CreateEvent(NULL, FALSE, FALSE, TEXT("NewMessage"));
@@ -50,7 +50,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part
-	cThread.pSMem = (char *)MapViewOfFile(cThread.hSMem, FILE_MAP_ALL_ACCESS, 0, 0, cThread.SMemSize.QuadPart);
+	cThread.pSMem = (invader *)MapViewOfFile(cThread.hSMem, FILE_MAP_ALL_ACCESS, 0, 0, cThread.SMemSize.QuadPart);
 	if (cThread.pSMem == NULL) {
 		_tprintf(TEXT("[Error] Mapping memory (%d)\n"), GetLastError());
 		return -1;
@@ -58,10 +58,36 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	SetEvent(hCanBootNow);
 
-	*cThread.pSMem = 'T';  //Puts the letter T in the shared memory
-	_tprintf(TEXT("This was put in shared memory -> %c\n"), *cThread.pSMem);
-	
+
+	_tprintf(TEXT("Server deployed an invader. Ctrl+C to quit"));
+
+	cThread.pSMem->x = 0;
+	cThread.pSMem->y = 0;
+
 	SetEvent(cThread.hNewMessage);
+
+	while (1) {
+		
+		for (cThread.pSMem->y; cThread.pSMem->y < YSIZE; cThread.pSMem->y++) {
+			Sleep(1000);
+			SetEvent(cThread.hNewMessage);
+			for (cThread.pSMem->x=0; cThread.pSMem->x < 4; cThread.pSMem->x++) {
+				Sleep(1000);
+				SetEvent(cThread.hNewMessage);
+			}
+
+			Sleep(1000);
+			cThread.pSMem->y++;
+			SetEvent(cThread.hNewMessage);
+
+			for (cThread.pSMem->x=4; cThread.pSMem->x >= 0; cThread.pSMem->x--) {
+				Sleep(1000);
+				SetEvent(cThread.hNewMessage);
+			}
+		}
+
+	}
+
 
 	_gettchar();
 	UnmapViewOfFile(cThread.pSMem);

@@ -18,5 +18,8 @@
     <ClCompile Include="clt_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="debug.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include "../Server/structs.h"
 #include "../DLL/dll.h"
+#include "../Client/debug.h"
 
 /**/ //TO DLL
 // Thread to read from memmory
@@ -12,7 +13,7 @@ typedef struct {
 	HANDLE			hNewMessage;		//Shared Memory handle
 	HANDLE			hSMem;				//Handle to shared memory
 	LARGE_INTEGER	SMemSize;			//Stores the size of the mapped file
-	char			*pSMem;				//Pointer to shared memory's first byte
+	invader			*pSMem;				//Pointer to shared memory's first byte
 	int				ThreadMustGoOn;		//Flag for thread shutdown
 } SMCtrl_Thread;
 /**/
@@ -25,12 +26,13 @@ int _tmain(int argc, LPTSTR argv[]) {
 #endif
 
 	HANDLE			hSMem;		//Handle to shared memory
-	char			*pSMem;		//Pointer to shared memory's first byte
+	invader			*pSMem;		//Pointer to shared memory's first byte
 	LARGE_INTEGER	SMemSize;	//Stores the size of the mapped file
 	HANDLE			hCanBootNow;
 	HANDLE			hNewMessage;
+	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
-	SMemSize.QuadPart = sizeof(char); //This should be in structs.h or dll
+	SMemSize.QuadPart = sizeof(invader); //This should be in structs.h or dll
 
 	//hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, (LPTSTR)TEXT("LetsBoot"));
 	hCanBootNow = CreateEvent(NULL, FALSE, FALSE, TEXT("LetsBoot"));
@@ -48,19 +50,21 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part
-	pSMem = (char *)MapViewOfFile(hSMem, FILE_MAP_ALL_ACCESS, 0, 0, SMemSize.QuadPart);
+	pSMem = (invader *)MapViewOfFile(hSMem, FILE_MAP_ALL_ACCESS, 0, 0, SMemSize.QuadPart);
 	if (pSMem == NULL) {
 		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
 	}
 
-	//Reads the value from memory
+	cls(hStdout);
+	hidecursor();
 	while (1) {//thread
-		//clean the screen
 		WaitForSingleObject(hNewMessage, INFINITE);
-		_tprintf(TEXT("This was read from memory -> %c\n"), *pSMem);
+		cls(hStdout);
+		gotoxy(pSMem->x, pSMem->y);
+		_tprintf(TEXT("W"));
 	}
-	_gettchar();
+
 	UnmapViewOfFile(pSMem);
 	CloseHandle(hSMem);
 

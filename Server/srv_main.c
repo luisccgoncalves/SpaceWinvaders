@@ -68,24 +68,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	while (1) {
 		
-		for (cThread.pSMem->y; cThread.pSMem->y < YSIZE; cThread.pSMem->y++) {
-			Sleep(1000);
-			SetEvent(cThread.hNewMessage);
-			for (cThread.pSMem->x=0; cThread.pSMem->x < 4; cThread.pSMem->x++) {
-				Sleep(1000);
+		for (cThread.pSMem->y = 0; cThread.pSMem->y <= (YSIZE - 2); cThread.pSMem->y++) {
+			for (cThread.pSMem->x = 0; cThread.pSMem->x < 4; cThread.pSMem->x++) {
+				Sleep(500);
 				SetEvent(cThread.hNewMessage);
 			}
-
-			Sleep(1000);
 			cThread.pSMem->y++;
-			SetEvent(cThread.hNewMessage);
-
-			for (cThread.pSMem->x=4; cThread.pSMem->x >= 0; cThread.pSMem->x--) {
-				Sleep(1000);
+			for (cThread.pSMem->x = 3; cThread.pSMem->x > -1; cThread.pSMem->x--) {
+				Sleep(500);
 				SetEvent(cThread.hNewMessage);
 			}
 		}
-
 	}
 
 

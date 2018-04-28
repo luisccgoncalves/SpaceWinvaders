@@ -10,11 +10,17 @@
 // Thread to read from memmory
 typedef struct {
 	HANDLE			hNewMessage;		//Handle to event. Warns gateway about updates in shared memory
+	HANDLE			mhInvader;			//Handle to mutex (TEST)
 	HANDLE			hSMem;				//Handle to shared memory
 	LARGE_INTEGER	SMemSize;			//Stores the size of the mapped file
 	invader			*pSMem;				//Pointer to shared memory's first byte
 	int				ThreadMustGoOn;		//Flag for thread shutdown
 } SMCtrl_Thread;
+
+typedef struct {
+	HANDLE			hTick;				//Handle to event. Warns gateway about updates in shared memory
+	int				ThreadMustGoOn;		
+}GTickStruct;
 /**/
 
 DWORD WINAPI InvaderDeploy(LPVOID tParam) {
@@ -28,31 +34,45 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 	cThread->pSMem->x = cThread->pSMem->x_init = 0;
 	cThread->pSMem->y = cThread->pSMem->x_init = 0;
 
-	//This should be a mutex, there should be another thread to warn the gateway of struct updates
-	SetEvent(cThread->hNewMessage);		
-
 	while (cThread->ThreadMustGoOn) {	//Thread main loop
 
-		for (cThread->pSMem->y = 0; cThread->pSMem->y <= (YSIZE - 2); cThread->pSMem->y++) {
-
-			//Invader goes 4 spaces to the right
-			for (cThread->pSMem->x = 0; cThread->pSMem->x < 4; cThread->pSMem->x++) {
-				Sleep(500);				//This should be a variable. Lower number==higher dificulty
-				if (cThread->ThreadMustGoOn) SetEvent(cThread->hNewMessage);	//Thread exit condition
+		WaitForSingleObject(cThread->mhInvader, INFINITE);													/**/
+		for (cThread->pSMem->y = 0; cThread->pSMem->y <= (YSIZE - 2); cThread->pSMem->y++) {				/**/
+																											/**/
+			//Invader goes 4 spaces to the right															/*CRITICAL SECTION*/
+			for (cThread->pSMem->x = 0; cThread->pSMem->x < 4; cThread->pSMem->x++) {						/**/
+				ReleaseMutex(cThread->mhInvader);															/**/
+				//Sleep(500) should be a variable. Lower number==higher dificulty
+				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
 				else return 0;
 			}
 			
-			//Invader goes down 1 space
-			cThread->pSMem->y++;
-
-			//Invader goes 4 spaces to the left
-			for (cThread->pSMem->x = 3; cThread->pSMem->x > -1; cThread->pSMem->x--) {
-				Sleep(500);
-				if (cThread->ThreadMustGoOn) SetEvent(cThread->hNewMessage);	//Thread exit condition
+			WaitForSingleObject(cThread->mhInvader, INFINITE);												/**/
+			//Invader goes down 1 space																		/**/
+			cThread->pSMem->y++;																			/**/
+																											/*CRITICAL SECTION*/
+			//Invader goes 4 spaces to the left																/**/
+			for (cThread->pSMem->x = 3; cThread->pSMem->x > -1; cThread->pSMem->x--) {						/**/
+				ReleaseMutex(cThread->mhInvader);															/**/
+				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
 				else return 0;
 			}
 		}
 	}
+}
+
+DWORD WINAPI GameTick(LPVOID tParam) {		//Warns gateway of structure updates
+	
+	GTickStruct		*sGTick;
+	sGTick = (GTickStruct*)tParam;
+
+	while (sGTick->ThreadMustGoOn) {
+
+		Sleep(100);
+		_tprintf(TEXT("TICK "));
+		SetEvent(sGTick->hTick);
+	}
+
 }
 
 int _tmain(int argc, LPTSTR argv[]) {
@@ -62,13 +82,23 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_setmode(_fileno(stdout), _O_WTEXT);
 	#endif
 	
-	SMCtrl_Thread	cThread;		//Thread parameter structure
-	HANDLE			hCanBootNow;	//Handle to event. Warns the gateway the shared memory is mapped
-	DWORD			tInvaderID;		//stores the ID of the Invader thread
-	HANDLE			htInvader;		//Handle to the Invader thread
+	SMCtrl_Thread	cThread;			//Thread parameter structure
+	HANDLE			hCanBootNow;		//Handle to event. Warns the gateway the shared memory is mapped
+	DWORD			tInvaderID;			//stores the ID of the Invader thread
+	HANDLE			htInvader;			//Handle to the Invader thread
+
+	GTickStruct		sGTick;
+	HANDLE			htGTick;
+	DWORD			tGTickID;
 	
 	cThread.SMemSize.QuadPart = sizeof(invader);	//This should be in structs.h or dll
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
+	sGTick.ThreadMustGoOn = 1;
+
+	cThread.mhInvader = CreateMutex(	//This a test
+		NULL,							//Security attributes
+		FALSE,							//Initial owner
+		NULL);							//Mutex name
 
 	hCanBootNow = CreateEvent(			//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,							//Event attributes
@@ -82,6 +112,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE, 							//Initial state
 		TEXT("NewMessage"));			//Event name
 
+	sGTick.hTick = cThread.hNewMessage;
+
 	cThread.hSMem = CreateFileMapping(	//Maps a file in memory 
 		INVALID_HANDLE_VALUE,			//Handle to file being mapped (INVALID_HANDLE_VALUE to swap)
 		NULL,							//Security attributes
@@ -90,7 +122,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		cThread.SMemSize.LowPart,		//MaximumSizeLow
 		SMName);						//File mapping name
 
-	if (cThread.hSMem == NULL) {				//Checks for errors
+	if (cThread.hSMem == NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -110,8 +142,19 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	SetEvent(hCanBootNow);						//Warns gateway that Shared memory is mapped
 
-	//Launches thread
-	_tprintf(TEXT("Launching thread... ENTER to quit\n"));
+	//Launches game tick thread
+	_tprintf(TEXT("Launching game tick thread...\n"));
+
+	htGTick = CreateThread(
+		NULL,					//Thread security attributes
+		0,						//Stack size
+		GameTick,				//Thread function name
+		(LPVOID)&sGTick,		//Thread parameter struct
+		0,						//Creation flags
+		&tGTickID);				//gets thread ID to close it afterwards
+
+	//Launches invader thread
+	_tprintf(TEXT("Launching invader thread... ENTER to quit\n"));
 
 	htInvader = CreateThread(
 		NULL,					//Thread security attributes
@@ -124,7 +167,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//Enter to end thread and exit
 	_gettchar();
 	cThread.ThreadMustGoOn = 0;					//Signals thread to gracefully exit
+	sGTick.ThreadMustGoOn = 0;					//Signals thread to gracefully exit
 	WaitForSingleObject(htInvader, INFINITE);	//Waits for thread to exit
+	WaitForSingleObject(htGTick, INFINITE);		//Waits for thread to exit
 	
 	UnmapViewOfFile(cThread.pSMem);				//Unmaps view of shared memory
 	CloseHandle(cThread.hSMem);					//Closes shared memory

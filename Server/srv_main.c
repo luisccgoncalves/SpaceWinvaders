@@ -9,12 +9,16 @@
 /**/ //TO DLL
 // Thread to read from memmory
 typedef struct {
-	HANDLE			hNewMessage;		//Handle to event. Warns gateway about updates in shared memory
-	HANDLE			mhInvader;			//Handle to mutex (TEST)
-	HANDLE			hSMem;				//Handle to shared memory
-	LARGE_INTEGER	SMemSize;			//Stores the size of the mapped file
-	invader			*pSMem;				//Pointer to shared memory's first byte
-	int				ThreadMustGoOn;		//Flag for thread shutdown
+	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
+	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
+	HANDLE			mhInvader;				//Handle to mutex (TEST)
+	HANDLE			hSMem;					//Handle to shared memory
+	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
+	LARGE_INTEGER	SMemViewServer;				//Stores the size of the mapped file
+	LARGE_INTEGER	SMemViewGateway;				//Stores the size of the mapped file
+	invader			*pSMem;					//Pointer to shared memory's first byte
+	char			*pSMGateway;			//Pointer to shared memory's first byte
+	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl_Thread;
 
 typedef struct {
@@ -91,7 +95,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE			htGTick;
 	DWORD			tGTickID;
 	
-	cThread.SMemSize.QuadPart = sizeof(invader);	//This should be in structs.h or dll
+	cThread.SMemSize.QuadPart = sizeof(invader) + sizeof(char); //This should be in structs.h or dll
+	cThread.SMemViewServer.QuadPart = sizeof(invader);
+	cThread.SMemViewGateway.QuadPart = sizeof(char);
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;
 
@@ -106,13 +112,19 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,							//Initial state
 		TEXT("LetsBoot"));				//Event name
 
-	cThread.hNewMessage = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 							//Event attributes
 		FALSE, 							//Manual reset (TRUE for auto-reset)
 		FALSE, 							//Initial state
-		TEXT("NewMessage"));			//Event name
+		TEXT("SMServerUpdate"));			//Event name
 
-	sGTick.hTick = cThread.hNewMessage;
+	cThread.hSMGatewayUpdate = CreateEvent(		//Creates the event to warn gateway that the shared memoy is mapped
+		NULL, 									//Event attributes
+		FALSE, 									//Manual reset (TRUE for auto-reset)
+		FALSE, 									//Initial state
+		TEXT("SMGatewayUpdate"));				//Event name
+
+	sGTick.hTick = cThread.hSMServerUpdate;
 
 	cThread.hSMem = CreateFileMapping(	//Maps a file in memory 
 		INVALID_HANDLE_VALUE,			//Handle to file being mapped (INVALID_HANDLE_VALUE to swap)
@@ -127,18 +139,35 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part
 	cThread.pSMem = (invader *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,							//Handle to the whole mapped object
-		FILE_MAP_ALL_ACCESS,					//Security attributes
-		0,										//OffsetHIgh (0 to map the whole thing)
-		0, 										//OffsetLow (0 to map the whole thing)
-		cThread.SMemSize.QuadPart);				//Number of bytes to map
+		FILE_MAP_WRITE,							//Security attributes
+		//cThread.SMemViewServer.HighPart,		//OffsetHIgh (0 to map the whole thing)
+		//cThread.SMemViewServer.LowPart, 		//OffsetLow (0 to map the whole thing)
+		0,
+		0,
+		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
 
-	if (cThread.pSMem == NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping memory (%d)\n"), GetLastError());
+	if (cThread.pSMem == NULL) {
+		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
 	}
+
+	//Creates a view of the desired part @ Gateway
+	cThread.pSMGateway = (char *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+		cThread.hSMem,								//Handle to the whole mapped object
+		FILE_MAP_READ,						//Security attributes
+		//cThread.SMemViewGateway.HighPart,			//OffsetHIgh (0 to map the whole thing)
+		//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
+		0,
+		0,
+		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
+
+	if (cThread.pSMGateway == NULL) {				//Checks for errors
+		_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
+		return -1;
+	}
+
 
 	SetEvent(hCanBootNow);						//Warns gateway that Shared memory is mapped
 

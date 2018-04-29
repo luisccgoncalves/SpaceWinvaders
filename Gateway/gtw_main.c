@@ -65,9 +65,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE			hCanBootNow;
 	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
-	cThread.SMemSize.QuadPart = sizeof(invader)+sizeof(char); //This should be in structs.h or dll
-	cThread.SMemViewServer.QuadPart = sizeof(invader);
-	cThread.SMemViewGateway.QuadPart = sizeof(char);
+	cThread.SMemSize.QuadPart = sizeof(SMServer_MSG) + sizeof(SMGateway_MSG); //This should be in structs.h or dll
+	cThread.SMemViewServer.QuadPart = sizeof(SMServer_MSG);
+	cThread.SMemViewGateway.QuadPart = sizeof(SMGateway_MSG);
 
 	cThread.ThreadMustGoOn = 1;
 
@@ -114,10 +114,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part @ Gateway
+	//Creates a view of the desired part <Gateway>
 	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,								//Handle to the whole mapped object
-		FILE_MAP_WRITE,						//Security attributes
+		FILE_MAP_WRITE,							//Security attributes
 		0,
 		0,
 		//cThread.SMemViewGateway.HighPart,			//OffsetHIgh (0 to map the whole thing)

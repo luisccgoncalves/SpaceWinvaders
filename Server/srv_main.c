@@ -172,29 +172,24 @@ int _tmain(int argc, LPTSTR argv[]) {
 		//cThread.SMemViewServer.LowPart, 		//OffsetLow (0 to map the whole thing)
 		0,
 		0,
-		cThread.SMemSize.QuadPart);		//Number of bytes to map
+		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
 
 	if (cThread.pSMemServer == NULL) {
-		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
+		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	//Creates a view of the desired part @ Gateway
+	//Creates a view of the desired part <Gateway>
 	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,								//Handle to the whole mapped object
 		FILE_MAP_ALL_ACCESS,						//Security attributes
-
-		//(DWORD *)cThread.SMemViewGateway.HighPart,
-		//(DWORD *)cThread.SMemViewGateway.LowPart,
-		
 		0,0,
-
-		//cThread.SMemViewGateway.HighPart,			//OffsetHIgh (0 to map the whole thing)
+		//cThread.SMemView.HighPart,			//OffsetHIgh (0 to map the whole thing)
 		//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
 		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
 
 	if (cThread.pSMGateway == NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
+		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
 

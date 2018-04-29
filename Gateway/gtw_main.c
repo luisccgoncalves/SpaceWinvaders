@@ -23,6 +23,28 @@ typedef struct {
 } SMCtrl_Thread;
 /**/
 
+
+/**/
+//typedef struct {
+//	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
+//	HANDLE			mhInvader;				//Handle to mutex (TEST)
+//	HANDLE			hSMem;					//Handle to shared memory
+//	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
+//	LARGE_INTEGER	SMemViewServer;				//Stores the size of the mapped file
+//	invader			*pSMem;					//Pointer to shared memory's first byte
+//	int				ThreadMustGoOn;			//Flag for thread shutdown
+//} SMCtrl_ServerThread;
+//
+//typedef struct {
+//	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
+//	HANDLE			hSMem;					//Handle to shared memory
+//	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
+//	LARGE_INTEGER	SMemViewGateway;				//Stores the size of the mapped file
+//	char			*pSMGateway;			//Pointer to shared memory's first byte
+//	int				ThreadMustGoOn;			//Flag for thread shutdown
+//} SMCtrl_GatewayThread;
+/**/
+
 int _tmain(int argc, LPTSTR argv[]) {
 
 #ifdef UNICODE

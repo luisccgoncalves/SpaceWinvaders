@@ -14,19 +14,20 @@ typedef struct {
 typedef struct {
 	invader			pSMem;					//Object type to use in the memory
 }SMServer_MSG;
+
 // Thread to read from memmory
 typedef struct {
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
 	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
+
 	HANDLE			mhInvader;				//Handle to mutex (TEST)
 	HANDLE			hSMem;					//Handle to shared memory
 	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
-	LARGE_INTEGER	SMemViewServer;				//Stores the size of the mapped file
-	LARGE_INTEGER	SMemViewGateway;				//Stores the size of the mapped file
+	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
+	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
 	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
 	SMGateway_MSG	*pSMGateway;			//Pointer to shared memory's first byte
-	//invader			*pSMem;					//Pointer to shared memory's first byte
-	//char			*pSMGateway;			//Pointer to shared memory's first byte
+
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl_Thread;
 
@@ -106,12 +107,25 @@ int _tmain(int argc, LPTSTR argv[]) {
 	GTickStruct		sGTick;
 	HANDLE			htGTick;
 	DWORD			tGTickID;
+
+	SYSTEM_INFO		SysInfo;
+	DWORD			dwSysGran;
+	DWORD			dwViewServerStart;
+	DWORD			dwViewGatewayStart;
 	
-	cThread.SMemSize.QuadPart = sizeof(invader) + sizeof(char); //This should be in structs.h or dll
-	cThread.SMemViewServer.QuadPart = sizeof(invader);
-	cThread.SMemViewGateway.QuadPart = sizeof(char);
+	cThread.SMemSize.QuadPart = sizeof(SMServer_MSG) + sizeof(SMGateway_MSG); //This should be in structs.h or dll
+	cThread.SMemViewServer.QuadPart = sizeof(SMServer_MSG);
+	cThread.SMemViewGateway.QuadPart = sizeof(SMGateway_MSG);
+
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;
+
+	GetSystemInfo(&SysInfo);									//Used to get system granularity
+	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
+
+	//ViewMap size considering the granularity
+	dwViewServerStart = ((sizeof(cThread.pSMemServer) / dwSysGran)*dwSysGran) + dwSysGran;
+	dwViewGatewayStart = ((sizeof(cThread.pSMGateway) / dwSysGran)*dwSysGran) + dwSysGran;
 
 	cThread.mhInvader = CreateMutex(	//This a test
 		NULL,							//Security attributes
@@ -158,7 +172,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		//cThread.SMemViewServer.LowPart, 		//OffsetLow (0 to map the whole thing)
 		0,
 		0,
-		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
+		cThread.SMemSize.QuadPart);		//Number of bytes to map
 
 	if (cThread.pSMemServer == NULL) {
 		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
@@ -166,13 +180,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part @ Gateway
-	cThread.pSMGateway = (char *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,								//Handle to the whole mapped object
-		FILE_MAP_READ,						//Security attributes
+		FILE_MAP_ALL_ACCESS,						//Security attributes
+
+		//(DWORD *)cThread.SMemViewGateway.HighPart,
+		//(DWORD *)cThread.SMemViewGateway.LowPart,
+		
+		0,0,
+
 		//cThread.SMemViewGateway.HighPart,			//OffsetHIgh (0 to map the whole thing)
 		//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
-		0,
-		0,
 		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
 
 	if (cThread.pSMGateway == NULL) {				//Checks for errors
@@ -212,7 +230,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htInvader, INFINITE);	//Waits for thread to exit
 	WaitForSingleObject(htGTick, INFINITE);		//Waits for thread to exit
 	
-	UnmapViewOfFile(cThread.pSMemServer);				//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemServer);		//Unmaps view of shared memory
 	CloseHandle(cThread.hSMem);					//Closes shared memory
 
 	return 0;

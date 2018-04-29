@@ -91,7 +91,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(hCanBootNow, 5000);
 
 	//Opens a mapped file by the server
-	cThread.hSMem = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, SMName);
+	cThread.hSMem = OpenFileMapping(
+		FILE_MAP_ALL_ACCESS, 
+		FALSE, 
+		SMName);
+
 	if (cThread.hSMem == NULL) {
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
@@ -103,8 +107,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FILE_MAP_READ,							//Security attributes
 		0,
 		0,
-		//cThread.SMemViewServer.HighPart,		//OffsetHIgh (0 to map the whole thing)
-		//cThread.SMemViewServer.LowPart, 		//OffsetLow (0 to map the whole thing)
 		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
 
 	if (cThread.pSMemServer == NULL) {
@@ -113,7 +115,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part @ Gateway
-	cThread.pSMGateway = (char *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,								//Handle to the whole mapped object
 		FILE_MAP_WRITE,						//Security attributes
 		0,

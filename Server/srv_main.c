@@ -7,6 +7,13 @@
 #include "../DLL/dll.h"
 
 /**/ //TO DLL
+typedef struct {
+	char			pSMem;					//Object type to use in the memory
+}SMGateway_MSG;
+
+typedef struct {
+	invader			pSMem;					//Object type to use in the memory
+}SMServer_MSG;
 // Thread to read from memmory
 typedef struct {
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
@@ -16,8 +23,10 @@ typedef struct {
 	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
 	LARGE_INTEGER	SMemViewServer;				//Stores the size of the mapped file
 	LARGE_INTEGER	SMemViewGateway;				//Stores the size of the mapped file
-	invader			*pSMem;					//Pointer to shared memory's first byte
-	char			*pSMGateway;			//Pointer to shared memory's first byte
+	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
+	SMGateway_MSG	*pSMGateway;			//Pointer to shared memory's first byte
+	//invader			*pSMem;					//Pointer to shared memory's first byte
+	//char			*pSMGateway;			//Pointer to shared memory's first byte
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl_Thread;
 
@@ -35,16 +44,18 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 	_tprintf(TEXT("Server deployed an invader."));
 
 	//Populates one invader with initial coords
-	cThread->pSMem->x = cThread->pSMem->x_init = 0;
-	cThread->pSMem->y = cThread->pSMem->x_init = 0;
+	cThread->pSMemServer->pSMem.x = cThread->pSMemServer->pSMem.x_init = 0;
+	cThread->pSMemServer->pSMem.y = cThread->pSMemServer->pSMem.x_init = 0;
 
 	while (cThread->ThreadMustGoOn) {	//Thread main loop
 
 		WaitForSingleObject(cThread->mhInvader, INFINITE);													/**/
-		for (cThread->pSMem->y = 0; cThread->pSMem->y <= (YSIZE - 2); cThread->pSMem->y++) {				/**/
+		for (cThread->pSMemServer->pSMem.y = 0; 
+			cThread->pSMemServer->pSMem.y <= (YSIZE - 2); cThread->pSMemServer->pSMem.y++) {				/**/
 																											/**/
 			//Invader goes 4 spaces to the right															/*CRITICAL SECTION*/
-			for (cThread->pSMem->x = 0; cThread->pSMem->x < 4; cThread->pSMem->x++) {						/**/
+			for (cThread->pSMemServer->pSMem.x = 0; 
+				cThread->pSMemServer->pSMem.x < 4; cThread->pSMemServer->pSMem.x++) {						/**/
 				ReleaseMutex(cThread->mhInvader);															/**/
 				//Sleep(500) should be a variable. Lower number==higher dificulty
 				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
@@ -53,10 +64,11 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 			
 			WaitForSingleObject(cThread->mhInvader, INFINITE);												/**/
 			//Invader goes down 1 space																		/**/
-			cThread->pSMem->y++;																			/**/
+			cThread->pSMemServer->pSMem.y++;																			/**/
 																											/*CRITICAL SECTION*/
 			//Invader goes 4 spaces to the left																/**/
-			for (cThread->pSMem->x = 3; cThread->pSMem->x > -1; cThread->pSMem->x--) {						/**/
+			for (cThread->pSMemServer->pSMem.x = 3; 
+				cThread->pSMemServer->pSMem.x > -1; cThread->pSMemServer->pSMem.x--) {						/**/
 				ReleaseMutex(cThread->mhInvader);															/**/
 				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
 				else return 0;
@@ -139,7 +151,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cThread.pSMem = (invader *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+	cThread.pSMemServer = (SMServer_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,							//Handle to the whole mapped object
 		FILE_MAP_WRITE,							//Security attributes
 		//cThread.SMemViewServer.HighPart,		//OffsetHIgh (0 to map the whole thing)
@@ -148,7 +160,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,
 		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
 
-	if (cThread.pSMem == NULL) {
+	if (cThread.pSMemServer == NULL) {
 		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
 	}
@@ -200,7 +212,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htInvader, INFINITE);	//Waits for thread to exit
 	WaitForSingleObject(htGTick, INFINITE);		//Waits for thread to exit
 	
-	UnmapViewOfFile(cThread.pSMem);				//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemServer);				//Unmaps view of shared memory
 	CloseHandle(cThread.hSMem);					//Closes shared memory
 
 	return 0;

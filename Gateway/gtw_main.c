@@ -8,6 +8,13 @@
 #include "../Client/debug.h"
 
 /**/ //TO DLL
+typedef struct {
+	char			pSMem;					//Object type to use in the memory
+}SMGateway_MSG;
+
+typedef struct {
+	invader			pSMem;					//Object type to use in the memory
+}SMServer_MSG;
 // Thread to read from memmory
 typedef struct {
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
@@ -17,8 +24,10 @@ typedef struct {
 	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
 	LARGE_INTEGER	SMemViewServer;				//Stores the size of the mapped file
 	LARGE_INTEGER	SMemViewGateway;				//Stores the size of the mapped file
-	invader			*pSMem;					//Pointer to shared memory's first byte
-	char			*pSMGateway;			//Pointer to shared memory's first byte
+	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
+	SMGateway_MSG	*pSMGateway;			//Pointer to shared memory's first byte
+	//invader			*pSMem;					//Pointer to shared memory's first byte
+	//char			*pSMGateway;			//Pointer to shared memory's first byte
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl_Thread;
 /**/
@@ -89,7 +98,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part
-	cThread.pSMem = (invader *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+	cThread.pSMemServer= (SMServer_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,							//Handle to the whole mapped object
 		FILE_MAP_READ,							//Security attributes
 		0,
@@ -98,7 +107,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		//cThread.SMemViewServer.LowPart, 		//OffsetLow (0 to map the whole thing)
 		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
 
-	if (cThread.pSMem == NULL) {
+	if (cThread.pSMemServer == NULL) {
 		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
 	}
@@ -123,12 +132,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 	while (cThread.ThreadMustGoOn) {
 		WaitForSingleObject(cThread.hSMServerUpdate, INFINITE);
 		cls(hStdout);
-		gotoxy(cThread.pSMem->x, cThread.pSMem->y);
+		gotoxy(cThread.pSMemServer->pSMem.x, cThread.pSMemServer->pSMem.y);
 		_tprintf(TEXT("W"));
 		SetEvent(cThread.hSMGatewayUpdate);
 	}
 
-	UnmapViewOfFile(cThread.pSMem);
+	UnmapViewOfFile(cThread.pSMemServer);
 	CloseHandle(cThread.hSMem);
 
 	return 0;

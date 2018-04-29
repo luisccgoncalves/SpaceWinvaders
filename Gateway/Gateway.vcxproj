@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="backup.c" />
     <ClCompile Include="gtw_main.c" />
   </ItemGroup>
   <ItemGroup>

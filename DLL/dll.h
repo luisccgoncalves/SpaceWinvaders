@@ -85,7 +85,7 @@ typedef struct {
 	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
 	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
 
-	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns gateway about updates in shared memory
+	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
 	SMServer_MSG	*pSMemGateway;			//Pointer to shared memory's first byte
 } SMCtrl;

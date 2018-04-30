@@ -150,27 +150,13 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	sGTick.hTick = cThread.smCtrl.hSMServerUpdate;
 
-	//cThread.hSMem = CreateFileMapping(	//Maps a file in memory 
-	//	INVALID_HANDLE_VALUE,			//Handle to file being mapped (INVALID_HANDLE_VALUE to swap)
-	//	NULL,							//Security attributes
-	//	PAGE_READWRITE,					//Maped file permissions
-	//	cThread.SMemSize.HighPart,		//MaximumSizeHigh
-	//	cThread.SMemSize.LowPart,		//MaximumSizeLow
-	//	SMName);						//File mapping name
-
 	sharedMemory(&cThread.smCtrl, SMName);
 	if (cThread.smCtrl.hSMem== NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	//cThread.pSMemServer = (SMServer_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-	//	cThread.hSMem,							//Handle to the whole mapped object
-	//	FILE_MAP_WRITE,							//Security attributes
-	//	0,
-	//	0,
-	//	cThread.SMemViewServer.QuadPart);		//Number of bytes to map
-
+	//Creates a view of the desired part <Server>
 	mapServerView(&cThread.smCtrl);
 	if (cThread.smCtrl.pSMemServer == NULL) {
 		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
@@ -178,20 +164,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part <Gateway>
-	cThread.smCtrl.pSMemGateway= (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-		cThread.smCtrl.hSMem,								//Handle to the whole mapped object
-		FILE_MAP_ALL_ACCESS,						//Security attributes
-		cThread.smCtrl.SMemViewServer.HighPart,			//OffsetHIgh (0 to map the whole thing)
-		cThread.smCtrl.SMemViewServer.LowPart, 			//OffsetLow (0 to map the whole thing)
-		cThread.smCtrl.SMemViewGateway.QuadPart);			//Number of bytes to map
-
+	mapGatewayView(&cThread.smCtrl);
 	if (cThread.smCtrl.pSMemGateway== NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
-
-	//####################################################################################################
-
 
 	SetEvent(hCanBootNow);						//Warns gateway that Shared memory is mapped
 

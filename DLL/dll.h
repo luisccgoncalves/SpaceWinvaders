@@ -77,9 +77,23 @@ typedef struct {							//Message to use in @ gateway view
 	char			pSMem;					//Object type to use in the memory
 }SMGateway_MSG;
 
+typedef struct {
+	HANDLE			hSMem;					//Handle to shared memory
+	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
+
+	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
+	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
+	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
+
+	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns gateway about updates in shared memory
+	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
+	SMServer_MSG	*pSMemGateway;			//Pointer to shared memory's first byte
+} SMCtrl;
+
 
 	//Variável global da DLL
 	extern DLL_IMP_API int nDLL;
 
-	DLL_IMP_API int sharedMemory(HANDLE *hSMem, TCHAR SMName[], LARGE_INTEGER SMemSize);
-	//DLL_IMP_API int mapServerView(SMServer_MSG *pSMemServer, HANDLE *hSMem, LARGE_INTEGER SMemViewServer);
+	DLL_IMP_API int sharedMemory(SMCtrl *smCtrl, TCHAR SMName[]);
+	DLL_IMP_API int mapServerView(SMCtrl *smCtrl);
+	DLL_IMP_API int mapGatewayView(SMCtrl *smCtrl);

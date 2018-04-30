@@ -11,23 +11,29 @@
 //####################################################################################################
 
 // Thread to read from memmory
-typedef struct {
-	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
-	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
-
-	HANDLE			mhInvader;				//Handle to mutex (TEST)
-
-	HANDLE			hSMem;					//Handle to shared memory
-	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
-	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
-	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
-	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
-	SMGateway_MSG	*pSMGateway;			//Pointer to shared memory's first byte
-
-	int				ThreadMustGoOn;			//Flag for thread shutdown
-} SMCtrl_Thread;
+//typedef struct {
+//	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
+//	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
+//
+//	HANDLE			mhInvader;				//Handle to mutex (TEST)
+//
+//	HANDLE			hSMem;					//Handle to shared memory
+//	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
+//	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
+//	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
+//	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
+//	SMGateway_MSG	*pSMGateway;			//Pointer to shared memory's first byte
+//
+//	int				ThreadMustGoOn;			//Flag for thread shutdown
+//} SMCtrl_Thread;
 
 //####################################################################################################
+
+typedef struct {
+	HANDLE			mhInvader;				//Handle to mutex (TEST)
+	SMCtrl			smCtrl;					//Shared memory structure
+	int				ThreadMustGoOn;			//Flag for thread shutdown
+} SMCtrl_Thread;
 
 typedef struct {
 	HANDLE			hTick;				//Handle to event. Warns gateway about updates in shared memory
@@ -43,18 +49,18 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 	_tprintf(TEXT("Server deployed an invader."));
 
 	//Populates one invader with initial coords
-	cThread->pSMemServer->pSMem.x = cThread->pSMemServer->pSMem.x_init = 0;
-	cThread->pSMemServer->pSMem.y = cThread->pSMemServer->pSMem.x_init = 0;
+	cThread->smCtrl.pSMemServer->pSMem.x = cThread->smCtrl.pSMemServer->pSMem.x_init = 0;
+	cThread->smCtrl.pSMemServer->pSMem.y = cThread->smCtrl.pSMemServer->pSMem.x_init = 0;
 
 	while (cThread->ThreadMustGoOn) {	//Thread main loop
 
 		WaitForSingleObject(cThread->mhInvader, INFINITE);													/**/
-		for (cThread->pSMemServer->pSMem.y = 0; 
-			cThread->pSMemServer->pSMem.y <= (YSIZE - 2); cThread->pSMemServer->pSMem.y++) {				/**/
+		for (cThread->smCtrl.pSMemServer->pSMem.y = 0;
+			cThread->smCtrl.pSMemServer->pSMem.y <= (YSIZE - 2); cThread->smCtrl.pSMemServer->pSMem.y++) {				/**/
 																											/**/
 			//Invader goes 4 spaces to the right															/*CRITICAL SECTION*/
-			for (cThread->pSMemServer->pSMem.x = 0; 
-				cThread->pSMemServer->pSMem.x < 4; cThread->pSMemServer->pSMem.x++) {						/**/
+			for (cThread->smCtrl.pSMemServer->pSMem.x = 0;
+				cThread->smCtrl.pSMemServer->pSMem.x < 4; cThread->smCtrl.pSMemServer->pSMem.x++) {						/**/
 				ReleaseMutex(cThread->mhInvader);															/**/
 				//Sleep(500) should be a variable. Lower number==higher dificulty
 				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
@@ -63,11 +69,11 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 			
 			WaitForSingleObject(cThread->mhInvader, INFINITE);												/**/
 			//Invader goes down 1 space																		/**/
-			cThread->pSMemServer->pSMem.y++;																			/**/
+			cThread->smCtrl.pSMemServer->pSMem.y++;																			/**/
 																											/*CRITICAL SECTION*/
 			//Invader goes 4 spaces to the left																/**/
-			for (cThread->pSMemServer->pSMem.x = 3; 
-				cThread->pSMemServer->pSMem.x > -1; cThread->pSMemServer->pSMem.x--) {						/**/
+			for (cThread->smCtrl.pSMemServer->pSMem.x = 3;
+				cThread->smCtrl.pSMemServer->pSMem.x > -1; cThread->smCtrl.pSMemServer->pSMem.x--) {						/**/
 				ReleaseMutex(cThread->mhInvader);															/**/
 				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
 				else return 0;
@@ -112,9 +118,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	GetSystemInfo(&SysInfo);									//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
 
-	cThread.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
+	cThread.smCtrl.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.smCtrl.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.smCtrl.SMemSize.QuadPart = cThread.smCtrl.SMemViewServer.QuadPart + cThread.smCtrl.SMemViewGateway.QuadPart;
 
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;
@@ -130,7 +136,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,							//Initial state
 		TEXT("LetsBoot"));				//Event name
 
-	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.smCtrl.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 							//Event attributes
 		FALSE, 							//Manual reset (TRUE for auto-reset)
 		FALSE, 							//Initial state
@@ -142,7 +148,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//	FALSE, 									//Initial state
 	//	TEXT("SMGatewayUpdate"));				//Event name
 
-	sGTick.hTick = cThread.hSMServerUpdate;
+	sGTick.hTick = cThread.smCtrl.hSMServerUpdate;
 
 	//cThread.hSMem = CreateFileMapping(	//Maps a file in memory 
 	//	INVALID_HANDLE_VALUE,			//Handle to file being mapped (INVALID_HANDLE_VALUE to swap)
@@ -152,35 +158,34 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//	cThread.SMemSize.LowPart,		//MaximumSizeLow
 	//	SMName);						//File mapping name
 
-	sharedMemory(&cThread.hSMem, SMName, cThread.SMemSize);
-
-
-	if (cThread.hSMem == NULL) {		//Checks for errors
+	sharedMemory(&cThread.smCtrl, SMName);
+	if (cThread.smCtrl.hSMem== NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	cThread.pSMemServer = (SMServer_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-		cThread.hSMem,							//Handle to the whole mapped object
-		FILE_MAP_WRITE,							//Security attributes
-		0,
-		0,
-		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
+	//cThread.pSMemServer = (SMServer_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+	//	cThread.hSMem,							//Handle to the whole mapped object
+	//	FILE_MAP_WRITE,							//Security attributes
+	//	0,
+	//	0,
+	//	cThread.SMemViewServer.QuadPart);		//Number of bytes to map
 
-	if (cThread.pSMemServer == NULL) {
+	mapServerView(&cThread.smCtrl);
+	if (cThread.smCtrl.pSMemServer == NULL) {
 		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Gateway>
-	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-		cThread.hSMem,								//Handle to the whole mapped object
+	cThread.smCtrl.pSMemGateway= (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+		cThread.smCtrl.hSMem,								//Handle to the whole mapped object
 		FILE_MAP_ALL_ACCESS,						//Security attributes
-		cThread.SMemViewServer.HighPart,			//OffsetHIgh (0 to map the whole thing)
-		cThread.SMemViewServer.LowPart, 			//OffsetLow (0 to map the whole thing)
-		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
+		cThread.smCtrl.SMemViewServer.HighPart,			//OffsetHIgh (0 to map the whole thing)
+		cThread.smCtrl.SMemViewServer.LowPart, 			//OffsetLow (0 to map the whole thing)
+		cThread.smCtrl.SMemViewGateway.QuadPart);			//Number of bytes to map
 
-	if (cThread.pSMGateway == NULL) {				//Checks for errors
+	if (cThread.smCtrl.pSMemGateway== NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -219,8 +224,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htInvader, INFINITE);	//Waits for thread to exit
 	WaitForSingleObject(htGTick, INFINITE);		//Waits for thread to exit
 	
-	UnmapViewOfFile(cThread.pSMemServer);		//Unmaps view of shared memory
-	CloseHandle(cThread.hSMem);					//Closes shared memory
+	UnmapViewOfFile(cThread.smCtrl.pSMemServer);		//Unmaps view of shared memory
+	CloseHandle(cThread.smCtrl.hSMem);					//Closes shared memory
 
 	return 0;
 }

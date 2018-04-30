@@ -158,13 +158,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	sGTick.hTick = cThread.hSMServerUpdate;
 
-	cThread.hSMem = CreateFileMapping(	//Maps a file in memory 
-		INVALID_HANDLE_VALUE,			//Handle to file being mapped (INVALID_HANDLE_VALUE to swap)
-		NULL,							//Security attributes
-		PAGE_READWRITE,					//Maped file permissions
-		cThread.SMemSize.HighPart,		//MaximumSizeHigh
-		cThread.SMemSize.LowPart,		//MaximumSizeLow
-		SMName);						//File mapping name
+	//cThread.hSMem = CreateFileMapping(	//Maps a file in memory 
+	//	INVALID_HANDLE_VALUE,			//Handle to file being mapped (INVALID_HANDLE_VALUE to swap)
+	//	NULL,							//Security attributes
+	//	PAGE_READWRITE,					//Maped file permissions
+	//	cThread.SMemSize.HighPart,		//MaximumSizeHigh
+	//	cThread.SMemSize.LowPart,		//MaximumSizeLow
+	//	SMName);						//File mapping name
+
+	sharedMemory(&cThread.hSMem, SMName, cThread.SMemSize);
+
 
 	if (cThread.hSMem == NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());

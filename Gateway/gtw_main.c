@@ -137,7 +137,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		cls(hStdout);
 		gotoxy(cThread.pSMemServer->pSMem.x, cThread.pSMemServer->pSMem.y);
 		_tprintf(TEXT("W"));
-		SetEvent(cThread.hSMGatewayUpdate);
+		//SetEvent(cThread.hSMGatewayUpdate);
 	}
 
 	UnmapViewOfFile(cThread.pSMemServer);

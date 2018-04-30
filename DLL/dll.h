@@ -24,3 +24,4 @@
 	//Funções a serem exportadas/importadas
 	DLL_IMP_API int UmaString(void);
 
+	DLL_IMP_API int sharedMemory(HANDLE *hSMem, TCHAR SMName[], LARGE_INTEGER SMemSize);

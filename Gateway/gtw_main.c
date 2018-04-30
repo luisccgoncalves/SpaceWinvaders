@@ -65,10 +65,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 	SMCtrl_Thread cThread;
 	HANDLE			hCanBootNow;
 	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
+	
+	SYSTEM_INFO		SysInfo;
+	DWORD			dwSysGran;
+	DWORD			dwViewServerStart;
 
-	cThread.SMemSize.QuadPart = sizeof(SMServer_MSG) + sizeof(SMGateway_MSG); //This should be in structs.h or dll
-	cThread.SMemViewServer.QuadPart = sizeof(SMServer_MSG);
-	cThread.SMemViewGateway.QuadPart = sizeof(SMGateway_MSG);
+	GetSystemInfo(&SysInfo);									//Used to get system granularity
+	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
+
+	cThread.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	cThread.ThreadMustGoOn = 1;
 
@@ -89,7 +96,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 
 	_tprintf(TEXT("Detecting if server is running.\n"));
-	WaitForSingleObject(hCanBootNow, 5000);
+	WaitForSingleObject(hCanBootNow, 500);
 
 	//Opens a mapped file by the server
 	cThread.hSMem = OpenFileMapping(
@@ -115,20 +122,18 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	////Creates a view of the desired part <Gateway>
-	//cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-	//	cThread.hSMem,								//Handle to the whole mapped object
-	//	FILE_MAP_WRITE,							//Security attributes
-	//	0,
-	//	0,
-	//	//cThread.SMemViewGateway.HighPart,			//OffsetHIgh (0 to map the whole thing)
-	//	//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
-	//	cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
+	//Creates a view of the desired part <Gateway>
+	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+		cThread.hSMem,								//Handle to the whole mapped object
+		FILE_MAP_WRITE,								//Security attributes
+		cThread.SMemViewServer.HighPart,			//OffsetHIgh (0 to map the whole thing)
+		cThread.SMemViewServer.LowPart, 			//OffsetLow (0 to map the whole thing)
+		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
 
-	//if (cThread.pSMGateway == NULL) {				//Checks for errors
-	//	_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
-	//	return -1;
-	//}
+	if (cThread.pSMGateway == NULL) {				//Checks for errors
+		_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
+		return -1;
+	}
 
 	cls(hStdout);
 	hidecursor();

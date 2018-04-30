@@ -116,22 +116,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	SYSTEM_INFO		SysInfo;
 	DWORD			dwSysGran;
-	DWORD			dwViewServerStart;
-	DWORD			dwViewGatewayStart;
-	
-	cThread.SMemSize.QuadPart = sizeof(SMServer_MSG) + sizeof(SMGateway_MSG); //This should be in structs.h or dll
-	cThread.SMemViewServer.QuadPart = sizeof(SMServer_MSG);
-	cThread.SMemViewGateway.QuadPart = sizeof(SMGateway_MSG);
-
-	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
-	sGTick.ThreadMustGoOn = 1;
 
 	GetSystemInfo(&SysInfo);									//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
 
-	//ViewMap size considering the granularity
-	dwViewServerStart = ((sizeof(cThread.pSMemServer) / dwSysGran)*dwSysGran) + dwSysGran;
-	dwViewGatewayStart = ((sizeof(cThread.pSMGateway) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
+
+	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
+	sGTick.ThreadMustGoOn = 1;
 
 	cThread.mhInvader = CreateMutex(	//This a test
 		NULL,							//Security attributes
@@ -177,8 +171,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.pSMemServer = (SMServer_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,							//Handle to the whole mapped object
 		FILE_MAP_WRITE,							//Security attributes
-		//cThread.SMemViewServer.HighPart,		//OffsetHIgh (0 to map the whole thing)
-		//cThread.SMemViewServer.LowPart, 		//OffsetLow (0 to map the whole thing)
 		0,
 		0,
 		cThread.SMemViewServer.QuadPart);		//Number of bytes to map
@@ -188,23 +180,18 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//####################################################################################################
-	//###################################   Gateway view under construction    ###########################
-	//####################################################################################################
+	//Creates a view of the desired part <Gateway>
+	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+		cThread.hSMem,								//Handle to the whole mapped object
+		FILE_MAP_ALL_ACCESS,						//Security attributes
+		cThread.SMemViewServer.HighPart,			//OffsetHIgh (0 to map the whole thing)
+		cThread.SMemViewServer.LowPart, 			//OffsetLow (0 to map the whole thing)
+		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
 
-	////Creates a view of the desired part <Gateway>
-	//cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-	//	cThread.hSMem,								//Handle to the whole mapped object
-	//	FILE_MAP_ALL_ACCESS,						//Security attributes
-	//	0,0,
-	//	//cThread.SMemView.HighPart,			//OffsetHIgh (0 to map the whole thing)
-	//	//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
-	//	cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
-
-	//if (cThread.pSMGateway == NULL) {				//Checks for errors
-	//	_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
-	//	return -1;
-	//}
+	if (cThread.pSMGateway == NULL) {				//Checks for errors
+		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	//####################################################################################################
 

@@ -191,6 +191,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,						//Creation flags
 		&tInvaderID);			//gets thread ID to close it afterwards
 
+	while (cThread.ThreadMustGoOn)		//TEST FOR EVENT FROM GATEWAY! IT WORKS!
+	{
+		WaitForSingleObject(cThread.smCtrl.hSMGatewayUpdate, INFINITE);
+		_tprintf(TEXT("G"));
+	}
+
 	//Enter to end thread and exit
 	_gettchar();
 	cThread.ThreadMustGoOn = 0;					//Signals thread to gracefully exit

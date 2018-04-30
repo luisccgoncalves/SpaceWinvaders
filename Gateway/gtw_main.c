@@ -87,7 +87,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		cls(hStdout);
 		gotoxy(cThread.smCtrl.pSMemServer->pSMem.x, cThread.smCtrl.pSMemServer->pSMem.y);
 		_tprintf(TEXT("W"));
-		//SetEvent(cThread.hSMGatewayUpdate);
+		SetEvent(cThread.smCtrl.hSMGatewayUpdate);
 	}
 
 	UnmapViewOfFile(cThread.smCtrl.pSMemServer);		//Unmaps view of shared memory

@@ -23,5 +23,8 @@
     <ClCompile Include="srv_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="backup.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

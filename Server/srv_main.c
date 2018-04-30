@@ -10,14 +10,6 @@
 //#################################    To include in DLL    ##########################################
 //####################################################################################################
 
-typedef struct {							//Message to use in @ gateway view
-	char			pSMem;					//Object type to use in the memory
-}SMGateway_MSG;
-
-typedef struct {							////Message to use in @ server view
-	invader			pSMem;					//Object type to use in the memory
-}SMServer_MSG;
-
 // Thread to read from memmory
 typedef struct {
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory

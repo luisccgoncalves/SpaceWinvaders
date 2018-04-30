@@ -8,14 +8,6 @@
 #include "../Client/debug.h"
 
 /**/ //TO DLL
-// Message structures to use in SM
-typedef struct {
-	char			pSMem;					//Object type to use in the memory
-}SMGateway_MSG;
-
-typedef struct {
-	invader			pSMem;					//Object type to use in the memory
-}SMServer_MSG;
 // Thread to read from memmory
 typedef struct {
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory

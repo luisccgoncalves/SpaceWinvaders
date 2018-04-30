@@ -6,12 +6,15 @@
 #include "structs.h"
 #include "../DLL/dll.h"
 
-/**/ //TO DLL
-typedef struct {
+//####################################################################################################
+//#################################    To include in DLL    ##########################################
+//####################################################################################################
+
+typedef struct {							//Message to use in @ gateway view
 	char			pSMem;					//Object type to use in the memory
 }SMGateway_MSG;
 
-typedef struct {
+typedef struct {							////Message to use in @ server view
 	invader			pSMem;					//Object type to use in the memory
 }SMServer_MSG;
 
@@ -21,6 +24,7 @@ typedef struct {
 	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
 
 	HANDLE			mhInvader;				//Handle to mutex (TEST)
+
 	HANDLE			hSMem;					//Handle to shared memory
 	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
 	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
@@ -30,6 +34,8 @@ typedef struct {
 
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl_Thread;
+
+//####################################################################################################
 
 typedef struct {
 	HANDLE			hTick;				//Handle to event. Warns gateway about updates in shared memory
@@ -144,11 +150,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE, 							//Initial state
 		TEXT("SMServerUpdate"));			//Event name
 
-	cThread.hSMGatewayUpdate = CreateEvent(		//Creates the event to warn gateway that the shared memoy is mapped
-		NULL, 									//Event attributes
-		FALSE, 									//Manual reset (TRUE for auto-reset)
-		FALSE, 									//Initial state
-		TEXT("SMGatewayUpdate"));				//Event name
+	//cThread.hSMGatewayUpdate = CreateEvent(		//Creates the event to warn gateway that the shared memoy is mapped
+	//	NULL, 									//Event attributes
+	//	FALSE, 									//Manual reset (TRUE for auto-reset)
+	//	FALSE, 									//Initial state
+	//	TEXT("SMGatewayUpdate"));				//Event name
 
 	sGTick.hTick = cThread.hSMServerUpdate;
 
@@ -179,19 +185,25 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part <Gateway>
-	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-		cThread.hSMem,								//Handle to the whole mapped object
-		FILE_MAP_ALL_ACCESS,						//Security attributes
-		0,0,
-		//cThread.SMemView.HighPart,			//OffsetHIgh (0 to map the whole thing)
-		//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
-		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
+	//####################################################################################################
+	//###################################   Gateway view under construction    ###########################
+	//####################################################################################################
 
-	if (cThread.pSMGateway == NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
-		return -1;
-	}
+	////Creates a view of the desired part <Gateway>
+	//cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+	//	cThread.hSMem,								//Handle to the whole mapped object
+	//	FILE_MAP_ALL_ACCESS,						//Security attributes
+	//	0,0,
+	//	//cThread.SMemView.HighPart,			//OffsetHIgh (0 to map the whole thing)
+	//	//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
+	//	cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
+
+	//if (cThread.pSMGateway == NULL) {				//Checks for errors
+	//	_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
+	//	return -1;
+	//}
+
+	//####################################################################################################
 
 
 	SetEvent(hCanBootNow);						//Warns gateway that Shared memory is mapped

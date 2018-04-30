@@ -8,6 +8,7 @@
 #include "../Client/debug.h"
 
 /**/ //TO DLL
+// Message structures to use in SM
 typedef struct {
 	char			pSMem;					//Object type to use in the memory
 }SMGateway_MSG;
@@ -80,11 +81,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE, 									//Initial state
 		TEXT("SMServerUpdate"));				//Event name
 
-	cThread.hSMGatewayUpdate = CreateEvent(		//Creates the event to warn gateway that the shared memoy is mapped
-		NULL, 									//Event attributes
-		FALSE, 									//Manual reset (TRUE for auto-reset)
-		FALSE, 									//Initial state
-		TEXT("SMGatewayUpdate"));				//Event name
+	//cThread.hSMGatewayUpdate = CreateEvent(		//Creates the event to warn server that the shared memoy is mapped
+	//	NULL, 									//Event attributes
+	//	FALSE, 									//Manual reset (TRUE for auto-reset)
+	//	FALSE, 									//Initial state
+	//	TEXT("SMGatewayUpdate"));				//Event name
 
 
 	_tprintf(TEXT("Detecting if server is running.\n"));
@@ -101,7 +102,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part
+	//Creates a view for the server message
 	cThread.pSMemServer= (SMServer_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
 		cThread.hSMem,							//Handle to the whole mapped object
 		FILE_MAP_READ,							//Security attributes
@@ -114,20 +115,20 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part <Gateway>
-	cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
-		cThread.hSMem,								//Handle to the whole mapped object
-		FILE_MAP_WRITE,							//Security attributes
-		0,
-		0,
-		//cThread.SMemViewGateway.HighPart,			//OffsetHIgh (0 to map the whole thing)
-		//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
-		cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
+	////Creates a view of the desired part <Gateway>
+	//cThread.pSMGateway = (SMGateway_MSG *)MapViewOfFile(	//Casts view of shared memory to a known struct type
+	//	cThread.hSMem,								//Handle to the whole mapped object
+	//	FILE_MAP_WRITE,							//Security attributes
+	//	0,
+	//	0,
+	//	//cThread.SMemViewGateway.HighPart,			//OffsetHIgh (0 to map the whole thing)
+	//	//cThread.SMemViewGateway.LowPart, 			//OffsetLow (0 to map the whole thing)
+	//	cThread.SMemViewGateway.QuadPart);			//Number of bytes to map
 
-	if (cThread.pSMGateway == NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
-		return -1;
-	}
+	//if (cThread.pSMGateway == NULL) {				//Checks for errors
+	//	_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
+	//	return -1;
+	//}
 
 	cls(hStdout);
 	hidecursor();

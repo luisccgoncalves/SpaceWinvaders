@@ -6,26 +6,6 @@
 #include "structs.h"
 #include "../DLL/dll.h"
 
-//####################################################################################################
-//#################################    To delete            ##########################################
-//####################################################################################################
-
-// Thread to read from memmory
-//typedef struct {
-//	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
-//	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
-//	HANDLE			mhInvader;				//Handle to mutex (TEST)
-//	HANDLE			hSMem;					//Handle to shared memory
-//	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
-//	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
-//	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
-//	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
-//	SMGateway_MSG	*pSMGateway;			//Pointer to shared memory's first byte
-//	int				ThreadMustGoOn;			//Flag for thread shutdown
-//} SMCtrl_Thread;
-
-//####################################################################################################
-
 typedef struct {
 	HANDLE			mhInvader;						//Handle to mutex (TEST)
 	SMCtrl			smCtrl;							//Shared memory structure

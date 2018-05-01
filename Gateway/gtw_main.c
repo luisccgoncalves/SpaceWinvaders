@@ -52,7 +52,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		TEXT("SMGatewayUpdate"));					//Event name
 
 	_tprintf(TEXT("Detecting if server is running.\n"));
-	WaitForSingleObject(hCanBootNow, 500);
+	WaitForSingleObject(hCanBootNow, 5000);
 
 	//Opens a mapped file by the server
 	cThread.smCtrl.hSMem = OpenFileMapping(

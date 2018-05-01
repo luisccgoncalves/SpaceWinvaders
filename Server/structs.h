@@ -60,7 +60,7 @@
 //	int		ship_shot_spd;	//Ship shot speed multiplier
 //}map;
 
-TCHAR SMName[] = TEXT("SWInvadersMem"); //Name of the shared memory, this has to be known between processes
+//TCHAR SMName[] = TEXT("SWInvadersMem"); //Name of the shared memory, this has to be known between processes
 
 
 

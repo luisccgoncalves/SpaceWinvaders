@@ -147,7 +147,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	sGTick.hTick = cThread.smCtrl.hSMServerUpdate;
 
-	sharedMemory(&cThread.smCtrl, SMName);
+	sharedMemory(&cThread.smCtrl);
 	if (cThread.smCtrl.hSMem== NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;

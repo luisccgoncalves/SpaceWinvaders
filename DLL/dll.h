@@ -90,10 +90,8 @@ typedef struct {
 	SMServer_MSG	*pSMemGateway;			//Pointer to shared memory's first byte
 } SMCtrl;
 
+TCHAR SMName[] = TEXT("SWInvadersMem");		//Name of the shared memory, this has to be known between processes
 
-	//Variável global da DLL
-	extern DLL_IMP_API int nDLL;
-
-	DLL_IMP_API int sharedMemory(SMCtrl *smCtrl, TCHAR SMName[]);
+	DLL_IMP_API int sharedMemory(SMCtrl *smCtrl);
 	DLL_IMP_API int mapServerView(SMCtrl *smCtrl);
 	DLL_IMP_API int mapGatewayView(SMCtrl *smCtrl);

@@ -47,7 +47,7 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 
 	//Populates one invader with initial coords
 	cThread->smCtrl.pSMemServer->pSMem.x = cThread->smCtrl.pSMemServer->pSMem.x_init = 0;
-	cThread->smCtrl.pSMemServer->pSMem.y = cThread->smCtrl.pSMemServer->pSMem.x_init = 0;
+	cThread->smCtrl.pSMemServer->pSMem.y = cThread->smCtrl.pSMemServer->pSMem.y_init = 0;
 
 	while (cThread->ThreadMustGoOn) {				//Thread main loop
 

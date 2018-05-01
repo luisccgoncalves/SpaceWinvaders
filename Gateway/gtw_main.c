@@ -26,7 +26,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	
 	SYSTEM_INFO		SysInfo;
 	DWORD			dwSysGran;
-	DWORD			dwViewServerStart;
 
 	GetSystemInfo(&SysInfo);									//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity

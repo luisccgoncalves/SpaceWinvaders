@@ -22,37 +22,28 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 
 	SMCtrl_Thread	*cThread;						//Pointer to thread parameter structure
 	cThread = (SMCtrl_Thread *)tParam;				//Points it to the right direction
-
+	int i;
 	_tprintf(TEXT("Server deployed an invader."));
 
 	//Let's shorten this path
-	invader *invader1=&cThread->smCtrl.pSMemServer->pSMem;
+	invader *invader1 = &cThread->smCtrl.pSMemServer->pSMem;
+
 	//Populates one invader with initial coords
 	invader1->x = invader1->x_init = 0;
 	invader1->y = invader1->y_init = 0;
 
 	while (cThread->ThreadMustGoOn) {				//Thread main loop
 
-		for (invader1->y = 0;
-			invader1->y <= (YSIZE - 2); invader1->y++) {
-																									
-			//Invader goes 4 spaces to the right													
-			for (invader1->x = 0;
-				invader1->x < 4; invader1->x++) {												
-				//Sleep(500) should be a variable. Lower number==higher dificulty
-				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
-				else return 0;
-			}
-												
-			//Invader goes down 1 space																
-			invader1->y++;
-																									
-			//Invader goes 4 spaces to the left														
-			for (invader1->x = 3;
-				invader1->x > -1; invader1->x--) {												
-				if (cThread->ThreadMustGoOn) Sleep(500);	//Thread exit condition
-				else return 0;
-			}
+		for (i = 0; i < (YSIZE*4); i++) {
+
+			invader1->y = i/4;			//Invader goes down after 4 iterations
+
+			if ((i % 8) < 4)
+				invader1->x = i % 8;	//Invader goes right
+			else if ((i % 8) > 4)
+				invader1->x--;			//Invader goes left
+
+			Sleep(500);
 		}
 	}
 }

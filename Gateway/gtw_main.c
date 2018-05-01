@@ -13,6 +13,24 @@ typedef struct {
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl_Thread;
 
+DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure updates
+
+	SMCtrl_Thread	*cThread;
+	cThread = (SMCtrl_Thread*)tParam;
+	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
+
+	cls(hStdout);
+	hidecursor();
+
+	while (cThread->ThreadMustGoOn) {
+		WaitForSingleObject(cThread->smCtrl.hSMServerUpdate, INFINITE);
+		cls(hStdout);
+		gotoxy(cThread->smCtrl.pSMemServer->pSMem.x, cThread->smCtrl.pSMemServer->pSMem.y);
+		_tprintf(TEXT("R"));
+		SetEvent(cThread->smCtrl.hSMGatewayUpdate);
+	}
+}
+
 int _tmain(int argc, LPTSTR argv[]) {
 
 #ifdef UNICODE
@@ -22,8 +40,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	SMCtrl_Thread	cThread;
 	HANDLE			hCanBootNow;
+	HANDLE			htSReadMsg;
 	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
-	
+
+	DWORD			tRSMsgID;
+
 	SYSTEM_INFO		SysInfo;
 	DWORD			dwSysGran;
 
@@ -79,15 +100,25 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cls(hStdout);
-	hidecursor();
-	while (cThread.ThreadMustGoOn) {
-		WaitForSingleObject(cThread.smCtrl.hSMServerUpdate, INFINITE);
-		cls(hStdout);
-		gotoxy(cThread.smCtrl.pSMemServer->pSMem.x, cThread.smCtrl.pSMemServer->pSMem.y);
-		_tprintf(TEXT("W"));
-		SetEvent(cThread.smCtrl.hSMGatewayUpdate);
-	}
+	htSReadMsg = CreateThread(
+		NULL,					//Thread security attributes
+		0,						//Stack size
+		ReadServerMsg,			//Thread function name
+		(LPVOID)&cThread,		//Thread parameter struct
+		0,						//Creation flags
+		&tRSMsgID);				//gets thread ID to close it afterwards
+
+	WaitForSingleObject(htSReadMsg, INFINITE);
+
+	/*cls(hStdout);
+	hidecursor();*/
+	//while (cThread.ThreadMustGoOn) {
+	//	//WaitForSingleObject(cThread.smCtrl.hSMServerUpdate, INFINITE);
+	//	//cls(hStdout);
+	//	//gotoxy(cThread.smCtrl.pSMemServer->pSMem.x, cThread.smCtrl.pSMemServer->pSMem.y);
+	//	//_tprintf(TEXT("W"));
+	//	//SetEvent(cThread.smCtrl.hSMGatewayUpdate);
+	//}
 
 	UnmapViewOfFile(cThread.smCtrl.pSMemServer);		//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);		//Unmaps view of shared memory

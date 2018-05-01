@@ -59,7 +59,17 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		_tprintf(TEXT(". "));
 		SetEvent(sGTick->hTick);
 	}
+}
 
+DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {				//Warns gateway of structure updates
+
+	SMCtrl_Thread	*cThread;
+	cThread = (SMCtrl_Thread*)tParam;
+
+	while (cThread->ThreadMustGoOn) {
+		WaitForSingleObject(cThread->smCtrl.hSMGatewayUpdate, INFINITE);
+		_tprintf(TEXT(" g "));
+	}
 }
 
 int _tmain(int argc, LPTSTR argv[]) {
@@ -76,7 +86,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	GTickStruct		sGTick;
 	HANDLE			htGTick;
+	HANDLE			htGReadMsg;
 	DWORD			tGTickID;
+	DWORD			tRGMsgID;
 
 	SYSTEM_INFO		SysInfo;
 	DWORD			dwSysGran;
@@ -149,6 +161,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,						//Creation flags
 		&tGTickID);				//gets thread ID to close it afterwards
 
+	htGReadMsg = CreateThread(
+		NULL,					//Thread security attributes
+		0,						//Stack size
+		ReadGatewayMsg,			//Thread function name
+		(LPVOID)&cThread,		//Thread parameter struct
+		0,						//Creation flags
+		&tRGMsgID);				//gets thread ID to close it afterwards
+
 	//Launches invader thread
 	_tprintf(TEXT("Launching invader thread... ENTER to quit\n"));
 
@@ -160,11 +180,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,						//Creation flags
 		&tInvaderID);			//gets thread ID to close it afterwards
 
-	while (cThread.ThreadMustGoOn)		//TEST FOR EVENT FROM GATEWAY! IT WORKS!
-	{
-		WaitForSingleObject(cThread.smCtrl.hSMGatewayUpdate, INFINITE);
-		_tprintf(TEXT("G"));
-	}
+	//while (cThread.ThreadMustGoOn)		//TEST FOR EVENT FROM GATEWAY! IT WORKS!
+	//{
+	//	WaitForSingleObject(cThread.smCtrl.hSMGatewayUpdate, INFINITE);
+	//	_tprintf(TEXT("G"));
+	//}
 
 	//Enter to end thread and exit
 	_gettchar();
@@ -172,6 +192,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	sGTick.ThreadMustGoOn = 0;					//Signals thread to gracefully exit
 	WaitForSingleObject(htInvader, INFINITE);	//Waits for thread to exit
 	WaitForSingleObject(htGTick, INFINITE);		//Waits for thread to exit
+	WaitForSingleObject(htGReadMsg, INFINITE);
 	
 	UnmapViewOfFile(cThread.smCtrl.pSMemServer);		//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);		//Unmaps view of shared memory

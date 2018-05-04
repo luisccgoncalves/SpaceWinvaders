@@ -63,12 +63,11 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updates
 
-	SMCtrl_Thread	*cThread;
-	cThread = (SMCtrl_Thread*)tParam;
+	int * ThreadMustGoOn = ((SMCtrl_Thread*)tParam)->ThreadMustGoOn;
+	HANDLE * hSMGatewayUpdate = ((SMCtrl_Thread*)tParam)->smCtrl.hSMGatewayUpdate;
 
-	while (cThread->ThreadMustGoOn) {
-
-		WaitForSingleObject(cThread->smCtrl.hSMGatewayUpdate, INFINITE);
+	while (ThreadMustGoOn) {
+		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
 		_tprintf(TEXT(" g "));
 	}
 }

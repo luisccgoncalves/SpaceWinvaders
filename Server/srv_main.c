@@ -56,7 +56,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	while (sGTick->ThreadMustGoOn) {
 
 		Sleep(100);
-		_tprintf(TEXT(". "));
+		_tprintf(TEXT("."));
 		SetEvent(sGTick->hTick);
 	}
 }
@@ -99,6 +99,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.smCtrl.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.smCtrl.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.smCtrl.SMemSize.QuadPart = cThread.smCtrl.SMemViewServer.QuadPart + cThread.smCtrl.SMemViewGateway.QuadPart;
+
+	//#######################################################################################################################
+	//#####################################GRANULARITY TESTS//DELETE THIS####################################################
+	//#######################################################################################################################
+	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMServer_MSG), sizeof(SMGateway_MSG));
+	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMServer_MSG), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMGateway_MSG),dwSysGran,dwSysGran, dwSysGran, ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("TestBigView:\t((%d/%d)*%d)+%d=%d\n"), 66000, dwSysGran, dwSysGran, dwSysGran, ((66000 / dwSysGran)*dwSysGran) + dwSysGran);
+	//#######################################################################################################################
+	//#######################################################################################################################
+	//#######################################################################################################################
 
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;

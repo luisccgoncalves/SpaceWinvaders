@@ -26,22 +26,22 @@ DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 	_tprintf(TEXT("Server deployed an invader."));
 
 	//Let's shorten this path
-	invader *invader1 = &cThread->smCtrl.pSMemServer->pSMem;
+	invader *invader = &cThread->smCtrl.pSMemServer->pSMem;
 
 	//Populates one invader with initial coords
-	invader1->x = invader1->x_init = 0;
-	invader1->y = invader1->y_init = 0;
+	invader->x = invader->x_init = 0;
+	invader->y = invader->y_init = 0;
 
 	while (cThread->ThreadMustGoOn) {				//Thread main loop
 
-		for (i = 0; i < (YSIZE*4); i++) {
+		for (i = 0; i < (YSIZE*4) && cThread->ThreadMustGoOn; i++) {
 
-			invader1->y = i/4;			//Invader goes down after 4 iterations
+			invader->y = i/4;						//Invader goes down after 4 iterations
 
 			if ((i % 8) < 4)
-				invader1->x = i % 8;	//Invader goes right
+				invader->x = i % 8;					//Invader goes right
 			else if ((i % 8) > 4)
-				invader1->x--;			//Invader goes left
+				invader->x--;						//Invader goes left
 
 			Sleep(500);
 		}
@@ -61,12 +61,13 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	}
 }
 
-DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {				//Warns gateway of structure updates
+DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updates
 
 	SMCtrl_Thread	*cThread;
 	cThread = (SMCtrl_Thread*)tParam;
 
 	while (cThread->ThreadMustGoOn) {
+
 		WaitForSingleObject(cThread->smCtrl.hSMGatewayUpdate, INFINITE);
 		_tprintf(TEXT(" g "));
 	}
@@ -74,15 +75,15 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {				//Warns gateway of structure upd
 
 int _tmain(int argc, LPTSTR argv[]) {
 
-	#ifdef UNICODE							//Sets console to unicode
+	#ifdef UNICODE									//Sets console to unicode
 		_setmode(_fileno(stdin), _O_WTEXT);
 		_setmode(_fileno(stdout), _O_WTEXT);
 	#endif
 	
-	SMCtrl_Thread	cThread;				//Thread parameter structure
-	HANDLE			hCanBootNow;			//Handle to event. Warns the gateway the shared memory is mapped
-	DWORD			tInvaderID;				//stores the ID of the Invader thread
-	HANDLE			htInvader;				//Handle to the Invader thread
+	SMCtrl_Thread	cThread;						//Thread parameter structure
+	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
+	DWORD			tInvaderID;						//stores the ID of the Invader thread
+	HANDLE			htInvader;						//Handle to the Invader thread
 
 	GTickStruct		sGTick;
 	HANDLE			htGTick;
@@ -93,8 +94,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	SYSTEM_INFO		SysInfo;
 	DWORD			dwSysGran;
 
-	GetSystemInfo(&SysInfo);									//Used to get system granularity
-	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
+	GetSystemInfo(&SysInfo);						//Used to get system granularity
+	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
 	cThread.smCtrl.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.smCtrl.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
@@ -165,49 +166,48 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_tprintf(TEXT("Launching game tick thread...\n"));
 
 	htGTick = CreateThread(
-		NULL,					//Thread security attributes
-		0,						//Stack size
-		GameTick,				//Thread function name
-		(LPVOID)&sGTick,		//Thread parameter struct
-		0,						//Creation flags
-		&tGTickID);				//gets thread ID to close it afterwards
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		GameTick,									//Thread function name
+		(LPVOID)&sGTick,							//Thread parameter struct
+		0,											//Creation flags
+		&tGTickID);									//gets thread ID to close it afterwards
 
+	//Launches gateway message receiver thread
+	_tprintf(TEXT("Launching gateway message receiver thread...\n"));
 	htGReadMsg = CreateThread(
-		NULL,					//Thread security attributes
-		0,						//Stack size
-		ReadGatewayMsg,			//Thread function name
-		(LPVOID)&cThread,		//Thread parameter struct
-		0,						//Creation flags
-		&tRGMsgID);				//gets thread ID to close it afterwards
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		ReadGatewayMsg,								//Thread function name
+		(LPVOID)&cThread,							//Thread parameter struct
+		0,											//Creation flags
+		&tRGMsgID);									//gets thread ID to close it afterwards
 
 	//Launches invader thread
 	_tprintf(TEXT("Launching invader thread... ENTER to quit\n"));
 
 	htInvader = CreateThread(
-		NULL,					//Thread security attributes
-		0,						//Stack size
-		InvaderDeploy,			//Thread function name
-		(LPVOID)&cThread,		//Thread parameter struct
-		0,						//Creation flags
-		&tInvaderID);			//gets thread ID to close it afterwards
-
-	//while (cThread.ThreadMustGoOn)		//TEST FOR EVENT FROM GATEWAY! IT WORKS!
-	//{
-	//	WaitForSingleObject(cThread.smCtrl.hSMGatewayUpdate, INFINITE);
-	//	_tprintf(TEXT("G"));
-	//}
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		InvaderDeploy,								//Thread function name
+		(LPVOID)&cThread,							//Thread parameter struct
+		0,											//Creation flags
+		&tInvaderID);								//gets thread ID to close it afterwards
 
 	//Enter to end thread and exit
 	_gettchar();
-	cThread.ThreadMustGoOn = 0;					//Signals thread to gracefully exit
-	sGTick.ThreadMustGoOn = 0;					//Signals thread to gracefully exit
-	WaitForSingleObject(htInvader, INFINITE);	//Waits for thread to exit
-	WaitForSingleObject(htGTick, INFINITE);		//Waits for thread to exit
+	cThread.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
+	sGTick.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
+
+	WaitForSingleObject(htInvader, INFINITE);		//Waits for thread to exit
+	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
+
+	SetEvent(cThread.smCtrl.hSMGatewayUpdate);
 	WaitForSingleObject(htGReadMsg, INFINITE);
 	
-	UnmapViewOfFile(cThread.smCtrl.pSMemServer);		//Unmaps view of shared memory
-	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);		//Unmaps view of shared memory
-	CloseHandle(cThread.smCtrl.hSMem);					//Closes shared memory
+	UnmapViewOfFile(cThread.smCtrl.pSMemServer);	//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);	//Unmaps view of shared memory
+	CloseHandle(cThread.smCtrl.hSMem);				//Closes shared memory
 
 	return 0;
 }

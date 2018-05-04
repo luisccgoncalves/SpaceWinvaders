@@ -1,8 +1,5 @@
 #include <windows.h>
 #include <tchar.h>
-//Definir uma constante para facilitar a leitura do protótipo da função
-//Este .h deve ser incluído no projeto que o vai usar (modo implícito)
-#define TAM 256
 
 #ifdef DLL_EXPORTS
 #define DLL_IMP_API __declspec(dllexport)
@@ -12,6 +9,8 @@
 
 #define XSIZE 80  //---------------(?)--------------
 #define YSIZE 25
+
+#define MAX_INVADER 20
 
 typedef struct {
 	int		id;
@@ -69,8 +68,8 @@ typedef struct {
 	int		ship_shot_spd;	//Ship shot speed multiplier
 }map;
 
-typedef struct {							////Message to use in @ server view
-	invader			pSMem;					//Object type to use in the memory
+typedef struct {							//Message to use in @ server view
+	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 }SMServer_MSG;
 
 typedef struct {							//Message to use in @ gateway view
@@ -83,7 +82,7 @@ typedef struct {
 
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
 	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
-	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's first byte
+	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's structure
 
 	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view

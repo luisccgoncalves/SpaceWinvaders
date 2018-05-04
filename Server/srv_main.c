@@ -16,32 +16,40 @@ typedef struct {
 	HANDLE			hTick;							//Handle to event. Warns gateway about updates in shared memory
 	int				ThreadMustGoOn;		
 }GTickStruct;
-/**/
 
-DWORD WINAPI InvaderDeploy(LPVOID tParam) {
 
-	SMCtrl_Thread	*cThread;						//Pointer to thread parameter structure
-	cThread = (SMCtrl_Thread *)tParam;				//Points it to the right direction
+void moveInvader(invader * enemy) {
+
+	enemy->y = enemy->y_init/4;						//Invader goes down after 4 iterations
+	enemy->y_init++;
+
+	if ((enemy->x_init % 8) < 4)
+		enemy->x = enemy->x_init % 8;					//Invader goes right
+	else if ((enemy->x_init % 8) > 4)
+		enemy->x--;						//Invader goes left
+
+	enemy->x_init++;
+}
+
+DWORD WINAPI Level01(LPVOID tParam) {
+
+	int * ThreadMustGoOn = ((SMCtrl_Thread *)tParam)->ThreadMustGoOn;
+	SMServer_MSG *lvl = ((SMCtrl_Thread *)tParam)->smCtrl.pSMemServer;
 	int i;
-	_tprintf(TEXT("Server deployed an invader."));
 
-	//Let's shorten this path
-	invader *invader = &cThread->smCtrl.pSMemServer->pSMem;
+	//Populates invaders
+	for (i = 0; i < MAX_INVADER; i++) {
 
-	//Populates one invader with initial coords
-	invader->x = invader->x_init = 0;
-	invader->y = invader->y_init = 0;
+		lvl->invad[i].x = lvl->invad[i].x_init = i;
+		lvl->invad[i].y = lvl->invad[i].y_init = i;
+	}
 
-	while (cThread->ThreadMustGoOn) {				//Thread main loop
 
-		for (i = 0; i < (YSIZE*4) && cThread->ThreadMustGoOn; i++) {
+	while (ThreadMustGoOn) {						//Thread main loop
 
-			invader->y = i/4;						//Invader goes down after 4 iterations
+		for (i = 0; i < MAX_INVADER && ThreadMustGoOn; i++) {
 
-			if ((i % 8) < 4)
-				invader->x = i % 8;					//Invader goes right
-			else if ((i % 8) > 4)
-				invader->x--;						//Invader goes left
+			moveInvader(&lvl->invad[i]);
 
 			Sleep(500);
 		}
@@ -81,7 +89,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	
 	SMCtrl_Thread	cThread;						//Thread parameter structure
 	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
-	DWORD			tInvaderID;						//stores the ID of the Invader thread
+	DWORD			tLevel01ID;						//stores the ID of the Invader thread
 	HANDLE			htInvader;						//Handle to the Invader thread
 
 	GTickStruct		sGTick;
@@ -182,16 +190,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,											//Creation flags
 		&tRGMsgID);									//gets thread ID to close it afterwards
 
-	//Launches invader thread
-	_tprintf(TEXT("Launching invader thread... ENTER to quit\n"));
+	//Launches Level 1 thread
+	_tprintf(TEXT("Launching Level 1 thread... ENTER to quit\n"));
 
 	htInvader = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size
-		InvaderDeploy,								//Thread function name
+		Level01,									//Thread function name
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
-		&tInvaderID);								//gets thread ID to close it afterwards
+		&tLevel01ID);								//gets thread ID to close it afterwards
 
 	//Enter to end thread and exit
 	_gettchar();

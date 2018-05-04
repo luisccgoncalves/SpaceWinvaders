@@ -25,9 +25,9 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 	while (cThread->ThreadMustGoOn) {
 		WaitForSingleObject(cThread->smCtrl.hSMServerUpdate, INFINITE);
 		cls(hStdout);
-		gotoxy(cThread->smCtrl.pSMemServer->pSMem.x, cThread->smCtrl.pSMemServer->pSMem.y);
-		_tprintf(TEXT("R"));
-		SetEvent(cThread->smCtrl.hSMGatewayUpdate);
+		gotoxy(cThread->smCtrl.pSMemServer->invad->x, cThread->smCtrl.pSMemServer->invad->y);
+		_tprintf(TEXT("W"));
+		//SetEvent(cThread->smCtrl.hSMGatewayUpdate);
 	}
 }
 

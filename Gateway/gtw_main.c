@@ -18,6 +18,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 	SMCtrl_Thread	*cThread;
 	cThread = (SMCtrl_Thread*)tParam;
 	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
+	int i;
 
 	cls(hStdout);
 	hidecursor();
@@ -25,8 +26,11 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 	while (cThread->ThreadMustGoOn) {
 		WaitForSingleObject(cThread->smCtrl.hSMServerUpdate, INFINITE);
 		cls(hStdout);
-		gotoxy(cThread->smCtrl.pSMemServer->invad->x, cThread->smCtrl.pSMemServer->invad->y);
-		_tprintf(TEXT("W"));
+		for (i = 0; i < 1; i++) {
+			gotoxy(cThread->smCtrl.pSMemServer->invad[i].x, cThread->smCtrl.pSMemServer->invad[i].y);
+			_tprintf(TEXT("%d"), cThread->smCtrl.pSMemServer->invad[i].x);
+		}
+		
 		//SetEvent(cThread->smCtrl.hSMGatewayUpdate);
 	}
 }

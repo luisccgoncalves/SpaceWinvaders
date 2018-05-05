@@ -94,3 +94,8 @@ TCHAR SMName[] = TEXT("SWInvadersMem");		//Name of the shared memory, this has t
 	DLL_IMP_API int sharedMemory(SMCtrl *smCtrl);
 	DLL_IMP_API int mapServerView(SMCtrl *smCtrl);
 	DLL_IMP_API int mapGatewayView(SMCtrl *smCtrl);
+
+	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl); //Maps Msg area - ALL ACCESS
+	DLL_IMP_API int mapWriteGameDateView(SMCtrl *smCtrl); //Maps Msg area - WRITE
+	DLL_IMP_API int mapReadGameDataView(SMCtrl *smCtrl); //Maps Msg area - READ
+

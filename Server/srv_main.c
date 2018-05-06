@@ -20,12 +20,12 @@ typedef struct {
 
 void moveInvader(invader * enemy, int steps, int sidestep) {
 
-	enemy->y = (steps / sidestep) + enemy->y_init;
+	enemy->y = (steps / sidestep) + enemy->y_init;				//Invader goes down after n sidesteps
 
 	if ((steps % (sidestep * 2)) < sidestep)
 		enemy->x = (steps % (sidestep * 2))+enemy->x_init;		//Invader goes right
 	else if ((steps % (sidestep*2)) > sidestep)
-		enemy->x--;									//Invader goes left
+		enemy->x--;												//Invader goes left
 }
 
 DWORD WINAPI Level01(LPVOID tParam) {
@@ -45,8 +45,8 @@ DWORD WINAPI Level01(LPVOID tParam) {
 	}
 
 	while (ThreadMustGoOn) {						//Thread main loop
-		for (i = 0; i < YSIZE * sidestep; i++) {
-			for (j = 0; j < MAX_INVADER && ThreadMustGoOn; j++) {
+		for (i = 0; (i < YSIZE * sidestep) && ThreadMustGoOn; i++) {
+			for (j = 0;( j < MAX_INVADER )&& ThreadMustGoOn; j++) {
 
 				moveInvader(&lvl->invad[j], i, sidestep);
 			}
@@ -205,7 +205,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 	sGTick.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 
+	_tprintf(TEXT("batatas\n"));
 	WaitForSingleObject(htInvader, INFINITE);		//Waits for thread to exit
+	_tprintf(TEXT("batatas\n"));
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
 	SetEvent(cThread.smCtrl.hSMGatewayUpdate);

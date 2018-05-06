@@ -18,13 +18,13 @@ typedef struct {
 }GTickStruct;
 
 
-void moveInvader(invader * enemy, int steps) {
+void moveInvader(invader * enemy, int steps, int sidestep) {
 
-	enemy->y = steps / 4;
+	enemy->y = (steps / sidestep) + enemy->y_init;
 
-	if ((steps % 8) < 4)
+	if ((steps % (sidestep * 2)) < sidestep)
 		enemy->x = (steps % 8)+enemy->x_init;		//Invader goes right
-	else if ((steps % 8) > 4)
+	else if ((steps % (sidestep*2)) > sidestep)
 		enemy->x--;									//Invader goes left
 }
 
@@ -33,19 +33,22 @@ DWORD WINAPI Level01(LPVOID tParam) {
 	int * ThreadMustGoOn = ((SMCtrl_Thread *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl_Thread *)tParam)->smCtrl.pSMemServer;
 	int i,j;
+	int sidestep=4;
 
-	//Populates invaders
-	for (i = 0; i < MAX_INVADER; i++) {
+	for (i = 0; i < MAX_INVADER; i++) {				//Populates invaders
 
-		lvl->invad[i].x = lvl->invad[i].x_init = i%11;
+		//deploys 11 invaders per line with a spacing of 2
+		lvl->invad[i].x = lvl->invad[i].x_init = (i%11)*2;  
+
+		//Deploys 5 lines of invaders (MAX_INVADER/11=5)
 		lvl->invad[i].y = lvl->invad[i].y_init = i / 11;
 	}
 
 	while (ThreadMustGoOn) {						//Thread main loop
-		for (i = 0; i < YSIZE * 4; i++) {
+		for (i = 0; i < YSIZE * sidestep; i++) {
 			for (j = 0; j < MAX_INVADER && ThreadMustGoOn; j++) {
 
-				moveInvader(&lvl->invad[j],i);
+				moveInvader(&lvl->invad[j], i, sidestep);
 			}
 			Sleep(500);
 		}

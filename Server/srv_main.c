@@ -17,6 +17,7 @@ typedef struct {
 	int				ThreadMustGoOn;		
 }GTickStruct;
 
+int ThreadMustGoOn = 1;
 
 void moveInvader(invader * enemy, int steps, int sidestep) {
 
@@ -30,12 +31,12 @@ void moveInvader(invader * enemy, int steps, int sidestep) {
 
 DWORD WINAPI Level01(LPVOID tParam) {
 
-	int * ThreadMustGoOn = ((SMCtrl_Thread *)tParam)->ThreadMustGoOn;
+	int * ThreadMustGoOn = &((SMCtrl_Thread *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl_Thread *)tParam)->smCtrl.pSMemServer;
 	int i,j;
 	int sidestep=5;
 
-	for (i = 0; i < MAX_INVADER; i++) {				//Populates invaders
+	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		//Populates invaders
 
 		//deploys 11 invaders per line with a spacing of 2
 		lvl->invad[i].x = lvl->invad[i].x_init = (i%11)*2;  
@@ -44,9 +45,9 @@ DWORD WINAPI Level01(LPVOID tParam) {
 		lvl->invad[i].y = lvl->invad[i].y_init = i / 11;
 	}
 
-	while (ThreadMustGoOn) {						//Thread main loop
-		for (i = 0; (i < YSIZE * sidestep) && ThreadMustGoOn; i++) {
-			for (j = 0;( j < MAX_INVADER )&& ThreadMustGoOn; j++) {
+	while (*ThreadMustGoOn) {						//Thread main loop
+		for (i = 0; (i < YSIZE * sidestep) && *ThreadMustGoOn; i++) {
+			for (j = 0;( j < MAX_INVADER )&& *ThreadMustGoOn; j++) {
 
 				moveInvader(&lvl->invad[j], i, sidestep);
 			}
@@ -88,8 +89,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	
 	SMCtrl_Thread	cThread;						//Thread parameter structure
 	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
-	DWORD			tLevel01ID;						//stores the ID of the Invader thread
-	HANDLE			htInvader;						//Handle to the Invader thread
+	DWORD			tLevel01ID;						//stores the ID of the game thread
+	HANDLE			htGame;							//Handle to the game thread
 
 	GTickStruct		sGTick;
 	HANDLE			htGTick;
@@ -192,7 +193,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//Launches Level 1 thread
 	_tprintf(TEXT("Launching Level 1 thread... ENTER to quit\n"));
 
-	htInvader = CreateThread(
+	htGame = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size
 		Level01,									//Thread function name
@@ -201,17 +202,18 @@ int _tmain(int argc, LPTSTR argv[]) {
 		&tLevel01ID);								//gets thread ID to close it afterwards
 
 	//Enter to end thread and exit
-	_gettchar();
+	//_gettchar();
+	Sleep(100);
 	cThread.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 	sGTick.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 
 	_tprintf(TEXT("batatas\n"));
-	WaitForSingleObject(htInvader, INFINITE);		//Waits for thread to exit
+	WaitForSingleObject(htGame, INFINITE);			//Waits for thread to exit
 	_tprintf(TEXT("batatas\n"));
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
-	SetEvent(cThread.smCtrl.hSMGatewayUpdate);
-	WaitForSingleObject(htGReadMsg, INFINITE);
+	SetEvent(cThread.smCtrl.hSMGatewayUpdate);		//Sets event to own process, this will iterate the thread main loop to check ThreadMustGoOn == 0
+	//WaitForSingleObject(htGReadMsg, INFINITE);		//		------------------------		PROBLEM:No exit condition
 	
 	UnmapViewOfFile(cThread.smCtrl.pSMemServer);	//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);	//Unmaps view of shared memory

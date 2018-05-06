@@ -23,7 +23,7 @@ void moveInvader(invader * enemy, int steps, int sidestep) {
 	enemy->y = (steps / sidestep) + enemy->y_init;
 
 	if ((steps % (sidestep * 2)) < sidestep)
-		enemy->x = (steps % 8)+enemy->x_init;		//Invader goes right
+		enemy->x = (steps % (sidestep * 2))+enemy->x_init;		//Invader goes right
 	else if ((steps % (sidestep*2)) > sidestep)
 		enemy->x--;									//Invader goes left
 }
@@ -33,7 +33,7 @@ DWORD WINAPI Level01(LPVOID tParam) {
 	int * ThreadMustGoOn = ((SMCtrl_Thread *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl_Thread *)tParam)->smCtrl.pSMemServer;
 	int i,j;
-	int sidestep=4;
+	int sidestep=5;
 
 	for (i = 0; i < MAX_INVADER; i++) {				//Populates invaders
 
@@ -62,7 +62,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	while (sGTick->ThreadMustGoOn) {
 
-		Sleep(100);
+		Sleep(50);
 		_tprintf(TEXT("."));
 		SetEvent(sGTick->hTick);
 	}

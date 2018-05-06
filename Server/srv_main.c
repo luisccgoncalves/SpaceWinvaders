@@ -17,8 +17,6 @@ typedef struct {
 	int				ThreadMustGoOn;		
 }GTickStruct;
 
-int ThreadMustGoOn = 1;
-
 void moveInvader(invader * enemy, int steps, int sidestep) {
 
 	enemy->y = (steps / sidestep) + enemy->y_init;				//Invader goes down after n sidesteps
@@ -202,14 +200,13 @@ int _tmain(int argc, LPTSTR argv[]) {
 		&tLevel01ID);								//gets thread ID to close it afterwards
 
 	//Enter to end thread and exit
-	//_gettchar();
-	Sleep(100);
+	_gettchar();
+
 	cThread.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 	sGTick.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 
-	_tprintf(TEXT("batatas\n"));
 	WaitForSingleObject(htGame, INFINITE);			//Waits for thread to exit
-	_tprintf(TEXT("batatas\n"));
+
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
 	SetEvent(cThread.smCtrl.hSMGatewayUpdate);		//Sets event to own process, this will iterate the thread main loop to check ThreadMustGoOn == 0

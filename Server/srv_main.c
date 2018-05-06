@@ -20,29 +20,26 @@ typedef struct {
 
 void moveInvader(invader * enemy) {
 
-//	enemy->y = enemy->y_init/4;						//Invader goes down after 4 iterations
-//	enemy->y_init++;
-//
-//	if ((enemy->x_init % 8) < 4)
-//		enemy->x = enemy->x_init % 8;					//Invader goes right
-//	else if ((enemy->x_init % 8) > 4)
-//		enemy->x--;						//Invader goes left
-//
-//	enemy->x_init++;
-
-	enemy->y = enemy->y_init / 4;
+	enemy->y = (enemy->y_init) / 4;
 	enemy->y_init++;
-	//if ((enemy->x == (enemy->x_init + 4))&&(enemy->y%2))
-	//	return;
 
-	if ((!(enemy->y%2))&&(enemy->x>1)) {
-		enemy->x++;
-		return;
-	}
-	if ((enemy->y % 2) && (enemy->x<5)) {
-		enemy->x--;
-	}
-		
+	//if ((enemy->y % 2 == 0)) {
+	//	enemy->x++;
+	//}
+	//else {
+	//	enemy->x--;
+	//}
+	//	
+	//if (enemy->x == 4) {
+	//	enemy->y_init--;
+	//}
+
+	if ((enemy->x_init % 8) < 4)
+		enemy->x = enemy->x_init % 8;					//Invader goes right
+	else if ((enemy->x_init % 8) > 4)
+		enemy->x--;						//Invader goes left
+	
+	enemy->x_init++;
 }
 
 DWORD WINAPI Level01(LPVOID tParam) {
@@ -57,14 +54,14 @@ DWORD WINAPI Level01(LPVOID tParam) {
 	//	lvl->invad[i].x = lvl->invad[i].x_init = i;
 	//	lvl->invad[i].y = lvl->invad[i].y_init = i;
 	//}
-	lvl->invad[0].x = lvl->invad[0].x_init = 1;
+	lvl->invad[0].x = lvl->invad[0].x_init = 0;
 	lvl->invad[0].y = lvl->invad[0].y_init = 0;
-	//lvl->invad[1].x = lvl->invad[1].x_init = 1;
-	//lvl->invad[1].y = lvl->invad[1].y_init = 0;
+	lvl->invad[1].x = lvl->invad[1].x_init = 1;
+	lvl->invad[1].y = lvl->invad[1].y_init = 0;
 
 	while (ThreadMustGoOn) {						//Thread main loop
 
-		for (i = 0; i < 1 && ThreadMustGoOn; i++) {
+		for (i = 0; i < 2 && ThreadMustGoOn; i++) {
 
 			moveInvader(&lvl->invad[i]);
 		}

@@ -7,12 +7,6 @@
 #include "../DLL/dll.h"
 
 typedef struct {
-	HANDLE			mhInvader;						//Handle to mutex (TEST)
-	SMCtrl			smCtrl;							//Shared memory structure
-	int				ThreadMustGoOn;					//Flag for thread shutdown
-} SMCtrl_Thread;
-
-typedef struct {
 	HANDLE			hTick;							//Handle to event. Warns gateway about updates in shared memory
 	int				ThreadMustGoOn;		
 }GTickStruct;
@@ -37,8 +31,8 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 DWORD WINAPI StartGame(LPVOID tParam) {
 
-	int * ThreadMustGoOn = &((SMCtrl_Thread *)tParam)->ThreadMustGoOn;
-	SMServer_MSG *lvl = ((SMCtrl_Thread *)tParam)->smCtrl.pSMemServer;
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
 	int i,j;
 	int sidestep=5;
 
@@ -67,7 +61,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 			lvl->invad[i].y = lvl->invad[i].y_init = rand() % YSIZE;
 			_tprintf(TEXT("\nInvader no: %d\nX= %d\nY= %d\n%d\n"),i, lvl->invad[i].x, lvl->invad[i].y,rand());
 		}
-		
 	}
 
 	while (*ThreadMustGoOn) {						//Thread main loop
@@ -99,8 +92,8 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updates
 
-	int * ThreadMustGoOn = &((SMCtrl_Thread*)tParam)->ThreadMustGoOn;
-	HANDLE * hSMGatewayUpdate = ((SMCtrl_Thread*)tParam)->smCtrl.hSMGatewayUpdate;
+	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
+	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
 
 	while (*ThreadMustGoOn) {
 		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
@@ -115,7 +108,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_setmode(_fileno(stdout), _O_WTEXT);
 	#endif
 	
-	SMCtrl_Thread	cThread;						//Thread parameter structure
+	SMCtrl			cThread;						//Thread parameter structure
 	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
 	DWORD			tGameID;						//stores the ID of the game thread
 	HANDLE			htGame;							//Handle to the game thread
@@ -132,9 +125,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	GetSystemInfo(&SysInfo);						//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
-	cThread.smCtrl.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.smCtrl.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.smCtrl.SMemSize.QuadPart = cThread.smCtrl.SMemViewServer.QuadPart + cThread.smCtrl.SMemViewGateway.QuadPart;
+	cThread.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	//#######################################################################################################################
 	//#####################################GRANULARITY TESTS//DELETE THIS####################################################
@@ -161,36 +154,36 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,										//Initial state
 		TEXT("LetsBoot"));							//Event name
 
-	cThread.smCtrl.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
 		TEXT("SMServerUpdate"));					//Event name
 
-	cThread.smCtrl.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
 		TEXT("SMGatewayUpdate"));					//Event name
 
-	sGTick.hTick = cThread.smCtrl.hSMServerUpdate;
+	sGTick.hTick = cThread.hSMServerUpdate;
 
-	sharedMemory(&cThread.smCtrl);
-	if (cThread.smCtrl.hSMem== NULL) {				//Checks for errors
+	sharedMemory(&cThread);
+	if (cThread.hSMem== NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Server>
-	mapServerView(&cThread.smCtrl);
-	if (cThread.smCtrl.pSMemServer == NULL) {		//Checks for errors
+	mapServerView(&cThread);
+	if (cThread.pSMemServer == NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Gateway>
-	mapGatewayView(&cThread.smCtrl);
-	if (cThread.smCtrl.pSMemGateway== NULL) {		//Checks for errors
+	mapGatewayView(&cThread);
+	if (cThread.pSMemGateway== NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -239,12 +232,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
-	SetEvent(cThread.smCtrl.hSMGatewayUpdate);		//Sets event to own process, this will iterate the thread main loop to check ThreadMustGoOn == 0
+	SetEvent(cThread.hSMGatewayUpdate);		//Sets event to own process, this will iterate the thread main loop to check ThreadMustGoOn == 0
 	WaitForSingleObject(htGReadMsg, INFINITE);		//		------------------------		PROBLEM:No exit condition
 	
-	UnmapViewOfFile(cThread.smCtrl.pSMemServer);	//Unmaps view of shared memory
-	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);	//Unmaps view of shared memory
-	CloseHandle(cThread.smCtrl.hSMem);				//Closes shared memory
+	UnmapViewOfFile(cThread.pSMemServer);	//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemGateway);	//Unmaps view of shared memory
+	CloseHandle(cThread.hSMem);				//Closes shared memory
 
 	return 0;
 }

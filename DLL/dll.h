@@ -89,6 +89,9 @@ typedef struct {
 	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
 	SMGateway_MSG	*pSMemGateway;			//Pointer to shared memory's first byte
+
+	HANDLE			mhInvader;				//Handle to mutex (TEST)
+	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl;
 
 TCHAR SMName[] = TEXT("SWInvadersMem");		//Name of the shared memory, this has to be known between processes

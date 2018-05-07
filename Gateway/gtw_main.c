@@ -7,16 +7,10 @@
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
-typedef struct {
-	//HANDLE			mhInvader;				//Handle to mutex (TEST)
-	SMCtrl			smCtrl;					//Shared memory structure
-	int				ThreadMustGoOn;			//Flag for thread shutdown
-} SMCtrl_Thread;
-
 DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure updates
 
-	SMCtrl_Thread	*cThread;
-	cThread = (SMCtrl_Thread*)tParam;
+	SMCtrl	*cThread;
+	cThread = (SMCtrl*)tParam;
 	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 	int i;
 
@@ -24,11 +18,11 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 	hidecursor();
 
 	while (cThread->ThreadMustGoOn) {
-		WaitForSingleObject(cThread->smCtrl.hSMServerUpdate, INFINITE);
+		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
-			gotoxy(cThread->smCtrl.pSMemServer->invad[i].x, cThread->smCtrl.pSMemServer->invad[i].y);
-			if(cThread->smCtrl.pSMemServer->invad[i].rand_path)
+			gotoxy(cThread->pSMemServer->invad[i].x, cThread->pSMemServer->invad[i].y);
+			if(cThread->pSMemServer->invad[i].rand_path)
 				_tprintf(TEXT("X"));
 			else
 				_tprintf(TEXT("W"));
@@ -45,35 +39,35 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_setmode(_fileno(stdout), _O_WTEXT);
 #endif
 
-	SMCtrl_Thread	cThread;
-	HANDLE			hCanBootNow;
-	HANDLE			htSReadMsg;
-	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
+	SMCtrl		cThread;
+	HANDLE		hCanBootNow;
+	HANDLE		htSReadMsg;
+	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
-	DWORD			tRSMsgID;
+	DWORD		tRSMsgID;
 
-	SYSTEM_INFO		SysInfo;
-	DWORD			dwSysGran;
+	SYSTEM_INFO	SysInfo;
+	DWORD		dwSysGran;
 
 	GetSystemInfo(&SysInfo);									//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
 
-	cThread.smCtrl.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.smCtrl.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.smCtrl.SMemSize.QuadPart = cThread.smCtrl.SMemViewServer.QuadPart + cThread.smCtrl.SMemViewGateway.QuadPart;
+	cThread.SMemViewServer.QuadPart		= ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewGateway.QuadPart	= ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemSize.QuadPart			= cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	cThread.ThreadMustGoOn = 1;
 
 	//hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, (LPTSTR)TEXT("LetsBoot")); *WIP from LG
 	hCanBootNow = CreateEvent(NULL, FALSE, FALSE, TEXT("LetsBoot"));
 
-	cThread.smCtrl.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
 		TEXT("SMServerUpdate"));					//Event name
 
-	cThread.smCtrl.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn server that the shared memoy is mapped
+	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn server that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
@@ -83,26 +77,26 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(hCanBootNow, 5000);
 
 	//Opens a mapped file by the server
-	cThread.smCtrl.hSMem = OpenFileMapping(
+	cThread.hSMem = OpenFileMapping(
 		FILE_MAP_ALL_ACCESS, 
 		FALSE, 
 		SMName);
 
-	if (cThread.smCtrl.hSMem == NULL) {				//Checks for errors
+	if (cThread.hSMem == NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Server>
-	mapServerView(&cThread.smCtrl);
-	if (cThread.smCtrl.pSMemServer == NULL) {		//Checks for errors
+	mapServerView(&cThread);
+	if (cThread.pSMemServer == NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Gateway>
-	mapGatewayView(&cThread.smCtrl);
-	if (cThread.smCtrl.pSMemGateway == NULL) {		//Checks for errors
+	mapGatewayView(&cThread);
+	if (cThread.pSMemGateway == NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
 		return -1;
 	}
@@ -117,9 +111,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	WaitForSingleObject(htSReadMsg, INFINITE);
 
-	UnmapViewOfFile(cThread.smCtrl.pSMemServer);		//Unmaps view of shared memory
-	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);		//Unmaps view of shared memory
-	CloseHandle(cThread.smCtrl.hSMem);
+	UnmapViewOfFile(cThread.pSMemServer);		//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemGateway);		//Unmaps view of shared memory
+	CloseHandle(cThread.hSMem);
 
 	return 0;
 }

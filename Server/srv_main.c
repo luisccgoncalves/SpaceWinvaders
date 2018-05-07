@@ -27,29 +27,55 @@ void moveInvader(invader * enemy, int steps, int sidestep) {
 		enemy->x--;												//Invader goes left
 }
 
-DWORD WINAPI Level01(LPVOID tParam) {
+DWORD WINAPI RegPathInvaders(LPVOID tParam) {
+
+}
+
+DWORD WINAPI RandPathInvaders(LPVOID tParam) {
+
+}
+
+DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl_Thread *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl_Thread *)tParam)->smCtrl.pSMemServer;
 	int i,j;
 	int sidestep=5;
 
-	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		//Populates invaders
+	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		//Defines invader path
+		if (i < RAND_INVADER)
+			lvl->invad[i].rand_path = 1;
+		else
+			lvl->invad[i].rand_path = 0;
+	}
 
-		//deploys 11 invaders per line with a spacing of 2
-		lvl->invad[i].x = lvl->invad[i].x_init = (i%11)*2;  
+	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		//Populates invaders with coords
 
-		//Deploys 5 lines of invaders (MAX_INVADER/11=5)
-		lvl->invad[i].y = lvl->invad[i].y_init = i / 11;
+		if (!(lvl->invad[i].rand_path)) {							//If regular path
+			
+			//deploys 11 invaders per line with a spacing of 2
+			lvl->invad[i].x = lvl->invad[i].x_init = (i % 11) * 2;
+
+			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
+			lvl->invad[i].y = lvl->invad[i].y_init = i / 11;
+		}
+		else {
+			lvl->invad[i].x = lvl->invad[i].x_init = 40;
+			lvl->invad[i].y = lvl->invad[i].y_init = 15;
+		}
+		
 	}
 
 	while (*ThreadMustGoOn) {						//Thread main loop
+
 		for (i = 0; (i < YSIZE * sidestep) && *ThreadMustGoOn; i++) {
+
 			for (j = 0;( j < MAX_INVADER )&& *ThreadMustGoOn; j++) {
 
 				moveInvader(&lvl->invad[j], i, sidestep);
 			}
-			Sleep(500);
+
+			Sleep(INVADER_SPEED);
 		}
 	}
 }
@@ -61,7 +87,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	while (sGTick->ThreadMustGoOn) {
 
-		Sleep(50);
+		Sleep(100);
 		_tprintf(TEXT("."));
 		SetEvent(sGTick->hTick);
 	}
@@ -87,7 +113,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	
 	SMCtrl_Thread	cThread;						//Thread parameter structure
 	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
-	DWORD			tLevel01ID;						//stores the ID of the game thread
+	DWORD			tGameID;						//stores the ID of the game thread
 	HANDLE			htGame;							//Handle to the game thread
 
 	GTickStruct		sGTick;
@@ -188,16 +214,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,											//Creation flags
 		&tRGMsgID);									//gets thread ID to close it afterwards
 
-	//Launches Level 1 thread
-	_tprintf(TEXT("Launching Level 1 thread... ENTER to quit\n"));
+	//Launches Game thread
+	_tprintf(TEXT("Launching Game thread... ENTER to quit\n"));
 
 	htGame = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size
-		Level01,									//Thread function name
+		StartGame,									//Thread function name
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
-		&tLevel01ID);								//gets thread ID to close it afterwards
+		&tGameID);								//gets thread ID to close it afterwards
 
 	//Enter to end thread and exit
 	_gettchar();

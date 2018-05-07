@@ -10,7 +10,9 @@
 #define XSIZE 80  //---------------(?)--------------
 #define YSIZE 25
 
-#define MAX_INVADER 55
+#define MAX_INVADER		55
+#define RAND_INVADER	2
+#define INVADER_SPEED	1000
 
 typedef struct {
 	int		id;

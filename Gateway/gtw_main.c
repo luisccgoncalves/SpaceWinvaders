@@ -28,7 +28,10 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
 			gotoxy(cThread->smCtrl.pSMemServer->invad[i].x, cThread->smCtrl.pSMemServer->invad[i].y);
-			_tprintf(TEXT("W"));
+			if(cThread->smCtrl.pSMemServer->invad[i].rand_path)
+				_tprintf(TEXT("X"));
+			else
+				_tprintf(TEXT("W"));
 		}
 		
 		//SetEvent(cThread->smCtrl.hSMGatewayUpdate);
@@ -113,16 +116,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		&tRSMsgID);				//gets thread ID to close it afterwards
 
 	WaitForSingleObject(htSReadMsg, INFINITE);
-
-	/*cls(hStdout);
-	hidecursor();*/
-	//while (cThread.ThreadMustGoOn) {
-	//	//WaitForSingleObject(cThread.smCtrl.hSMServerUpdate, INFINITE);
-	//	//cls(hStdout);
-	//	//gotoxy(cThread.smCtrl.pSMemServer->pSMem.x, cThread.smCtrl.pSMemServer->pSMem.y);
-	//	//_tprintf(TEXT("W"));
-	//	//SetEvent(cThread.smCtrl.hSMGatewayUpdate);
-	//}
 
 	UnmapViewOfFile(cThread.smCtrl.pSMemServer);		//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);		//Unmaps view of shared memory

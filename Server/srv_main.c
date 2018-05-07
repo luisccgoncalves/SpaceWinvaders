@@ -11,30 +11,58 @@ typedef struct {
 	int				ThreadMustGoOn;		
 }GTickStruct;
 
-void moveInvader(invader * enemy, int steps, int sidestep) {
-
-	enemy->y = (steps / sidestep) + enemy->y_init;				//Invader goes down after n sidesteps
-
-	if ((steps % (sidestep * 2)) < sidestep)
-		enemy->x = (steps % (sidestep * 2))+enemy->x_init;		//Invader goes right
-	else if ((steps % (sidestep*2)) > sidestep)
-		enemy->x--;												//Invader goes left
-}
-
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+
+	int i, j;
+	int sidestep = 5;
+
+	while (*ThreadMustGoOn) {						//Thread main loop
+
+		for (i = 0; (i < YSIZE * sidestep) && *ThreadMustGoOn; i++) {
+
+			for (j = 0; (j < (MAX_INVADER - RAND_INVADER)) && *ThreadMustGoOn; j++) {
+
+				lvl->invad[j].y = (i / sidestep) + lvl->invad[j].y_init;				//Invader goes down after n sidesteps
+
+				if ((i % (sidestep * 2)) < sidestep)
+					lvl->invad[j].x = (i % (sidestep * 2)) + lvl->invad[j].x_init;		//Invader goes right
+				else if ((i % (sidestep * 2)) > sidestep)
+					lvl->invad[j].x--;													//Invader goes left
+			}
+
+			Sleep(INVADER_SPEED);
+		}
+	}
 }
 
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+	int i;
+
+	while (*ThreadMustGoOn) {						//Thread main loop
+		for (i = (MAX_INVADER - RAND_INVADER); (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
+			lvl->invad[i].x = rand() % XSIZE;
+			lvl->invad[i].y = rand() % YSIZE;
+		}
+	}
 }
 
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
-	int i,j;
-	int sidestep=5;
+
+	DWORD			tRegPathInvaderID;
+	HANDLE			htRegPathInvader;
+	DWORD			tRandPathInvaderID;
+	HANDLE			htRandPathInvader;
+
+	int i;
 
 	srand((unsigned)time(NULL));				//Seeds the RNG
 	_tprintf(TEXT("\n %d\n"), rand());
@@ -63,18 +91,24 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		}
 	}
 
-	while (*ThreadMustGoOn) {						//Thread main loop
+	htRegPathInvader = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		RegPathInvaders,							//Thread function name
+		tParam,										//Thread parameter struct
+		0,											//Creation flags
+		&tRegPathInvaderID);						//gets thread ID to close it afterwards
 
-		for (i = 0; (i < YSIZE * sidestep) && *ThreadMustGoOn; i++) {
+	htRandPathInvader = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		RandPathInvaders,							//Thread function name
+		tParam,										//Thread parameter struct
+		0,											//Creation flags
+		&tRandPathInvaderID);						//gets thread ID to close it afterwards
 
-			for (j = 0;( j < (MAX_INVADER-RAND_INVADER) )&& *ThreadMustGoOn; j++) {
-
-				moveInvader(&lvl->invad[j], i, sidestep);
-			}
-
-			Sleep(INVADER_SPEED);
-		}
-	}
+	WaitForSingleObject(htRegPathInvader,INFINITE);
+	WaitForSingleObject(htRandPathInvader, INFINITE);
 }
 
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates

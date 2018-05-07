@@ -42,11 +42,14 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	int i,j;
 	int sidestep=5;
 
+	srand((unsigned)time(NULL));				//Seeds the RNG
+	_tprintf(TEXT("\n %d\n"), rand());
+
 	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		//Defines invader path
-		if (i < RAND_INVADER)
-			lvl->invad[i].rand_path = 1;
-		else
+		if (i < (MAX_INVADER-RAND_INVADER))
 			lvl->invad[i].rand_path = 0;
+		else
+			lvl->invad[i].rand_path = 1;
 	}
 
 	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		//Populates invaders with coords
@@ -60,8 +63,9 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 			lvl->invad[i].y = lvl->invad[i].y_init = i / 11;
 		}
 		else {
-			lvl->invad[i].x = lvl->invad[i].x_init = 40;
-			lvl->invad[i].y = lvl->invad[i].y_init = 15;
+			lvl->invad[i].x = lvl->invad[i].x_init = rand() % XSIZE;
+			lvl->invad[i].y = lvl->invad[i].y_init = rand() % YSIZE;
+			_tprintf(TEXT("\nInvader no: %d\nX= %d\nY= %d\n%d\n"),i, lvl->invad[i].x, lvl->invad[i].y,rand());
 		}
 		
 	}
@@ -70,7 +74,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 		for (i = 0; (i < YSIZE * sidestep) && *ThreadMustGoOn; i++) {
 
-			for (j = 0;( j < MAX_INVADER )&& *ThreadMustGoOn; j++) {
+			for (j = 0;( j < (MAX_INVADER-RAND_INVADER) )&& *ThreadMustGoOn; j++) {
 
 				moveInvader(&lvl->invad[j], i, sidestep);
 			}

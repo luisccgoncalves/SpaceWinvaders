@@ -46,9 +46,28 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 		for (i = (MAX_INVADER - RAND_INVADER); (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
-			lvl->invad[i].x = rand() % XSIZE;
-			lvl->invad[i].y = rand() % YSIZE;
+
+			switch (rand() % 4) {
+			case 0:
+				if (lvl->invad[i].x > 0)
+					lvl->invad[i].x--;
+				break;
+			case 1:
+				if (lvl->invad[i].x < XSIZE)
+					lvl->invad[i].x++;
+				break;
+			case 2:
+				if (lvl->invad[i].y > 0)
+					lvl->invad[i].y--;
+				break;
+			case 3:
+				if (lvl->invad[i].x < YSIZE)
+					lvl->invad[i].y++;
+				break;
+			}
 		}
+
+		Sleep(INVADER_SPEED/2);
 	}
 }
 

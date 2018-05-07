@@ -69,10 +69,10 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updates
 
-	int * ThreadMustGoOn = ((SMCtrl_Thread*)tParam)->ThreadMustGoOn;
+	int * ThreadMustGoOn = &((SMCtrl_Thread*)tParam)->ThreadMustGoOn;
 	HANDLE * hSMGatewayUpdate = ((SMCtrl_Thread*)tParam)->smCtrl.hSMGatewayUpdate;
 
-	while (ThreadMustGoOn) {
+	while (*ThreadMustGoOn) {
 		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
 		_tprintf(TEXT(" g "));
 	}
@@ -210,7 +210,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
 	SetEvent(cThread.smCtrl.hSMGatewayUpdate);		//Sets event to own process, this will iterate the thread main loop to check ThreadMustGoOn == 0
-	//WaitForSingleObject(htGReadMsg, INFINITE);		//		------------------------		PROBLEM:No exit condition
+	WaitForSingleObject(htGReadMsg, INFINITE);		//		------------------------		PROBLEM:No exit condition
 	
 	UnmapViewOfFile(cThread.smCtrl.pSMemServer);	//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.smCtrl.pSMemGateway);	//Unmaps view of shared memory

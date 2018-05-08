@@ -9,19 +9,23 @@
 typedef struct {
 	HANDLE			hTick;							//Handle to event. Warns gateway about updates in shared memory
 	int				ThreadMustGoOn;		
+	HANDLE			*mhInvader;
 }GTickStruct;
 
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+	HANDLE		*mhInvader = ((SMCtrl *)tParam)->mhInvader;
 
 	int i, j;
-	int sidestep = 5;
+	int sidestep = 4;
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
 		for (i = 0; (i < ((YSIZE-(MAX_INVADER/INVADER_BY_ROW)) * sidestep)) && *ThreadMustGoOn; i++) {
+
+			WaitForSingleObject(mhInvader, INFINITE);
 
 			for (j = 0; (j < (MAX_INVADER - RAND_INVADER)) && *ThreadMustGoOn; j++) {
 
@@ -33,6 +37,8 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					lvl->invad[j].x--;													//Invader goes left
 			}
 
+			ReleaseMutex(mhInvader);
+
 			Sleep(INVADER_SPEED);
 		}
 	}
@@ -42,9 +48,13 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+	HANDLE		*mhInvader = ((SMCtrl *)tParam)->mhInvader;
 	int i;
 
 	while (*ThreadMustGoOn) {						//Thread main loop
+
+		WaitForSingleObject(mhInvader, INFINITE);
+
 		for (i = (MAX_INVADER - RAND_INVADER); (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
 
 			switch (rand() % 4) {
@@ -75,6 +85,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 			}
 		}
 
+		ReleaseMutex(mhInvader);
 		Sleep(INVADER_SPEED/4);
 	}
 }
@@ -147,7 +158,9 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 		Sleep(100);
 		_tprintf(TEXT("."));
+		WaitForSingleObject(sGTick->mhInvader, INFINITE);
 		SetEvent(sGTick->hTick);
+		ReleaseMutex(sGTick->mhInvader);
 	}
 }
 
@@ -208,6 +221,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		NULL);										//Mutex name
+
+	sGTick.mhInvader = cThread.mhInvader;
 
 	hCanBootNow = CreateEvent(						//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes

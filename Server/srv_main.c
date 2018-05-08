@@ -21,7 +21,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
-		for (i = 0; (i < YSIZE * sidestep) && *ThreadMustGoOn; i++) {
+		for (i = 0; (i < ((YSIZE-(MAX_INVADER/INVADER_BY_ROW)) * sidestep)) && *ThreadMustGoOn; i++) {
 
 			for (j = 0; (j < (MAX_INVADER - RAND_INVADER)) && *ThreadMustGoOn; j++) {
 
@@ -51,23 +51,31 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 			case 0:
 				if (lvl->invad[i].x > 0)
 					lvl->invad[i].x--;
+				else
+					lvl->invad[i].x=1;
 				break;
 			case 1:
-				if (lvl->invad[i].x < XSIZE)
+				if (lvl->invad[i].x < XSIZE-1)
 					lvl->invad[i].x++;
+				else
+					lvl->invad[i].x= XSIZE-2;
 				break;
 			case 2:
 				if (lvl->invad[i].y > 0)
 					lvl->invad[i].y--;
+				else
+					lvl->invad[i].y=1;
 				break;
 			case 3:
-				if (lvl->invad[i].x < YSIZE)
+				if (lvl->invad[i].y < YSIZE-1)
 					lvl->invad[i].y++;
+				else
+					lvl->invad[i].y= YSIZE-2;
 				break;
 			}
 		}
 
-		Sleep(INVADER_SPEED/2);
+		Sleep(INVADER_SPEED/4);
 	}
 }
 
@@ -97,11 +105,11 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 		if (!(lvl->invad[i].rand_path)) {							//If regular path
 			
-			//deploys 11 invaders per line with a spacing of 2
-			lvl->invad[i].x = lvl->invad[i].x_init = (i % 11) * 2;
+			//deploys INVADER_BY_ROW invaders per line with a spacing of 2
+			lvl->invad[i].x = lvl->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
 
 			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
-			lvl->invad[i].y = lvl->invad[i].y_init = i / 11;
+			lvl->invad[i].y = lvl->invad[i].y_init = i / INVADER_BY_ROW;
 		}
 		else {
 			lvl->invad[i].x = lvl->invad[i].x_init = rand() % XSIZE;

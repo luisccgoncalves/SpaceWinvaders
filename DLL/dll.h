@@ -14,6 +14,8 @@
 #define RAND_INVADER	2
 #define INVADER_SPEED	1000
 
+#define INVADER_BY_ROW	11
+
 typedef struct {
 	int		id;
 	TCHAR	username[20];

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
+#include <time.h>
 #include "../DLL/dll.h"
 
 typedef struct {
@@ -41,6 +42,8 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 			Sleep(INVADER_SPEED*(*ThreadMustGoOn));
 		}
 	}
+
+	return 0;
 }
 
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
@@ -87,6 +90,8 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 		ReleaseMutex(mhInvader);
 		Sleep((INVADER_SPEED/4)*(*ThreadMustGoOn));
 	}
+
+	return 0;
 }
 
 DWORD WINAPI StartGame(LPVOID tParam) {
@@ -146,6 +151,9 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	WaitForSingleObject(htRegPathInvader,INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
+
+	return 0;
+
 }
 
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
@@ -161,6 +169,8 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		SetEvent(sGTick->hTick);
 		ReleaseMutex(sGTick->mhInvader);
 	}
+
+	return 0;
 }
 
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updates
@@ -172,6 +182,8 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updat
 		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
 		_tprintf(TEXT(" g "));
 	}
+
+	return 0;
 }
 
 int _tmain(int argc, LPTSTR argv[]) {

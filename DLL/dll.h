@@ -7,19 +7,20 @@
 #define DLL_IMP_API __declspec(dllimport)
 #endif
 
-#define SMEM_NAME TEXT("SWInvadersMem")		//Name of the shared memory
-#define XSIZE 80  
-#define YSIZE 25
+#define SMEM_NAME		TEXT("SWInvadersMem")		//Name of the shared memory
+#define SMALL_BUFF		20							//Used for small strings (Ex:username)
+#define XSIZE			80							//Terminal max collumn number
+#define YSIZE			25							//Terminal max row number
 
-#define MAX_INVADER		57
-#define RAND_INVADER	2
-#define INVADER_SPEED	1000
+#define MAX_INVADER		57							//Maximum invaders by level
+#define RAND_INVADER	2							//Number of random path invaders
+#define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 
-#define INVADER_BY_ROW	11
+#define INVADER_BY_ROW	11							//Number of maximum invaders by row
 
 typedef struct {
 	int		id;
-	TCHAR	username[20];
+	TCHAR	username[SMALL_BUFF];
 	int		high_score;
 }player;
 
@@ -44,6 +45,7 @@ typedef struct {
 	int		y;
 	int		x_init;			//ship x,y initial position
 	int		y_init;			//needed for relative coordinates
+
 	int		hp;				//ship hit points
 	int		bombrate;		//bomb drop rate
 	int		rand_path;		//true for random trajectory, false for zig-zag
@@ -68,9 +70,9 @@ typedef struct {
 }ship_shot;
 
 typedef struct {
-	int		matrix[XSIZE][YSIZE];
-	int		invader_speed;	//invader speed multiplier
-	int		ship_shot_spd;	//Ship shot speed multiplier
+	int		matrix[XSIZE][YSIZE];			//collision detection
+	int		invader_speed;					//invader speed multiplier
+	int		ship_shot_spd;					//Ship shot speed multiplier
 }map;
 
 typedef struct {							//Message to use in @ server view

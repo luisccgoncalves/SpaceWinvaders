@@ -188,29 +188,36 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_setmode(_fileno(stdout), _O_WTEXT);
 	#endif
 	
+	//StartGame thread STRUCT/HANDLE/ID
 	SMCtrl			cThread;						//Thread parameter structure
-	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
-	DWORD			tGameID;						//stores the ID of the game thread
 	HANDLE			htGame;							//Handle to the game thread
+	DWORD			tGameID;						//stores the ID of the game thread
 
-	GTickStruct		sGTick;
-	HANDLE			htGTick;
-	HANDLE			htGReadMsg;
-	DWORD			tGTickID;
-	DWORD			tRGMsgID;
+	//GameTick thread STRUCT/HANDLE/ID
+	GTickStruct		sGTick;							//Thread parameter structure
+	HANDLE			htGTick;						//Handle to the game tick thread
+	DWORD			tGTickID;						//Stores the ID of GTick thread
 
-	SYSTEM_INFO		SysInfo;
-	DWORD			dwSysGran;
+	//Gateway Message thread HANDLE/ID (uses cThread as parameter)
+	HANDLE			htGReadMsg;						//Handle to the Gateway Message thread
+	DWORD			tRGMsgID;						//Stores the ID of the Gateway Message thread
+
+	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
+
+	SYSTEM_INFO		SysInfo;						//System info structure; Needed to extract dwAllocationGranularity
+	DWORD			dwSysGran;						//Stores system granularity (usually arround 65KB)
 
 	GetSystemInfo(&SysInfo);						//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
+	//Rounds view sizes to the neares granularity multiple
 	cThread.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	//#######################################################################################################################
-	//#####################################GRANULARITY TESTS//DELETE THIS####################################################
+	//##################################### GRANULARITY TESTS//DELETE THIS ##################################################
 	//#######################################################################################################################
 	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMServer_MSG), sizeof(SMGateway_MSG));
 	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMServer_MSG), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran);
@@ -227,8 +234,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		NULL);										//Mutex name
-
-	sGTick.mhInvader = cThread.mhInvader;
 
 	hCanBootNow = CreateEvent(						//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
@@ -248,10 +253,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE, 										//Initial state
 		TEXT("SMGatewayUpdate"));					//Event name
 
-	sGTick.hTick = cThread.hSMServerUpdate;			
-	
+	//Populate sGTick's pointers
+	sGTick.mhInvader = cThread.mhInvader;			//Copies Invader moving mutex to the GTick struct thread
+	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
 
-	//######################WAITING FOR PROFESSOR'S EMAIL REPLY##############################################
+
+	//#####################################WAITING FOR PROFESSOR'S EMAIL REPLY##############################################
 
 	//Creates a mapped file
 	if (sharedMemory(&cThread.hSMem, &cThread.SMemSize) == -1) {
@@ -272,7 +279,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
-	//######################################################################################################
+	//######################################################################################################################
 
 
 	SetEvent(hCanBootNow);							//Warns gateway that Shared memory is mapped
@@ -326,9 +333,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htGReadMsg, INFINITE);		//Waits for thread to exit
 	
 
-	UnmapViewOfFile(cThread.pSMemServer);	//Unmaps view of shared memory
-	UnmapViewOfFile(cThread.pSMemGateway);	//Unmaps view of shared memory
-	CloseHandle(cThread.hSMem);				//Closes shared memory
+	UnmapViewOfFile(cThread.pSMemServer);			//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemGateway);			//Unmaps view of shared memory
+	CloseHandle(cThread.hSMem);						//Closes shared memory
 
 	return 0;
 }

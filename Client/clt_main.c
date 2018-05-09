@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <time.h>
 #include <process.h>
-//#include "../Server/structs.h"
 #include "../DLL/dll.h"
 #include "debug.h"
 

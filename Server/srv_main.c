@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
-#include "structs.h"
 #include "../DLL/dll.h"
 
 typedef struct {
@@ -39,7 +38,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 			ReleaseMutex(mhInvader);
 
-			Sleep(INVADER_SPEED);
+			Sleep(INVADER_SPEED*(*ThreadMustGoOn));
 		}
 	}
 }
@@ -86,7 +85,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 		}
 
 		ReleaseMutex(mhInvader);
-		Sleep(INVADER_SPEED/4);
+		Sleep((INVADER_SPEED/4)*(*ThreadMustGoOn));
 	}
 }
 
@@ -102,7 +101,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int i;
 
-	srand((unsigned)time(NULL));				//Seeds the RNG
+	srand((unsigned)time(NULL));					//Seeds the RNG
 	_tprintf(TEXT("\n %d\n"), rand());
 
 	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		//Defines invader path
@@ -245,21 +244,21 @@ int _tmain(int argc, LPTSTR argv[]) {
 	sGTick.hTick = cThread.hSMServerUpdate;
 
 	sharedMemory(&cThread);
-	if (cThread.hSMem== NULL) {				//Checks for errors
+	if (cThread.hSMem== NULL) {						//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Server>
 	mapServerView(&cThread);
-	if (cThread.pSMemServer == NULL) {		//Checks for errors
+	if (cThread.pSMemServer == NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Gateway>
 	mapGatewayView(&cThread);
-	if (cThread.pSMemGateway== NULL) {		//Checks for errors
+	if (cThread.pSMemGateway== NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -271,7 +270,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	htGTick = CreateThread(
 		NULL,										//Thread security attributes
-		0,											//Stack size
+		0,											//Stack size (0 for default)
 		GameTick,									//Thread function name
 		(LPVOID)&sGTick,							//Thread parameter struct
 		0,											//Creation flags
@@ -281,7 +280,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_tprintf(TEXT("Launching gateway message receiver thread...\n"));
 	htGReadMsg = CreateThread(
 		NULL,										//Thread security attributes
-		0,											//Stack size
+		0,											//Stack size (0 for default)
 		ReadGatewayMsg,								//Thread function name
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
@@ -292,11 +291,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	htGame = CreateThread(
 		NULL,										//Thread security attributes
-		0,											//Stack size
+		0,											//Stack size (0 for default)
 		StartGame,									//Thread function name
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
-		&tGameID);								//gets thread ID to close it afterwards
+		&tGameID);									//gets thread ID to close it afterwards
 
 	//Enter to end thread and exit
 	_gettchar();
@@ -304,13 +303,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 	sGTick.ThreadMustGoOn = 0;						//Signals thread to gracefully exit
 
+
+	//If this gets bigger we should maybe move all handles into an array and waitformultipleobjects instead
 	WaitForSingleObject(htGame, INFINITE);			//Waits for thread to exit
 
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
-	SetEvent(cThread.hSMGatewayUpdate);		//Sets event to own process, this will iterate the thread main loop to check ThreadMustGoOn == 0
-	WaitForSingleObject(htGReadMsg, INFINITE);		//		------------------------		PROBLEM:No exit condition
+	SetEvent(cThread.hSMGatewayUpdate);				//Sets event to own process, this will iterate
+													//the thread main loop to check ThreadMustGoOn == 0
+	WaitForSingleObject(htGReadMsg, INFINITE);		//Waits for thread to exit
 	
+
 	UnmapViewOfFile(cThread.pSMemServer);	//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.pSMemGateway);	//Unmaps view of shared memory
 	CloseHandle(cThread.hSMem);				//Closes shared memory

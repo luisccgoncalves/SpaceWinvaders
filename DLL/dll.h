@@ -7,7 +7,7 @@
 #define DLL_IMP_API __declspec(dllimport)
 #endif
 
-#define XSIZE 80  //---------------(?)--------------
+#define XSIZE 80  
 #define YSIZE 25
 
 #define MAX_INVADER		57

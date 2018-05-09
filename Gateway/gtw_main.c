@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
-#include "../Server/structs.h"
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
@@ -57,8 +56,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	cThread.ThreadMustGoOn = 1;
 
-	//hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, (LPTSTR)TEXT("LetsBoot")); *WIP from LG
-	hCanBootNow = CreateEvent(NULL, FALSE, FALSE, TEXT("LetsBoot"));
+	hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, TEXT("LetsBoot"));
+	if (!hCanBootNow) {
+		hCanBootNow = CreateEvent(NULL, FALSE, FALSE, TEXT("LetsBoot"));
+		_tprintf(TEXT("Waiting for server to boot.\n"));
+		WaitForSingleObject(hCanBootNow, INFINITE);
+	}
 
 	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
@@ -72,9 +75,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE, 										//Initial state
 		TEXT("SMGatewayUpdate"));					//Event name
 
-	_tprintf(TEXT("Detecting if server is running.\n"));
-	WaitForSingleObject(hCanBootNow, 5000);
-
 	//Opens a mapped file by the server
 	cThread.hSMem = OpenFileMapping(
 		FILE_MAP_ALL_ACCESS, 
@@ -82,7 +82,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		SMName);
 
 	if (cThread.hSMem == NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Opening file mapping (%d)\nIs the server running?\n"), GetLastError());
+		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
 

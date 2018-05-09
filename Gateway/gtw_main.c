@@ -76,10 +76,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 		TEXT("SMGatewayUpdate"));					//Event name
 
 	//Opens a mapped file by the server
-	cThread.hSMem = OpenFileMapping(
-		FILE_MAP_ALL_ACCESS, 
-		FALSE, 
-		SMName);
+	if (sharedMemory(&cThread.hSMem, 0) == -1) {
+		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	if (cThread.hSMem == NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());

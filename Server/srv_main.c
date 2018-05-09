@@ -243,8 +243,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	sGTick.hTick = cThread.hSMServerUpdate;
 
-	sharedMemory(&cThread);
-	if (cThread.hSMem== NULL) {						//Checks for errors
+	//Creates a mapped file
+	if(sharedMemory(&cThread.hSMem,&cThread.SMemSize)==-1){
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}

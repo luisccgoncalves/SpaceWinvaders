@@ -151,9 +151,6 @@
     <ClCompile Include="srv_main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="structs.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\DLL\DLL.vcxproj">
       <Project>{9e21106a-e867-4267-aaf7-2f91606b957c}</Project>
     </ProjectReference>

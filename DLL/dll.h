@@ -7,6 +7,7 @@
 #define DLL_IMP_API __declspec(dllimport)
 #endif
 
+#define SMEM_NAME TEXT("SWInvadersMem")		//Name of the shared memory
 #define XSIZE 80  
 #define YSIZE 25
 
@@ -95,8 +96,6 @@ typedef struct {
 	HANDLE			mhInvader;				//Handle to mutex (TEST)
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl;
-
-TCHAR SMName[] = TEXT("SWInvadersMem");		//Name of the shared memory, this has to be known between processes
 
 	DLL_IMP_API int sharedMemory(SMCtrl *smCtrl);
 	DLL_IMP_API int mapServerView(SMCtrl *smCtrl);

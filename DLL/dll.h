@@ -97,7 +97,7 @@ typedef struct {
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl;
 
-	DLL_IMP_API int sharedMemory(SMCtrl *smCtrl);
+	DLL_IMP_API int sharedMemory(HANDLE * hSMem, LARGE_INTEGER * SMemSize);
 	DLL_IMP_API int mapServerView(SMCtrl *smCtrl);
 	DLL_IMP_API int mapGatewayView(SMCtrl *smCtrl);
 

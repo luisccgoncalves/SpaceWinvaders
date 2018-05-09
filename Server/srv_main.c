@@ -4,13 +4,8 @@
 #include <io.h>
 #include <fcntl.h>
 #include <time.h>
+#include "localStructs.h"
 #include "../DLL/dll.h"
-
-typedef struct {
-	HANDLE			hTick;							//Handle to event. Warns gateway about updates in shared memory
-	int				ThreadMustGoOn;		
-	HANDLE			*mhInvader;
-}GTickStruct;
 
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
@@ -226,7 +221,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//#######################################################################################################################
 
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
-	sGTick.ThreadMustGoOn = 1;
+	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
 
 	cThread.mhInvader = CreateMutex(				//This a test
 		NULL,										//Security attributes
@@ -253,10 +248,13 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE, 										//Initial state
 		TEXT("SMGatewayUpdate"));					//Event name
 
-	sGTick.hTick = cThread.hSMServerUpdate;
+	sGTick.hTick = cThread.hSMServerUpdate;			
+	
+
+	//######################WAITING FOR PROFESSOR'S EMAIL REPLY##############################################
 
 	//Creates a mapped file
-	if(sharedMemory(&cThread.hSMem,&cThread.SMemSize)==-1){
+	if (sharedMemory(&cThread.hSMem, &cThread.SMemSize) == -1) {
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -274,6 +272,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
+	//######################################################################################################
+
 
 	SetEvent(hCanBootNow);							//Warns gateway that Shared memory is mapped
 

@@ -15,14 +15,17 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int i, j;
 	int sidestep = 4;
+	int totalsteps = (YSIZE - (MAX_INVADER / INVADER_BY_ROW)) * sidestep;
+	int regInvaderNr = (MAX_INVADER - RAND_INVADER);
+
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
-		for (i = 0; (i < ((YSIZE-(MAX_INVADER/INVADER_BY_ROW)) * sidestep)) && *ThreadMustGoOn; i++) {
+		for (i = 0; (i < totalsteps) && *ThreadMustGoOn; i++) {
 
 			WaitForSingleObject(mhStructSync, INFINITE);
 
-			for (j = 0; (j < (MAX_INVADER - RAND_INVADER)) && *ThreadMustGoOn; j++) {
+			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn; j++) {
 
 				lvl->invad[j].y = (i / sidestep) + lvl->invad[j].y_init;				//Invader goes down after n sidesteps
 
@@ -47,12 +50,15 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 	int i;
+	int startIndex = MAX_INVADER - RAND_INVADER;
+	int maxXpos = XSIZE - 1;
+	int maxYpos = (YSIZE - 1)*0.8;
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
 		WaitForSingleObject(mhStructSync, INFINITE);
 
-		for (i = (MAX_INVADER - RAND_INVADER); (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
+		for (i= startIndex; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
 
 			switch (rand() % 4) {
 			case 0:
@@ -62,10 +68,10 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					lvl->invad[i].x=1;
 				break;
 			case 1:
-				if (lvl->invad[i].x < XSIZE-1)
+				if (lvl->invad[i].x < maxXpos)
 					lvl->invad[i].x++;
 				else
-					lvl->invad[i].x= XSIZE-2;
+					lvl->invad[i].x= maxXpos -1;
 				break;
 			case 2:
 				if (lvl->invad[i].y > 0)
@@ -74,10 +80,10 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					lvl->invad[i].y=1;
 				break;
 			case 3:
-				if (lvl->invad[i].y < YSIZE-1)
+				if (lvl->invad[i].y < maxYpos)
 					lvl->invad[i].y++;
 				else
-					lvl->invad[i].y= YSIZE-2;
+					lvl->invad[i].y= maxYpos -1;
 				break;
 			}
 		}

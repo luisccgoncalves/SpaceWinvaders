@@ -77,6 +77,8 @@ typedef struct {
 
 typedef struct {							//Message to use in the game data view
 	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
+	invaderbomb		bomb;
+
 }SMGameData;
 
 typedef struct {							//Message to use in the message view

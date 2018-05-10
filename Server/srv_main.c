@@ -7,6 +7,23 @@
 #include "localStructs.h"
 #include "../DLL/dll.h"
 
+DWORD WINAPI InvadersBomb(LPVOID tParam) {
+
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+
+	lvl->bomb.x = 10;
+	lvl->bomb.y = 0;
+	while (*ThreadMustGoOn){
+		lvl->bomb.y++;
+		if (lvl->bomb.y == 31)
+			return 0;
+		Sleep(500*(*ThreadMustGoOn));
+	}
+
+	return 0;
+}
+
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
@@ -104,6 +121,8 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	HANDLE			htRegPathInvader;
 	DWORD			tRandPathInvaderID;
 	HANDLE			htRandPathInvader;
+	DWORD			tInvadersBombID;
+	HANDLE			htInvadersBomb;
 
 	int i;
 
@@ -150,8 +169,17 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		0,											//Creation flags
 		&tRandPathInvaderID);						//gets thread ID to close it afterwards
 
+	htInvadersBomb = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		InvadersBomb,							//Thread function name
+		tParam,										//Thread parameter struct
+		0,											//Creation flags
+		&tInvadersBombID);						//gets thread ID to close it afterwards
+
 	WaitForSingleObject(htRegPathInvader,INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
+	WaitForSingleObject(htInvadersBomb, INFINITE);
 
 	return 0;
 
@@ -183,24 +211,24 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updat
 	SMMessage * msg = ((SMCtrl *)tParam)->pSMemMessage;
 	SMMessage *copy;
 
-	CopyMemory(copy, msg, sizeof(SMMessage));
-	//copy = msg;
+	//CopyMemory(copy, msg, sizeof(SMMessage));
+	////copy = msg;
 
-	while (*ThreadMustGoOn) {
-		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
-		//
-		if (copy->details == NULL) {
-			_tprintf(TEXT(" z "));
-		}
-		else {
-			if (copy->details == 1) {
-				_tprintf(TEXT(" ! "));
-			}
-			else {
-				_tprintf(TEXT(" a "));
-			}
-		}
-	}
+	//while (*ThreadMustGoOn) {
+	//	WaitForSingleObject(hSMGatewayUpdate, INFINITE);
+	//	//
+	//	if (copy->details == NULL) {
+	//		_tprintf(TEXT(" z "));
+	//	}
+	//	else {
+	//		if (copy->details == 1) {
+	//			_tprintf(TEXT(" ! "));
+	//		}
+	//		else {
+	//			_tprintf(TEXT(" a "));
+	//		}
+	//	}
+	//}
 
 	return 0;
 }

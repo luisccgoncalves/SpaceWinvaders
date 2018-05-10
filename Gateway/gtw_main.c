@@ -24,10 +24,14 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
 			gotoxy(cThread->pSMemGameData->invad[i].x, cThread->pSMemGameData->invad[i].y);
-			if(cThread->pSMemGameData->invad[i].rand_path)
+			if (cThread->pSMemGameData->invad[i].rand_path)
 				_tprintf(TEXT("X"));
 			else
 				_tprintf(TEXT("W"));
+			if (cThread->pSMemGameData->bomb.y < 25) {
+				gotoxy(cThread->pSMemGameData->bomb.x, cThread->pSMemGameData->bomb.y);
+				_tprintf(TEXT("0"));
+			}
 		}
 		//temporary test
 		msg->details = 1;

@@ -29,7 +29,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 			else
 				_tprintf(TEXT("W"));
 		}
-		
+		//temporary test
 		msg->details = 1;
 
 		SetEvent(cThread->hSMGatewayUpdate);

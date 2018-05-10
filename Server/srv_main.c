@@ -173,18 +173,21 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updat
 
 	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
 	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
+	
 	SMMessage * msg = ((SMCtrl *)tParam)->pSMemMessage;
+	SMMessage *copy;
 
-	//CopyMemory(&copy, msg, sizeof(SMMessage));
+	CopyMemory(copy, msg, sizeof(SMMessage));
+	//copy = msg;
 
 	while (*ThreadMustGoOn) {
 		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
 		//
-		if (msg->details == NULL) {
+		if (copy->details == NULL) {
 			_tprintf(TEXT(" z "));
 		}
 		else {
-			if (msg->details == 1) {
+			if (copy->details == 1) {
 				_tprintf(TEXT(" ! "));
 			}
 			else {

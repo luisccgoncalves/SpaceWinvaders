@@ -69,7 +69,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	int i;
 	int startIndex = MAX_INVADER - RAND_INVADER;
 	int maxXpos = XSIZE - 1;
-	int maxYpos = (YSIZE - 1)*0.8;
+	int maxYpos = (int)((YSIZE - 1)*0.8);
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
@@ -208,27 +208,27 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updat
 	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
 	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
 	
-	SMMessage * msg = ((SMCtrl *)tParam)->pSMemMessage;
-	SMMessage *copy;
+	SMMessage * msg = (((SMCtrl *)tParam)->pSMemMessage);
 
-	//CopyMemory(copy, msg, sizeof(SMMessage));
-	////copy = msg;
+	SMMessage * copy=malloc(sizeof(SMMessage));
 
-	//while (*ThreadMustGoOn) {
-	//	WaitForSingleObject(hSMGatewayUpdate, INFINITE);
-	//	//
-	//	if (copy->details == NULL) {
-	//		_tprintf(TEXT(" z "));
-	//	}
-	//	else {
-	//		if (copy->details == 1) {
-	//			_tprintf(TEXT(" ! "));
-	//		}
-	//		else {
-	//			_tprintf(TEXT(" a "));
-	//		}
-	//	}
-	//}
+	CopyMemory(copy, msg, sizeof(SMMessage));
+
+	while (*ThreadMustGoOn) {
+		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
+		//
+		if (copy->details == NULL) {
+			_tprintf(TEXT(" z "));
+		}
+		else {
+			if (copy->details == 1) {
+				_tprintf(TEXT(" ! "));
+			}
+			else {
+				_tprintf(TEXT(" a "));
+			}
+		}
+	}
 
 	return 0;
 }

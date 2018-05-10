@@ -93,11 +93,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	if (cThread.hSMem == NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
-		return -1;
-	}
-
 	//Creates a view of the desired part <Server>
 	mapServerView(&cThread);
 	if (cThread.pSMemGameData== NULL) {		//Checks for errors

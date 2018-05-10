@@ -26,7 +26,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 			else
 				_tprintf(TEXT("W"));
 		}
-				//SetEvent(cThread->hSMGatewayUpdate);
+				SetEvent(cThread->hSMGatewayUpdate);
 	}
 
 	return 0;
@@ -78,7 +78,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		TEXT("SMGatewayUpdate"));					//Event name
 
 	//Opens a mapped file by the server
-	if (sharedMemory(&cThread.hSMem, 0) == -1) {
+	if (sharedMemory(&cThread.hSMem, NULL) == -1) {
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
 		return -1;
 	}

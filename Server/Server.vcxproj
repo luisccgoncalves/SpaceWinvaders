@@ -147,7 +147,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="backup.c" />
     <ClCompile Include="srv_main.c" />
   </ItemGroup>
   <ItemGroup>

@@ -162,6 +162,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		_tprintf(TEXT("."));
 		WaitForSingleObject(sGTick->mhInvader, INFINITE);
 		SetEvent(sGTick->hTick);
+
 		ReleaseMutex(sGTick->mhInvader);
 	}
 

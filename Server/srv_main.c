@@ -11,7 +11,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
-	HANDLE		*mhInvader = ((SMCtrl *)tParam)->mhInvader;
+	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
 	int sidestep = 4;
@@ -20,7 +20,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 		for (i = 0; (i < ((YSIZE-(MAX_INVADER/INVADER_BY_ROW)) * sidestep)) && *ThreadMustGoOn; i++) {
 
-			WaitForSingleObject(mhInvader, INFINITE);
+			WaitForSingleObject(mhStructSync, INFINITE);
 
 			for (j = 0; (j < (MAX_INVADER - RAND_INVADER)) && *ThreadMustGoOn; j++) {
 
@@ -32,7 +32,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					lvl->invad[j].x--;													//Invader goes left
 			}
 
-			ReleaseMutex(mhInvader);
+			ReleaseMutex(mhStructSync);
 
 			Sleep(INVADER_SPEED*(*ThreadMustGoOn));
 		}
@@ -45,12 +45,12 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
-	HANDLE		*mhInvader = ((SMCtrl *)tParam)->mhInvader;
+	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 	int i;
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
-		WaitForSingleObject(mhInvader, INFINITE);
+		WaitForSingleObject(mhStructSync, INFINITE);
 
 		for (i = (MAX_INVADER - RAND_INVADER); (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
 
@@ -82,7 +82,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 			}
 		}
 
-		ReleaseMutex(mhInvader);
+		ReleaseMutex(mhStructSync);
 		Sleep((INVADER_SPEED/4)*(*ThreadMustGoOn));
 	}
 
@@ -160,10 +160,10 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 		Sleep(100);
 		_tprintf(TEXT("."));
-		WaitForSingleObject(sGTick->mhInvader, INFINITE);
+		WaitForSingleObject(sGTick->mhStructSync, INFINITE);
 		SetEvent(sGTick->hTick);
 
-		ReleaseMutex(sGTick->mhInvader);
+		ReleaseMutex(sGTick->mhStructSync);
 	}
 
 	return 0;
@@ -231,7 +231,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
 
-	cThread.mhInvader = CreateMutex(				//This a test
+	cThread.mhStructSync = CreateMutex(				//This a test
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		NULL);										//Mutex name
@@ -255,7 +255,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		TEXT("SMGatewayUpdate"));					//Event name
 
 	//Populate sGTick's pointers
-	sGTick.mhInvader = cThread.mhInvader;			//Copies Invader moving mutex to the GTick struct thread
+	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
 
 

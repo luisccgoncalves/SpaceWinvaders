@@ -95,7 +95,7 @@ typedef struct {
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
 	SMGateway_MSG	*pSMemGateway;			//Pointer to shared memory's first byte
 
-	HANDLE			mhInvader;				//Handle to mutex (TEST)
+	HANDLE			mhStructSync;				//Handle to mutex (TEST)
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl;
 

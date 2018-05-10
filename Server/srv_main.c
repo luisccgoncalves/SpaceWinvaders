@@ -52,7 +52,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	int i;
 	int startIndex = MAX_INVADER - RAND_INVADER;
 	int maxXpos = XSIZE - 1;
-	int maxYpos = (YSIZE - 1)*0.8;
+	int maxYpos = (int)((YSIZE - 1)*0.8);
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
@@ -180,11 +180,11 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updat
 	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
 	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
 	
-	SMMessage * msg = ((SMCtrl *)tParam)->pSMemMessage;
-	SMMessage *copy;
+	SMMessage * msg = (((SMCtrl *)tParam)->pSMemMessage);
+
+	SMMessage * copy=malloc(sizeof(SMMessage));
 
 	CopyMemory(copy, msg, sizeof(SMMessage));
-	//copy = msg;
 
 	while (*ThreadMustGoOn) {
 		WaitForSingleObject(hSMGatewayUpdate, INFINITE);

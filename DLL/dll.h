@@ -75,12 +75,17 @@ typedef struct {
 	int		ship_shot_spd;					//Ship shot speed multiplier
 }map;
 
-typedef struct {							//Message to use in @ server view
+typedef struct {							//Message to use in the game data view
 	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 }SMGameData;
 
-typedef struct {							//Message to use in @ gateway view
-	char			pSMem;					//Object type to use in the memory
+typedef struct {							//Message to use in the message view
+	int		msgID;							
+	int		owner;							//player1, player2, server, gateway, etc..
+	int		instruction;					//movement, powerUp, shutdown, updateHighscore, etc...
+	int		details;						//up, down, right, left, highscore, etc...
+
+	//if this aproach is to follow we need to consider constants
 }SMMessage;
 
 typedef struct {

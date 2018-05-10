@@ -10,7 +10,7 @@
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
@@ -44,7 +44,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 	int i;
 
@@ -92,7 +92,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
@@ -212,17 +212,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
 	//Rounds view sizes to the neares granularity multiple
-	cThread.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewServer.QuadPart = ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewGateway.QuadPart = ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran;
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	//#######################################################################################################################
 	//##################################### GRANULARITY TESTS//DELETE THIS ##################################################
 	//#######################################################################################################################
-	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMServer_MSG), sizeof(SMGateway_MSG));
-	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMServer_MSG), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran);
-	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMGateway_MSG),dwSysGran,dwSysGran, dwSysGran, ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMGameData), sizeof(SMMessage));
+	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMGameData), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMMessage),dwSysGran,dwSysGran, dwSysGran, ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran);
 	_tprintf(TEXT("TestBigView:\t((%d/%d)*%d)+%d=%d\n"), 66000, dwSysGran, dwSysGran, dwSysGran, ((66000 / dwSysGran)*dwSysGran) + dwSysGran);
 	//#######################################################################################################################
 	//#######################################################################################################################
@@ -269,14 +269,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	//Creates a view of the desired part <Server>
 	mapServerView(&cThread);
-	if (cThread.pSMemServer == NULL) {				//Checks for errors
+	if (cThread.pSMemGameData== NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Gateway>
 	mapGatewayView(&cThread);
-	if (cThread.pSMemGateway== NULL) {				//Checks for errors
+	if (cThread.pSMemMessage== NULL) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -334,8 +334,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htGReadMsg, INFINITE);		//Waits for thread to exit
 	
 
-	UnmapViewOfFile(cThread.pSMemServer);			//Unmaps view of shared memory
-	UnmapViewOfFile(cThread.pSMemGateway);			//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemGameData);			//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemMessage);			//Unmaps view of shared memory
 	CloseHandle(cThread.hSMem);						//Closes shared memory
 
 	return 0;

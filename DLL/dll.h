@@ -77,11 +77,11 @@ typedef struct {
 
 typedef struct {							//Message to use in @ server view
 	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
-}SMServer_MSG;
+}SMGameData;
 
 typedef struct {							//Message to use in @ gateway view
 	char			pSMem;					//Object type to use in the memory
-}SMGateway_MSG;
+}SMMessage;
 
 typedef struct {
 	HANDLE			hSMem;					//Handle to shared memory
@@ -89,11 +89,12 @@ typedef struct {
 
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
 	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
-	SMServer_MSG	*pSMemServer;			//Pointer to shared memory's structure
 
 	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
-	SMGateway_MSG	*pSMemGateway;			//Pointer to shared memory's first byte
+	
+	SMGameData		*pSMemGameData;			//Pointer to shared memory's structure
+	SMMessage		*pSMemMessage;			//Pointer to shared memory's first byte
 
 	HANDLE			mhStructSync;				//Handle to mutex (TEST)
 	int				ThreadMustGoOn;			//Flag for thread shutdown

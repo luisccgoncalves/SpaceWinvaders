@@ -20,8 +20,8 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
-			gotoxy(cThread->pSMemServer->invad[i].x, cThread->pSMemServer->invad[i].y);
-			if(cThread->pSMemServer->invad[i].rand_path)
+			gotoxy(cThread->pSMemGameData->invad[i].x, cThread->pSMemGameData->invad[i].y);
+			if(cThread->pSMemGameData->invad[i].rand_path)
 				_tprintf(TEXT("X"));
 			else
 				_tprintf(TEXT("W"));
@@ -52,8 +52,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	GetSystemInfo(&SysInfo);									//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
 
-	cThread.SMemViewServer.QuadPart		= ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.SMemViewGateway.QuadPart	= ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewServer.QuadPart		= ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewGateway.QuadPart	= ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.SMemSize.QuadPart			= cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	cThread.ThreadMustGoOn = 1;
@@ -90,14 +90,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	//Creates a view of the desired part <Server>
 	mapServerView(&cThread);
-	if (cThread.pSMemServer == NULL) {		//Checks for errors
+	if (cThread.pSMemGameData== NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
 		return -1;
 	}
 
 	//Creates a view of the desired part <Gateway>
 	mapGatewayView(&cThread);
-	if (cThread.pSMemGateway == NULL) {		//Checks for errors
+	if (cThread.pSMemMessage== NULL) {		//Checks for errors
 		_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
 		return -1;
 	}
@@ -112,8 +112,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	WaitForSingleObject(htSReadMsg, INFINITE);
 
-	UnmapViewOfFile(cThread.pSMemServer);		//Unmaps view of shared memory
-	UnmapViewOfFile(cThread.pSMemGateway);		//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemGameData);		//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemMessage);		//Unmaps view of shared memory
 	CloseHandle(cThread.hSMem);
 
 	return 0;

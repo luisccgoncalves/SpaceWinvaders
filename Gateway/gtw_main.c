@@ -6,7 +6,26 @@
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
-DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure updates
+DWORD WINAPI simulClient(LPVOID tParam) {
+
+	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
+	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
+	SMMessage	*message = ((SMCtrl*)tParam)->pSMemMessage;
+
+	srand((unsigned)time(NULL));
+
+	message->owner = 0;
+
+	while (*ThreadMustGoOn) {
+		message->instruction=rand() % 4;
+		SetEvent(hSMGatewayUpdate);
+		Sleep(1000*(*ThreadMustGoOn));
+	}
+
+	return 0;
+}
+
+DWORD WINAPI ReadServerMsg(LPVOID tParam) {	
 
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
@@ -31,16 +50,13 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 
 		if (cThread->pSMemGameData->bomb.y < 25) { //this needs another aproach (fired state?)
 			gotoxy(cThread->pSMemGameData->bomb.x, cThread->pSMemGameData->bomb.y);
-			_tprintf(TEXT("0"));
+			_tprintf(TEXT("o"));
 		}
 
 		for (i = 0; i < MAX_PLAYERS; i++) {
 			gotoxy(cThread->pSMemGameData->ship[i].x, cThread->pSMemGameData->ship[i].y);
 			_tprintf(TEXT("Â"));
 		}
-		//temporary test
-		msg->details = 1;
-		SetEvent(cThread->hSMGatewayUpdate);
 	}
 
 	return 0;
@@ -55,10 +71,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	SMCtrl		cThread;
 	HANDLE		hCanBootNow;
-	HANDLE		htSReadMsg;
-	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
+	HANDLE		htSReadMsg;
 	DWORD		tRSMsgID;
+
+	HANDLE		htSimulClient;
+	DWORD		tSimulClientID;
+
+	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
 	SYSTEM_INFO	SysInfo;
 	DWORD		dwSysGran;
@@ -118,6 +138,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 		(LPVOID)&cThread,		//Thread parameter struct
 		0,						//Creation flags
 		&tRSMsgID);				//gets thread ID to close it afterwards
+
+	htSimulClient = CreateThread(
+		NULL,					//Thread security attributes
+		0,						//Stack size
+		simulClient,			//Thread function name
+		(LPVOID)&cThread,		//Thread parameter struct
+		0,						//Creation flags
+		&tSimulClientID);		//gets thread ID to close it afterwards
 
 	WaitForSingleObject(htSReadMsg, INFINITE);
 

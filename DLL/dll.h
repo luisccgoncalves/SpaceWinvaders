@@ -14,11 +14,8 @@
 
 #define MAX_PLAYERS		1							//Maximum number of concurrent players
 #define MAX_INVADER		57							//Maximum invaders by level
-#define RAND_INVADER	2							//Number of random path invaders
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define MAX_BOMBS		6							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
-
-#define INVADER_BY_ROW	11							//Number of maximum invaders by row
 
 typedef struct {
 	int		id;

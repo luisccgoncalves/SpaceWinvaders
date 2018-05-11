@@ -270,7 +270,7 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 				ship[copy->owner].x--;
 			break;
 		case 3:
-			if (ship[copy->owner].x<minYpos)
+			if (ship[copy->owner].y<minYpos)
 				ship[copy->owner].y--;
 			break;
 		default:
@@ -367,17 +367,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part <Server>
-	mapServerView(&cThread);
-	if (cThread.pSMemGameData== NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
+	//Creates a view of the desired part <GameDataView>
+	
+	if (mapGameDataView(&cThread, FILE_MAP_WRITE) == -1) {				//Checks for errors
+		_tprintf(TEXT("[Error] Mapping GameData view (%d) at Server\n"), GetLastError());
 		return -1;
 	}
 
-	//Creates a view of the desired part <Gateway>
-	mapGatewayView(&cThread);
-	if (cThread.pSMemMessage== NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
+	//Creates a view of the desired part <MsgView>
+	if (mapMsgView(&cThread) == -1) {		//Checks for errors
+		_tprintf(TEXT("[Error] Mapping MsgView (%d)\n at Server"), GetLastError());
 		return -1;
 	}
 	//######################################################################################################################

@@ -117,17 +117,15 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part <Server>
-	mapServerView(&cThread);
-	if (cThread.pSMemGameData== NULL) {		//Checks for errors
-		_tprintf(TEXT("[Error] Mapping memory (%d)\nIs the server running?\n"), GetLastError());
+	//Creates a view of the desired part <GameDataView>
+	if (mapGameDataView(&cThread, FILE_MAP_READ) == -1) {		//Checks for errors
+		_tprintf(TEXT("[Error] Mapping GameDataView (%d) at Gateway. Is the server running?\n"), GetLastError());
 		return -1;
 	}
 
-	//Creates a view of the desired part <Gateway>
-	mapGatewayView(&cThread);
-	if (cThread.pSMemMessage== NULL) {		//Checks for errors
-		_tprintf(TEXT("[Error] Mapping memory (%d)\n @ Gateway"), GetLastError());
+	//Creates a view of the desired part <MsgView>
+	if (mapMsgView(&cThread) == -1) {		//Checks for errors
+		_tprintf(TEXT("[Error] Mapping MsgView (%d)\n at Gateway"), GetLastError());
 		return -1;
 	}
 

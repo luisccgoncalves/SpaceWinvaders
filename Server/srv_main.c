@@ -13,10 +13,9 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 	//invader *xp = ;
 	//invader *yp = ;
-
 	lvl->bomb.x = lvl->invad->x;
 	lvl->bomb.y = lvl->invad->y;
-	while (*ThreadMustGoOn && lvl->bomb.y <25){
+	while (*ThreadMustGoOn && lvl->bomb.y <25/*&&bombColDetect(&bomb,tParam)*/){
 		lvl->bomb.y++;
 		Sleep(500*(*ThreadMustGoOn));
 	}
@@ -127,18 +126,19 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	int i;
 
 	srand((unsigned)time(NULL));					//Seeds the RNG
-	_tprintf(TEXT("\n %d\n"), rand());
 
-	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		//Defines invader path
+	//Defines invader path
+	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		
 		if (i < (MAX_INVADER-RAND_INVADER))
 			lvl->invad[i].rand_path = 0;
 		else
 			lvl->invad[i].rand_path = 1;
 	}
 
-	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		//Populates invaders with coords
+	//Populates invaders with coords
+	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		
 
-		if (!(lvl->invad[i].rand_path)) {							//If regular path
+		if (!(lvl->invad[i].rand_path)) {			//If regular path
 			
 			//deploys INVADER_BY_ROW invaders per line with a spacing of 2
 			lvl->invad[i].x = lvl->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
@@ -151,6 +151,13 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 			lvl->invad[i].y = lvl->invad[i].y_init = rand() % YSIZE;
 			_tprintf(TEXT("\nInvader no: %d\nX= %d\nY= %d\n%d\n"),i, lvl->invad[i].x, lvl->invad[i].y,rand());
 		}
+	}
+
+	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
+	for (i = 0; i < MAX_PLAYERS; i++) {
+
+		lvl->ship[i].x = 1;
+		lvl->ship[i].y = 23;
 	}
 
 	htRegPathInvader = CreateThread(
@@ -172,10 +179,10 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	htInvadersBomb = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size
-		InvadersBomb,							//Thread function name
+		InvadersBomb,								//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tInvadersBombID);						//gets thread ID to close it afterwards
+		&tInvadersBombID);							//gets thread ID to close it afterwards
 
 	WaitForSingleObject(htRegPathInvader,INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);

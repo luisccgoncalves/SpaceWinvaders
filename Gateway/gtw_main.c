@@ -8,16 +8,15 @@
 
 DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure updates
 
-	SMCtrl	*cThread;
-	cThread = (SMCtrl*)tParam;
-	HANDLE			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
+	SMCtrl		*cThread = (SMCtrl*)tParam;
+	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 	
-	SMMessage *msg = cThread->pSMemMessage;
+	SMMessage	*msg = cThread->pSMemMessage;
 
 	int i;
+
 	cls(hStdout);
 	hidecursor();
-
 
 	while (cThread->ThreadMustGoOn) {
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
@@ -28,15 +27,19 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {				//Warns gateway of structure upda
 				_tprintf(TEXT("X"));
 			else
 				_tprintf(TEXT("W"));
-			if (cThread->pSMemGameData->bomb.y < 25) {
-				gotoxy(cThread->pSMemGameData->bomb.x, cThread->pSMemGameData->bomb.y);
-				_tprintf(TEXT("0"));
-			}
+		}
+
+		if (cThread->pSMemGameData->bomb.y < 25) { //this needs another aproach (fired state?)
+			gotoxy(cThread->pSMemGameData->bomb.x, cThread->pSMemGameData->bomb.y);
+			_tprintf(TEXT("0"));
+		}
+
+		for (i = 0; i < MAX_PLAYERS; i++) {
+			gotoxy(cThread->pSMemGameData->ship[i].x, cThread->pSMemGameData->ship[i].y);
+			_tprintf(TEXT("Â"));
 		}
 		//temporary test
-		
 		msg->details = 1;
-
 		SetEvent(cThread->hSMGatewayUpdate);
 	}
 

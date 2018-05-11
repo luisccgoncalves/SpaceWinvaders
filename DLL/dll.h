@@ -12,6 +12,7 @@
 #define XSIZE			80							//Terminal max collumn number
 #define YSIZE			25							//Terminal max row number
 
+#define MAX_PLAYERS		1							//Maximum number of concurrent players
 #define MAX_INVADER		57							//Maximum invaders by level
 #define RAND_INVADER	2							//Number of random path invaders
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
@@ -38,7 +39,7 @@ typedef struct {
 	int		turbo;			//Player will move faster. -------(?)-------
 	int		laser_shots;	//kills all invaders in sight
 							//add more
-}ship;
+}Ship;
 
 typedef struct {
 	int		x;				//ship x,y position
@@ -78,7 +79,7 @@ typedef struct {
 typedef struct {							//Message to use in the game data view
 	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	invaderbomb		bomb;
-
+	Ship			ship[MAX_PLAYERS];
 }SMGameData;
 
 typedef struct {							//Message to use in the message view

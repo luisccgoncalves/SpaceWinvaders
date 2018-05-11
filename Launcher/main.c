@@ -2,7 +2,7 @@
 #include <tchar.h>
 #include <stdio.h>
 #include <io.h>
-#define SIZE 99999
+
 int boot(TCHAR * pProc) {
 
 	TCHAR	procname[20];

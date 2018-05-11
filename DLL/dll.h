@@ -39,7 +39,7 @@ typedef struct {
 	int		turbo;			//Player will move faster. -------(?)-------
 	int		laser_shots;	//kills all invaders in sight
 							//add more
-}Ship;
+}ship;
 
 typedef struct {
 	int		x;				//ship x,y position
@@ -79,7 +79,7 @@ typedef struct {
 typedef struct {							//Message to use in the game data view
 	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	invaderbomb		bomb;
-	Ship			ship[MAX_PLAYERS];
+	ship			ship[MAX_PLAYERS];
 }SMGameData;
 
 typedef struct {							//Message to use in the message view

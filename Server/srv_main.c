@@ -158,7 +158,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < MAX_PLAYERS; i++) {
 
-		lvl->ship[i].x = 1;
+		lvl->ship[i].x = 15;
 		lvl->ship[i].y = 23;
 	}
 
@@ -212,39 +212,11 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	return 0;
 }
 
-//DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		
-//	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
-//	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
-//	
-//	SMMessage * msg = (((SMCtrl *)tParam)->pSMemMessage);
-//	Sleep(200);
-//	SMMessage * copy = malloc(sizeof(SMMessage));
-//
-//	CopyMemory(copy, msg, sizeof(SMMessage));
-//
-//	while (*ThreadMustGoOn) {
-//		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
-//
-//		if (copy->details == NULL) {
-//			_tprintf(TEXT(" z "));
-//		}
-//		else {
-//			if (copy->details == 1) {
-//				_tprintf(TEXT(" ! "));
-//			}
-//			else {
-//				_tprintf(TEXT(" a "));
-//			}
-//		}
-//	}
-//
-//	return 0;
-//}
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		
 
 	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
 	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
-	Ship		*ship = ((SMCtrl*)tParam)->pSMemGameData->ship;
+	ship		*shipR = ((SMCtrl*)tParam)->pSMemGameData->ship;
 	SMMessage	*msg = ((SMCtrl *)tParam)->pSMemMessage;
 	SMMessage	*copy = malloc(sizeof(SMMessage));
 
@@ -258,20 +230,20 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 		copy = msg;
 		switch (copy->instruction) {
 		case 0:
-			if (ship[copy->owner].x<maxXpos)
-				ship[copy->owner].x++;
+			if (shipR[copy->owner].x<maxXpos)
+				shipR[copy->owner].x++;
 			break;
 		case 1:
-			if (ship[copy->owner].y<maxYpos)
-				ship[copy->owner].y++;
+			if (shipR[copy->owner].y<maxYpos)
+				shipR[copy->owner].y++;
 			break;
 		case 2:
-			if (ship[copy->owner].x>0)
-				ship[copy->owner].x--;
+			if (shipR[copy->owner].x>0)
+				shipR[copy->owner].x--;
 			break;
 		case 3:
-			if (ship[copy->owner].y<minYpos)
-				ship[copy->owner].y--;
+			if (shipR[copy->owner].y<minYpos)
+				shipR[copy->owner].y--;
 			break;
 		default:
 			break;

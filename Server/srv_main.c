@@ -15,11 +15,12 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 	/* generate random number between 1 and 50: */
 	int random = rand() % 50 + 1;
 
-	lvl->bomb.x = lvl->invad[random].x;
-	lvl->bomb.y = lvl->invad[random].y;
-	while (*ThreadMustGoOn && lvl->bomb.y <25/*&&bombColDetect(&bomb,tParam)*/) {
-		lvl->bomb.y++;
-		Sleep(lvl->bomb.speed * (*ThreadMustGoOn));
+	lvl->bomb[0].x = lvl->invad[random].x;
+	lvl->bomb[0].y = lvl->invad[random].y;
+	while (*ThreadMustGoOn && lvl->bomb[0].y <25/*&&bombColDetect(&bomb,tParam)*/) {
+		lvl->bomb[0].y++;
+		/*Sleep(lvl->bomb[0].speed * (*ThreadMustGoOn));*/
+		Sleep(250 * (*ThreadMustGoOn));
 	}
 
 	return 0;

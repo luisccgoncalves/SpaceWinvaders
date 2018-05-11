@@ -48,8 +48,8 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 				_tprintf(TEXT("W"));
 		}
 
-		if (cThread->pSMemGameData->bomb.y < 25) { //this needs another aproach (fired state?)
-			gotoxy(cThread->pSMemGameData->bomb.x, cThread->pSMemGameData->bomb.y);
+		if (cThread->pSMemGameData->bomb[0].y < 25) { //this needs another aproach (fired state?)
+			gotoxy(cThread->pSMemGameData->bomb[0].x, cThread->pSMemGameData->bomb[0].y);
 			_tprintf(TEXT("o"));
 		}
 

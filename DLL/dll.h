@@ -16,6 +16,7 @@
 #define MAX_INVADER		57							//Maximum invaders by level
 #define RAND_INVADER	2							//Number of random path invaders
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
+#define MAX_BOMBS		6							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
 
@@ -52,34 +53,47 @@ typedef struct {
 	int		rand_path;		//true for random trajectory, false for zig-zag
 }invader;
 
-typedef struct {
-	int		x;				//ship x,y position
-	int		y;
-	int		hp;
-}barriers;
+//typedef struct {
+//	int		x;				//ship x,y position
+//	int		y;
+//	int		hp;
+//}barriers;
 
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
-	int		speed;
+	int		fired;			//dead or alive
+	//int		speed;		//May not be sensible to have it here - RECONSIDER
+}powerup;
+
+typedef struct {
+	int		x;				//ship x,y position
+	int		y;
+	int		fired;			//dead or alive
+	//int		speed;		//May not be sensible to have it here - RECONSIDER
 }invaderbomb;
 
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
+	int		fired;			//dead or alive
 	int		speed;
 }ship_shot;
 
-typedef struct {
-	int		matrix[XSIZE][YSIZE];			//collision detection
-	int		invader_speed;					//invader speed multiplier
-	int		ship_shot_spd;					//Ship shot speed multiplier
-}map;
-
 typedef struct {							//Message to use in the game data view
 	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
-	invaderbomb		bomb;
-	ship			ship[MAX_PLAYERS];
+	invaderbomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
+	ship			ship[MAX_PLAYERS];		//number of ships/players in game
+	ship_shot		shot[25];				//temporary number of shots
+	powerup			pUp;					//One powerUp only at any given time
+
+	int xsize;						//max y size of play area
+	int ysize;						//max x size of play area
+	int invaders_speed;				//invaders speed
+	int invaders_bombs_speed;
+	int ship_shot_speed;			//defenders shot speed
+	int power_up_speed;				
+
 }SMGameData;
 
 typedef struct {							//Message to use in the message view

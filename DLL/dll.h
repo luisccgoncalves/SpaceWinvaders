@@ -11,6 +11,7 @@
 #define STRUCT_SYNC		TEXT("Structsync")			//Name of the struct sync mutex name
 
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
+#define	SMEM_BUFF		10
 #define XSIZE			80							//Terminal max collumn number
 #define YSIZE			25							//Terminal max row number
 
@@ -99,13 +100,18 @@ typedef struct {							//Message to use in the game data view
 
 }SMGameData;
 
-typedef struct {							//Message to use in the message view
+typedef struct {
 	//int		msgID;						//probably unnecessary - event driven approach	
 	int		owner;							//player1, player2, server, gateway, etc..
 	int		instruction;					//movement, powerUp, shutdown, updateHighscore, etc...
 	int		details;						//up, down, right, left, highscore, etc...
 
 	//if this aproach is to follow we may need to consider constants
+}packet;
+typedef struct {							//Message to use in the message view
+
+	packet	buffer[SMEM_BUFF];
+
 }SMMessage;
 
 typedef struct {

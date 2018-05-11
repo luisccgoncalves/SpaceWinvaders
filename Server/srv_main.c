@@ -210,31 +210,71 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	return 0;
 }
 
-DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updates
+//DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		
+//	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
+//	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
+//	
+//	SMMessage * msg = (((SMCtrl *)tParam)->pSMemMessage);
+//	Sleep(200);
+//	SMMessage * copy = malloc(sizeof(SMMessage));
+//
+//	CopyMemory(copy, msg, sizeof(SMMessage));
+//
+//	while (*ThreadMustGoOn) {
+//		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
+//
+//		if (copy->details == NULL) {
+//			_tprintf(TEXT(" z "));
+//		}
+//		else {
+//			if (copy->details == 1) {
+//				_tprintf(TEXT(" ! "));
+//			}
+//			else {
+//				_tprintf(TEXT(" a "));
+//			}
+//		}
+//	}
+//
+//	return 0;
+//}
+DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		
 
-	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
-	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
-	
-	SMMessage * msg = (((SMCtrl *)tParam)->pSMemMessage);
-	Sleep(200);
-	SMMessage * copy = malloc(sizeof(SMMessage));
+	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
+	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
+	Ship		*ship = ((SMCtrl*)tParam)->pSMemGameData->ship;
+	SMMessage	*msg = ((SMCtrl *)tParam)->pSMemMessage;
+	SMMessage	*copy = malloc(sizeof(SMMessage));
 
-	CopyMemory(copy, msg, sizeof(SMMessage));
+	int maxXpos = XSIZE - 1;
+	int maxYpos = YSIZE - 1;
+	int minYpos = YSIZE - (YSIZE*0.2);
 
 	while (*ThreadMustGoOn) {
-		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
 
-		if (copy->details == NULL) {
-			_tprintf(TEXT(" z "));
+		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
+		copy = msg;
+		switch (copy->instruction) {
+		case 0:
+			if (ship[copy->owner].x<maxXpos)
+				ship[copy->owner].x++;
+			break;
+		case 1:
+			if (ship[copy->owner].y<maxYpos)
+				ship[copy->owner].y++;
+			break;
+		case 2:
+			if (ship[copy->owner].x>0)
+				ship[copy->owner].x--;
+			break;
+		case 3:
+			if (ship[copy->owner].x<minYpos)
+				ship[copy->owner].y--;
+			break;
+		default:
+			break;
 		}
-		else {
-			if (copy->details == 1) {
-				_tprintf(TEXT(" ! "));
-			}
-			else {
-				_tprintf(TEXT(" a "));
-			}
-		}
+
 	}
 
 	return 0;

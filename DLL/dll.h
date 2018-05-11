@@ -93,6 +93,10 @@ typedef struct {							//Message to use in the game data view
 	int invaders_bombs_speed;
 	int ship_shot_speed;			//defenders shot speed
 	int power_up_speed;				
+	
+	int num_players;				//number of players per game
+	int max_invaders;
+	int max_bombs;
 
 }SMGameData;
 

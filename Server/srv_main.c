@@ -7,6 +7,8 @@
 #include "localStructs.h"
 #include "../DLL/dll.h"
 
+
+
 DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;

@@ -83,12 +83,12 @@ typedef struct {							//Message to use in the game data view
 }SMGameData;
 
 typedef struct {							//Message to use in the message view
-	int		msgID;							
+	//int		msgID;						//probably unnecessary - event driven approach	
 	int		owner;							//player1, player2, server, gateway, etc..
 	int		instruction;					//movement, powerUp, shutdown, updateHighscore, etc...
 	int		details;						//up, down, right, left, highscore, etc...
 
-	//if this aproach is to follow we need to consider constants
+	//if this aproach is to follow we may need to consider constants
 }SMMessage;
 
 typedef struct {

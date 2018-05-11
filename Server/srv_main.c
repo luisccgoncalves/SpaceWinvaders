@@ -11,13 +11,13 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	//invader *xp = ;
+	//invader *yp = ;
 
-	lvl->bomb.x = 10;
-	lvl->bomb.y = 0;
-	while (*ThreadMustGoOn){
+	lvl->bomb.x = lvl->invad->x;
+	lvl->bomb.y = lvl->invad->y;
+	while (*ThreadMustGoOn && lvl->bomb.y <25){
 		lvl->bomb.y++;
-		if (lvl->bomb.y == 31)
-			return 0;
 		Sleep(500*(*ThreadMustGoOn));
 	}
 

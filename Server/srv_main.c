@@ -155,6 +155,14 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		}
 	}
 
+	//Populates invaders with HP
+	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {
+		lvl->invad[i].hp = 1;
+	}
+
+	//Kills a random invader ##### For testing purposes #####
+	lvl->invad[rand()%55].hp = 0;
+
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < MAX_PLAYERS; i++) {
 

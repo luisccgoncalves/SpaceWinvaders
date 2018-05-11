@@ -41,11 +41,13 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
-			gotoxy(cThread->pSMemGameData->invad[i].x, cThread->pSMemGameData->invad[i].y);
-			if (cThread->pSMemGameData->invad[i].rand_path)
-				_tprintf(TEXT("X"));
-			else
-				_tprintf(TEXT("W"));
+			if (cThread->pSMemGameData->invad[i].hp) {
+				gotoxy(cThread->pSMemGameData->invad[i].x, cThread->pSMemGameData->invad[i].y);
+				if (cThread->pSMemGameData->invad[i].rand_path)
+					_tprintf(TEXT("X"));
+				else
+					_tprintf(TEXT("W"));
+			}
 		}
 
 		if (cThread->pSMemGameData->bomb.y < 25) { //this needs another aproach (fired state?)

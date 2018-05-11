@@ -8,7 +8,7 @@
 #include "../DLL/dll.h"
 #include "debug.h"
 
-void populate_structs(ship * d_ship) {
+void populate_structs(Ship * d_ship) {
 
 	d_ship->owner.id = _getpid();
 	_tprintf(TEXT("ID: %d\n"), d_ship->owner.id);
@@ -19,7 +19,7 @@ void populate_structs(ship * d_ship) {
 
 int _tmain(int argc, LPTSTR argv[]) {
 
-	ship	d_ship;
+	Ship	d_ship;
 	char	playing = 1, k_stroke;
 	HANDLE	hStdout=GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 

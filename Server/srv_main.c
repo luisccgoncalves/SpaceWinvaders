@@ -316,7 +316,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.mhStructSync = CreateMutex(				//This a test
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
-		TEXT("batatas"));										//Mutex name
+		STRUCT_SYNC);								//Mutex name
 
 	hCanBootNow = CreateEvent(						//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes

@@ -118,7 +118,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.mhStructSync = CreateMutex(				//This a test
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
-		TEXT("batatas"));										//Mutex name
+		STRUCT_SYNC);								//Mutex name
 
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {

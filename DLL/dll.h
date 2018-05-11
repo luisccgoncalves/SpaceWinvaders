@@ -8,6 +8,8 @@
 #endif
 
 #define SMEM_NAME		TEXT("SWInvadersMem")		//Name of the shared memory
+#define STRUCT_SYNC		TEXT("Structsync")			//Name of the struct sync mutex name
+
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define XSIZE			80							//Terminal max collumn number
 #define YSIZE			25							//Terminal max row number

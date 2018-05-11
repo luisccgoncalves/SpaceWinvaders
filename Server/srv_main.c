@@ -154,7 +154,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		else {
 			lvl->invad[i].x = lvl->invad[i].x_init = rand() % XSIZE;
 			lvl->invad[i].y = lvl->invad[i].y_init = rand() % YSIZE;
-			_tprintf(TEXT("\nInvader no: %d\nX= %d\nY= %d\n%d\n"),i, lvl->invad[i].x, lvl->invad[i].y,rand());
 		}
 	}
 
@@ -317,7 +316,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.mhStructSync = CreateMutex(				//This a test
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
-		NULL);										//Mutex name
+		TEXT("batatas"));										//Mutex name
 
 	hCanBootNow = CreateEvent(						//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes

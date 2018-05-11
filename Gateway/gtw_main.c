@@ -39,6 +39,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 
 	while (cThread->ThreadMustGoOn) {
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
+		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
 			if (cThread->pSMemGameData->invad[i].hp) {
@@ -59,6 +60,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 			gotoxy(cThread->pSMemGameData->ship[i].x, cThread->pSMemGameData->ship[i].y);
 			_tprintf(TEXT("Â"));
 		}
+		ReleaseMutex(cThread->mhStructSync);
 	}
 
 	return 0;
@@ -112,6 +114,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
 		TEXT("SMGatewayUpdate"));					//Event name
+
+	cThread.mhStructSync = CreateMutex(				//This a test
+		NULL,										//Security attributes
+		FALSE,										//Initial owner
+		TEXT("batatas"));										//Mutex name
 
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {

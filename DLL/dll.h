@@ -125,8 +125,8 @@ typedef struct {
 	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
 	
-	SMGameData		*pSMemGameData;			//Pointer to shared memory's structure server
-	SMMessage		*pSMemMessage;			//Pointer to shared memory's structure
+	SMGameData		*pSMemGameData;			//Pointer to shared memory's structure server>gateway
+	SMMessage		*pSMemMessage;			//Pointer to shared memory's structure gateway<>server
 
 	HANDLE			mhStructSync;			//Handle to mutex, grants pSMemGameData integrity
 	HANDLE			mhSemaph;				//Handle to mutex, grants psMemMsg integrity

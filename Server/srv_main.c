@@ -222,83 +222,33 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	return 0;
 }
 
-//DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {	
-//
-//	// #################################this has to be rethiked #######################################
-//	// ################################################################################################
-//
-//	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
-//	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;	//Event for updates
-//	ship		*shipR = ((SMCtrl*)tParam)->pSMemGameData->ship;			
-//	SMMessage	*msg = ((SMCtrl *)tParam)->pSMemMessage;
-//	SMMessage	*copy = malloc(sizeof(SMMessage));
-//
-//	int maxXpos = XSIZE - 1;
-//	int maxYpos = YSIZE - 1;
-//	int minYpos = YSIZE - (YSIZE*0.2);
-//
-//	while (*ThreadMustGoOn) {
-//
-//		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
-//		copy = msg;
-//		switch (copy->buffer[0].instruction) {
-//		case 0:
-//			if (shipR[copy->buffer[0].owner].x<maxXpos)
-//				shipR[copy->buffer[0].owner].x++;
-//			break;
-//		case 1:
-//			if (shipR[copy->buffer[0].owner].y<maxYpos)
-//				shipR[copy->buffer[0].owner].y++;
-//			break;
-//		case 2:
-//			if (shipR[copy->buffer[0].owner].x>0)
-//				shipR[copy->buffer[0].owner].x--;
-//			break;
-//		case 3:
-//			if (shipR[copy->buffer[0].owner].y<minYpos)
-//				shipR[copy->buffer[0].owner].y--;
-//			break;
-//		default:
-//			break;
-//		}
-//
-//	}
-//
-//	return 0;
-//}
-
 void consumePacket(SMCtrl *tParam, int * nextOut, packet *localpacket) {
-	HANDLE		*mhProdConsMut = tParam->mhProdConsMut;			//Mutex to grant buffer exclusivity
-	HANDLE		*shVacant = tParam->shVacant;					//Semaphore to count vacant places
-	HANDLE		*shOccupied = tParam->shOccupied;				//Semaphore to count occupied places
-	packet		*buffer = tParam->pSMemMessage->buffer;
+
+	SMCtrl		*cThread = (SMCtrl*)tParam;
 
 	//wait occupied semaphore
-	WaitForSingleObject(shOccupied, INFINITE);
+	WaitForSingleObject(cThread->shOccupied, INFINITE);
 
 	//wait mutex
-	WaitForSingleObject(mhProdConsMut, INFINITE);
+	WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
 
 	//copy buffer[nextout] to local
-	CopyMemory(localpacket, &buffer[*nextOut], sizeof(localpacket));
-	//*localpacket = buffer[*nextOut];
+	//CopyMemory(localpacket, &cThread->pSMemMessage->buffer[*nextOut], sizeof(localpacket));
+	*localpacket = cThread->pSMemMessage->buffer[*nextOut];
 
 	//nextout++
 	*nextOut = (*nextOut + 1) % SMEM_BUFF;
 
 	//release mutex
-	ReleaseMutex(mhProdConsMut);
+	ReleaseMutex(cThread->mhProdConsMut);
 
 	//release semaphore vacant	
-	ReleaseSemaphore(shVacant,1,NULL);
+	ReleaseSemaphore(cThread->shVacant,1,NULL);
 }
 
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
-
+	SMCtrl		*cThread = (SMCtrl*)tParam;
 	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
-	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;	//Event for updates #### maybe not needed ###
-	HANDLE		*mhStructSync = ((SMCtrl*)tParam)->mhStructSync;			//Mutex to grant structure integrity
-	packet		*buffer = ((SMCtrl*)tParam)->pSMemMessage->buffer;
 
 
 	packet		localpacket;
@@ -314,9 +264,9 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 		//Consume item from buffer
 		consumePacket(tParam,&nextOut,&localpacket);
 
-		WaitForSingleObject(mhStructSync, INFINITE);
-		localship = ((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner];
-		ReleaseMutex(mhStructSync);
+		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+		localship = cThread->pSMemGameData->ship[localpacket.owner];
+		ReleaseMutex(cThread->mhStructSync);
 
 		//validate action
 		switch (localpacket.instruction) {
@@ -342,10 +292,10 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 
 		//this is updating the structure either way ## rethink ##
 		//put it in respective place
-		WaitForSingleObject(mhStructSync,INFINITE);
-		((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner].x = localship.x;
-		((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner].y = localship.y;
-		ReleaseMutex(mhStructSync);
+		WaitForSingleObject(cThread->mhStructSync,INFINITE);
+		cThread->pSMemGameData->ship[localpacket.owner].x = localship.x;
+		cThread->pSMemGameData->ship[localpacket.owner].y = localship.y;
+		ReleaseMutex(cThread->mhStructSync);
 	}
 
 	return 0;

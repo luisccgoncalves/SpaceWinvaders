@@ -6,25 +6,6 @@
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
-//DWORD WINAPI simulClient(LPVOID tParam) {
-//
-//	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
-//	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
-//	SMMessage	*message = ((SMCtrl*)tParam)->pSMemMessage;
-//
-//	srand((unsigned)time(NULL));
-//
-//	message->buffer[0].owner = 0;
-//
-//	while (*ThreadMustGoOn) {
-//		message->buffer[0].instruction = rand() % 4;
-//		SetEvent(hSMGatewayUpdate);
-//		Sleep(1000 * (*ThreadMustGoOn));
-//	}
-//
-//	return 0;
-//}
-
 void simulClient(packet * localpacket) {
 
 	srand((unsigned)time(NULL));
@@ -39,37 +20,29 @@ void simulClient(packet * localpacket) {
 
 DWORD WINAPI sendMessage(LPVOID tParam) {
 
-	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
-	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;	//Event for updates #### maybe not needed ###
-	HANDLE		*mhProdConsMut = ((SMCtrl*)tParam)->mhProdConsMut;			//Mutex to grant buffer exclusivity
-	HANDLE		*shVacant = ((SMCtrl*)tParam)->shVacant;					//Semaphore to count vacant places
-	HANDLE		*shOccupied = ((SMCtrl*)tParam)->shOccupied;				//Semaphore to count occupied places
-	SMMessage	*message = ((SMCtrl*)tParam)->pSMemMessage;
-	packet		*buffer = ((SMCtrl*)tParam)->pSMemMessage->buffer;
+	SMCtrl		*cThread = (SMCtrl*)tParam;
 
 	packet		localpacket;
 
 	int nextIn = 0;
 
-	
-
-	while (*ThreadMustGoOn) {
+	while (cThread->ThreadMustGoOn) {
 
 		//Produces item
 		simulClient(&localpacket);
 
 		//Puts it in buffer
-		WaitForSingleObject(shVacant,INFINITE);
+		WaitForSingleObject(cThread->shVacant,INFINITE);
 
-		WaitForSingleObject(mhProdConsMut, INFINITE);
+		WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
 
-		buffer[nextIn] = localpacket;
+		cThread->pSMemMessage->buffer[nextIn] = localpacket;
 
 		nextIn = (nextIn + 1) % SMEM_BUFF;
 
-		ReleaseMutex(mhProdConsMut);
+		ReleaseMutex(cThread->mhProdConsMut);
 
-		ReleaseSemaphore(shOccupied, 1, NULL);
+		ReleaseSemaphore(cThread->shOccupied, 1, NULL);
 
 	}
 
@@ -83,6 +56,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 	SMGameData	*gameMsg;
 
 	gameMsg = malloc(sizeof(SMGameData));
+
 	int i;
 
 	cls(hStdout);

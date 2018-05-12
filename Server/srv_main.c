@@ -222,11 +222,14 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	return 0;
 }
 
-DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		
+DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {	
+
+	// #################################this has to be rethiked #######################################
+	// ################################################################################################
 
 	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
 	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
-	ship		*shipR = ((SMCtrl*)tParam)->pSMemGameData->ship;
+	ship		*shipR = ((SMCtrl*)tParam)->pSMemGameData->ship; 
 	SMMessage	*msg = ((SMCtrl *)tParam)->pSMemMessage;
 	SMMessage	*copy = malloc(sizeof(SMMessage));
 

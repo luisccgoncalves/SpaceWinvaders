@@ -313,6 +313,10 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 		//Consume item from buffer
 		consumePacket(tParam,&nextOut,&localpacket);
 
+		WaitForSingleObject(mhStructSync, INFINITE);
+		localship = ((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner];
+		ReleaseMutex(mhStructSync);
+
 		//validate action
 		switch (localpacket.instruction) {
 		case 0:

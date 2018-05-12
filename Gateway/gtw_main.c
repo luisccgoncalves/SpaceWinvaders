@@ -69,7 +69,7 @@ DWORD WINAPI sendMessage(LPVOID tParam) {
 
 		ReleaseMutex(mhProdConsMut);
 
-		ReleaseSemaphore(shVacant, 1, NULL);
+		ReleaseSemaphore(shOccupied, 1, NULL);
 
 	}
 

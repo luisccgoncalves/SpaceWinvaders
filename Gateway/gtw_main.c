@@ -161,31 +161,55 @@ int _tmain(int argc, LPTSTR argv[]) {
 		MUTEX_ALL_ACCESS,							//Desired access
 		FALSE,										//Inherit handle by child processes
 		STRUCT_SYNC);								//Event name
+	if (cThread.mhStructSync == NULL) {
+		_tprintf(TEXT("[Error] Mutex StructSync (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.mhProdConsMut = OpenMutex(
 		MUTEX_ALL_ACCESS,							//Desired access
 		FALSE,										//Inherit handle by child processes
 		MUT_PRODCONS);								//Event name
+	if (cThread.mhProdConsMut == NULL) {
+		_tprintf(TEXT("[Error] Mutex ProdCons (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.shVacant = OpenSemaphore(		//It starts with full vacancies
-		SEMAPHORE_ALL_ACCESS,										//Desired access
+		SEMAPHORE_ALL_ACCESS,						//Desired access
 		FALSE,										//Inherit handle by child processes
 		SEM_VACANT);								//Semaphore name
+	if (cThread.shVacant == NULL) {
+		_tprintf(TEXT("[Error] Semaphore vacant (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.shOccupied = OpenSemaphore(		//It starts without occupation
-		SEMAPHORE_ALL_ACCESS,										//Desired access
+		SEMAPHORE_ALL_ACCESS,						//Desired access
 		FALSE,										//Inherit handle by child processes
 		SEM_OCCUPIED);								//Semaphore name
+	if (cThread.shOccupied == NULL) {
+		_tprintf(TEXT("[Error] Semaphore occupied (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.hSMServerUpdate = OpenEvent(	//Opens the event to warn gateway that the shared memoy is mapped
 		EVENT_ALL_ACCESS, 							//Desired access
 		FALSE, 										//Inherit handle by child processes
 		EVE_SERV_UP);								//Event name
+	if (cThread.hSMServerUpdate == NULL) {
+		_tprintf(TEXT("[Error] Event server update (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.hSMGatewayUpdate = OpenEvent(	//Opens the event to warn server that the shared memoy is mapped
 		EVENT_ALL_ACCESS, 							//Desired access
 		FALSE, 										//Inherit handle by child processes
 		EVE_GATE_UP);								//Event name
+	if (cThread.hSMGatewayUpdate == NULL) {
+		_tprintf(TEXT("[Error] Event gateway update (%d)\n"), GetLastError());
+		return ;
+	}
 
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {

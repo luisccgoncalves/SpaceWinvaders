@@ -404,41 +404,70 @@ int _tmain(int argc, LPTSTR argv[]) {
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		STRUCT_SYNC);								//Mutex name
+	if (cThread.mhStructSync == NULL) {
+		_tprintf(TEXT("[Error] Mutex StructSync (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.mhProdConsMut = CreateMutex(
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		MUT_PRODCONS);								//Mutex name
+	if (cThread.mhProdConsMut == NULL) {
+		_tprintf(TEXT("[Error] Mutex ProdCons (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.shVacant = CreateSemaphore(		//It starts with full vacancies
 		NULL,										//Security attributes
 		SMEM_BUFF,									//Initial count
 		SMEM_BUFF,									//Maximum count
 		SEM_VACANT);								//Semaphor name
+	if (cThread.shVacant == NULL) {
+		_tprintf(TEXT("[Error] Semaphore vacant (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.shOccupied = CreateSemaphore(	//It starts without occupation
 		NULL,										//Security attributes
 		0,											//Initial count
 		SMEM_BUFF,									//Maximum count
 		SEM_OCCUPIED);								//Semaphor name
+	if (cThread.shOccupied == NULL) {
+		_tprintf(TEXT("[Error] Semaphore occupied (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	hCanBootNow = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
 		FALSE,										//Manual reset (TRUE for auto-reset)
 		FALSE,										//Initial state
 		EVE_BOOT);									//Event name
+	if (hCanBootNow == NULL) {
+		_tprintf(TEXT("[Error] Event boot order(%d)\n"), GetLastError());
+		return -1;
+	}
+
 
 	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
 		EVE_SERV_UP);								//Event name
+	if (cThread.hSMServerUpdate == NULL) {
+		_tprintf(TEXT("[Error] Event server update (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
 		EVE_GATE_UP);								//Event name
+	if (cThread.hSMGatewayUpdate == NULL) {
+		_tprintf(TEXT("[Error] Event gateway update (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	//Populate sGTick's pointers
 	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread

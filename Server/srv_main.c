@@ -222,46 +222,124 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	return 0;
 }
 
-DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {	
+//DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {	
+//
+//	// #################################this has to be rethiked #######################################
+//	// ################################################################################################
+//
+//	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
+//	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;	//Event for updates
+//	ship		*shipR = ((SMCtrl*)tParam)->pSMemGameData->ship;			
+//	SMMessage	*msg = ((SMCtrl *)tParam)->pSMemMessage;
+//	SMMessage	*copy = malloc(sizeof(SMMessage));
+//
+//	int maxXpos = XSIZE - 1;
+//	int maxYpos = YSIZE - 1;
+//	int minYpos = YSIZE - (YSIZE*0.2);
+//
+//	while (*ThreadMustGoOn) {
+//
+//		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
+//		copy = msg;
+//		switch (copy->buffer[0].instruction) {
+//		case 0:
+//			if (shipR[copy->buffer[0].owner].x<maxXpos)
+//				shipR[copy->buffer[0].owner].x++;
+//			break;
+//		case 1:
+//			if (shipR[copy->buffer[0].owner].y<maxYpos)
+//				shipR[copy->buffer[0].owner].y++;
+//			break;
+//		case 2:
+//			if (shipR[copy->buffer[0].owner].x>0)
+//				shipR[copy->buffer[0].owner].x--;
+//			break;
+//		case 3:
+//			if (shipR[copy->buffer[0].owner].y<minYpos)
+//				shipR[copy->buffer[0].owner].y--;
+//			break;
+//		default:
+//			break;
+//		}
+//
+//	}
+//
+//	return 0;
+//}
 
-	// #################################this has to be rethiked #######################################
-	// ################################################################################################
+void consumePacket(SMCtrl *tParam, int * nextOut, packet *local) {
+	HANDLE		*mhProdConsMut = tParam->mhProdConsMut;			//Mutex to grant buffer exclusivity
+	HANDLE		*shVacant = tParam->shVacant;					//Semaphore to count vacant places
+	HANDLE		*shOccupied = tParam->shOccupied;				//Semaphore to count occupied places
+	packet		*buffer = tParam->pSMemMessage->buffer;
 
-	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
-	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
-	ship		*shipR = ((SMCtrl*)tParam)->pSMemGameData->ship; 
-	SMMessage	*msg = ((SMCtrl *)tParam)->pSMemMessage;
-	SMMessage	*copy = malloc(sizeof(SMMessage));
+	//wait occupied semaphore
+	WaitForSingleObject(shOccupied, INFINITE);
 
+	//wait mutex
+	WaitForSingleObject(mhProdConsMut, INFINITE);
+
+	//copy buffer[nextout] to local
+	*local = buffer[*nextOut];
+
+	//nextout++
+	*nextOut = (*nextOut + 1) % SMEM_BUFF;
+
+	//release mutex
+	ReleaseMutex(mhProdConsMut);
+
+	//release semaphore vacant	
+	ReleaseSemaphore(shVacant,1,NULL);
+}
+
+DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
+
+	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
+	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;	//Event for updates #### maybe not needed ###
+	HANDLE		*mhStructSync = ((SMCtrl*)tParam)->mhStructSync;			//Mutex to grant structure integrity
+	packet		*buffer = ((SMCtrl*)tParam)->pSMemMessage->buffer;
+
+
+	packet		localpacket;
+	ship		localship;
+
+	int	NextOut=0;
 	int maxXpos = XSIZE - 1;
 	int maxYpos = YSIZE - 1;
 	int minYpos = YSIZE - (YSIZE*0.2);
 
 	while (*ThreadMustGoOn) {
 
-		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
-		copy = msg;
-		switch (copy->buffer[0].instruction) {
+		//Consume item from buffer
+		consumePacket(tParam,&NextOut,&localpacket);
+
+		//validate action
+		switch (localpacket.instruction) {
 		case 0:
-			if (shipR[copy->buffer[0].owner].x<maxXpos)
-				shipR[copy->buffer[0].owner].x++;
+			if (localship.x<maxXpos)
+				localship.x++;
 			break;
 		case 1:
-			if (shipR[copy->buffer[0].owner].y<maxYpos)
-				shipR[copy->buffer[0].owner].y++;
+			if (localship.y<maxYpos)
+				localship.y++;
 			break;
 		case 2:
-			if (shipR[copy->buffer[0].owner].x>0)
-				shipR[copy->buffer[0].owner].x--;
+			if (localship.x>0)
+				localship.x--;
 			break;
 		case 3:
-			if (shipR[copy->buffer[0].owner].y<minYpos)
-				shipR[copy->buffer[0].owner].y--;
+			if (localship.y<minYpos)
+				localship.y--;
 			break;
 		default:
 			break;
 		}
 
+		//this is updating the structure either way ## rethink ##
+		//put it in respective place
+		WaitForSingleObject(mhStructSync,INFINITE);
+		((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner] = localship;
+		ReleaseMutex(mhStructSync);
 	}
 
 	return 0;

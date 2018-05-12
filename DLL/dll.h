@@ -12,6 +12,9 @@
 #define SEM_VACANT		TEXT("VacantFields")
 #define SEM_OCCUPIED	TEXT("OccupiedFields")
 #define	MUT_PRODCONS	TEXT("ProdConsMutex")
+#define	EVE_BOOT		TEXT("LetsBoot")
+#define	EVE_SERV_UP		TEXT("SMServerUpdate")
+#define	EVE_GATE_UP		TEXT("SMGatewayUpdate")
 
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define	SMEM_BUFF		10

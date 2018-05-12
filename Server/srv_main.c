@@ -342,19 +342,19 @@ int _tmain(int argc, LPTSTR argv[]) {
 		NULL,										//Event attributes
 		FALSE,										//Manual reset (TRUE for auto-reset)
 		FALSE,										//Initial state
-		TEXT("LetsBoot"));							//Event name
+		EVE_BOOT);							//Event name
 
 	cThread.hSMServerUpdate = CreateEvent(			//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
-		TEXT("SMServerUpdate"));					//Event name
+		EVE_SERV_UP);					//Event name
 
 	cThread.hSMGatewayUpdate = CreateEvent(			//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
-		TEXT("SMGatewayUpdate"));					//Event name
+		EVE_GATE_UP);					//Event name
 
 	//Populate sGTick's pointers
 	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread

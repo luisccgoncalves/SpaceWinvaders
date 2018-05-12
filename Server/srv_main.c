@@ -321,6 +321,23 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,										//Initial owner
 		STRUCT_SYNC);								//Mutex name
 
+	cThread.mhSemaph = CreateMutex(
+		NULL,										//Security attributes
+		FALSE,										//Initial owner
+		TEXT("SemaphorMutex"));						//Mutex name
+
+	cThread.shVacant = CreateSemaphore(				//It starts with full vacancies
+		NULL,										//Security attributes
+		SMEM_BUFF,									//Initial count
+		SMEM_BUFF,									//Maximum count
+		TEXT("VacantFields"));						//Semaphor name
+
+	cThread.shOccupied = CreateSemaphore(			//It starts without occupation
+		NULL,										//Security attributes
+		0,											//Initial count
+		SMEM_BUFF,									//Maximum count
+		TEXT("OccupiedFields"));					//Semaphor name
+
 	hCanBootNow = CreateEvent(						//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
 		FALSE,										//Manual reset (TRUE for auto-reset)

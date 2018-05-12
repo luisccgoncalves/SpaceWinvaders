@@ -14,10 +14,10 @@ DWORD WINAPI simulClient(LPVOID tParam) {
 
 	srand((unsigned)time(NULL));
 
-	message->owner = 0;
+	message->buffer[0].owner = 0;
 
 	while (*ThreadMustGoOn) {
-		message->instruction=rand() % 4;
+		message->buffer[0].instruction=rand() % 4;
 		SetEvent(hSMGatewayUpdate);
 		Sleep(1000*(*ThreadMustGoOn));
 	}

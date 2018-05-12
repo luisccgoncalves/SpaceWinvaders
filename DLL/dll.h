@@ -108,6 +108,7 @@ typedef struct {
 
 	//if this aproach is to follow we may need to consider constants
 }packet;
+
 typedef struct {							//Message to use in the message view
 
 	packet	buffer[SMEM_BUFF];

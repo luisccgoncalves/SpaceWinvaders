@@ -238,22 +238,22 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 
 		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
 		copy = msg;
-		switch (copy->instruction) {
+		switch (copy->buffer[0].instruction) {
 		case 0:
-			if (shipR[copy->owner].x<maxXpos)
-				shipR[copy->owner].x++;
+			if (shipR[copy->buffer[0].owner].x<maxXpos)
+				shipR[copy->buffer[0].owner].x++;
 			break;
 		case 1:
-			if (shipR[copy->owner].y<maxYpos)
-				shipR[copy->owner].y++;
+			if (shipR[copy->buffer[0].owner].y<maxYpos)
+				shipR[copy->buffer[0].owner].y++;
 			break;
 		case 2:
-			if (shipR[copy->owner].x>0)
-				shipR[copy->owner].x--;
+			if (shipR[copy->buffer[0].owner].x>0)
+				shipR[copy->buffer[0].owner].x--;
 			break;
 		case 3:
-			if (shipR[copy->owner].y<minYpos)
-				shipR[copy->owner].y--;
+			if (shipR[copy->buffer[0].owner].y<minYpos)
+				shipR[copy->buffer[0].owner].y--;
 			break;
 		default:
 			break;

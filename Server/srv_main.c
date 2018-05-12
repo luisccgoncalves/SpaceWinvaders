@@ -326,35 +326,35 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,										//Initial owner
 		MUT_PRODCONS);								//Mutex name
 
-	cThread.shVacant = CreateSemaphore(				//It starts with full vacancies
+	cThread.shVacant = CreateSemaphore(		//It starts with full vacancies
 		NULL,										//Security attributes
 		SMEM_BUFF,									//Initial count
 		SMEM_BUFF,									//Maximum count
 		SEM_VACANT);								//Semaphor name
 
-	cThread.shOccupied = CreateSemaphore(			//It starts without occupation
+	cThread.shOccupied = CreateSemaphore(	//It starts without occupation
 		NULL,										//Security attributes
 		0,											//Initial count
 		SMEM_BUFF,									//Maximum count
 		SEM_OCCUPIED);								//Semaphor name
 
-	hCanBootNow = CreateEvent(						//Creates the event to warn gateway that the shared memoy is mapped
+	hCanBootNow = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
 		FALSE,										//Manual reset (TRUE for auto-reset)
 		FALSE,										//Initial state
-		EVE_BOOT);							//Event name
+		EVE_BOOT);									//Event name
 
-	cThread.hSMServerUpdate = CreateEvent(			//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
-		EVE_SERV_UP);					//Event name
+		EVE_SERV_UP);								//Event name
 
-	cThread.hSMGatewayUpdate = CreateEvent(			//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
-		EVE_GATE_UP);					//Event name
+		EVE_GATE_UP);								//Event name
 
 	//Populate sGTick's pointers
 	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread

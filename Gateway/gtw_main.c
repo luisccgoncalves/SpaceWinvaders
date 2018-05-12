@@ -103,37 +103,35 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(hCanBootNow, INFINITE);
 	}
 
-	cThread.hSMServerUpdate = OpenEvent(	//Opens the event to warn gateway that the shared memoy is mapped
-		EVENT_ALL_ACCESS, 							//Desired access
-		FALSE, 										//Inherit handle by child processes
-		EVE_SERV_UP);					//Event name
-
-	cThread.hSMGatewayUpdate = OpenEvent(	//Opens the event to warn server that the shared memoy is mapped
-		EVENT_ALL_ACCESS, 							//Desired access
-		FALSE, 										//Inherit handle by child processes
-		EVE_GATE_UP);					//Event name
-
 	cThread.mhStructSync = OpenMutex(				
 		MUTEX_ALL_ACCESS,							//Desired access
 		FALSE,										//Inherit handle by child processes
 		STRUCT_SYNC);								//Event name
 
 	cThread.mhProdConsMut = OpenMutex(
-		MUTEX_ALL_ACCESS,							//Security attributes
-		FALSE,										//Initial owner
-		MUT_PRODCONS);								//Mutex name
+		MUTEX_ALL_ACCESS,							//Desired access
+		FALSE,										//Inherit handle by child processes
+		MUT_PRODCONS);								//Event name
 
-	cThread.shVacant = OpenSemaphore(				//It starts with full vacancies
+	cThread.shVacant = OpenSemaphore(		//It starts with full vacancies
 		NULL,										//Desired access
 		FALSE,										//Inherit handle by child processes
 		SEM_VACANT);								//Semaphore name
 
-	cThread.shOccupied = OpenSemaphore(				//It starts without occupation
+	cThread.shOccupied = OpenSemaphore(		//It starts without occupation
 		NULL,										//Desired access
 		FALSE,										//Inherit handle by child processes
 		SEM_OCCUPIED);								//Semaphore name
 
+	cThread.hSMServerUpdate = OpenEvent(	//Opens the event to warn gateway that the shared memoy is mapped
+		EVENT_ALL_ACCESS, 							//Desired access
+		FALSE, 										//Inherit handle by child processes
+		EVE_SERV_UP);								//Event name
 
+	cThread.hSMGatewayUpdate = OpenEvent(	//Opens the event to warn server that the shared memoy is mapped
+		EVENT_ALL_ACCESS, 							//Desired access
+		FALSE, 										//Inherit handle by child processes
+		EVE_GATE_UP);								//Event name
 
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {

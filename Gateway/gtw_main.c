@@ -27,6 +27,8 @@
 
 void simulClient(packet * localpacket) {
 
+	srand((unsigned)time(NULL));
+
 	localpacket->owner = 0;
 
 	localpacket->instruction = rand() % 4;
@@ -49,7 +51,7 @@ DWORD WINAPI sendMessage(LPVOID tParam) {
 
 	int nextIn = 0;
 
-	srand((unsigned)time(NULL));
+	
 
 	while (*ThreadMustGoOn) {
 

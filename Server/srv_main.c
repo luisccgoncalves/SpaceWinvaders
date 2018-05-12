@@ -267,7 +267,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 //	return 0;
 //}
 
-void consumePacket(SMCtrl *tParam, int * nextOut, packet *local) {
+void consumePacket(SMCtrl *tParam, int * nextOut, packet *localpacket) {
 	HANDLE		*mhProdConsMut = tParam->mhProdConsMut;			//Mutex to grant buffer exclusivity
 	HANDLE		*shVacant = tParam->shVacant;					//Semaphore to count vacant places
 	HANDLE		*shOccupied = tParam->shOccupied;				//Semaphore to count occupied places
@@ -280,7 +280,7 @@ void consumePacket(SMCtrl *tParam, int * nextOut, packet *local) {
 	WaitForSingleObject(mhProdConsMut, INFINITE);
 
 	//copy buffer[nextout] to local
-	*local = buffer[*nextOut];
+	*localpacket = buffer[*nextOut];
 
 	//nextout++
 	*nextOut = (*nextOut + 1) % SMEM_BUFF;

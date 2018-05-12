@@ -9,6 +9,9 @@
 
 #define SMEM_NAME		TEXT("SWInvadersMem")		//Name of the shared memory
 #define STRUCT_SYNC		TEXT("Structsync")			//Name of the struct sync mutex name
+#define SEM_VACANT		TEXT("VacantFields")
+#define SEM_OCCUPIED	TEXT("OccupiedFields")
+#define	MUT_PRODCONS	TEXT("ProdConsMutex")
 
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define	SMEM_BUFF		10

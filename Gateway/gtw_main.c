@@ -134,10 +134,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 		SMEM_BUFF,							//Maximum count
 		TEXT("OccupiedFields"));			//Semaphor name
 
-	mhSemaph = CreateMutex(
+	mhProdConsMut = CreateMutex(
 		NULL,								//Security attributes
 		FALSE,								//Initial owner
-		TEXT("SemaphorMutex"));				//Mutex name
+		TEXT("ProdConsMutex"));				//Mutex name
 
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {

@@ -29,22 +29,26 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
-	
-	SMMessage	*msg = cThread->pSMemMessage;
+	SMGameData	*gameMsg;
 
+	gameMsg = malloc(sizeof(SMGameData));
 	int i;
 
 	cls(hStdout);
 	hidecursor();
 
 	while (cThread->ThreadMustGoOn) {
+
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+		CopyMemory(gameMsg, cThread->pSMemGameData, sizeof(SMGameData));
+		ReleaseMutex(cThread->mhStructSync);
+
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
-			if (cThread->pSMemGameData->invad[i].hp) {
-				gotoxy(cThread->pSMemGameData->invad[i].x, cThread->pSMemGameData->invad[i].y);
-				if (cThread->pSMemGameData->invad[i].rand_path)
+			if (gameMsg->invad[i].hp) {
+				gotoxy(gameMsg->invad[i].x, gameMsg->invad[i].y);
+				if (gameMsg->invad[i].rand_path)
 					_tprintf(TEXT("X"));
 				else
 					_tprintf(TEXT("W"));
@@ -52,15 +56,14 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 		}
 
 		if (cThread->pSMemGameData->bomb[0].y < 25) { //this needs another aproach (fired state?)
-			gotoxy(cThread->pSMemGameData->bomb[0].x, cThread->pSMemGameData->bomb[0].y);
+			gotoxy(gameMsg->bomb[0].x, gameMsg->bomb[0].y);
 			_tprintf(TEXT("o"));
 		}
 
 		for (i = 0; i < MAX_PLAYERS; i++) {
-			gotoxy(cThread->pSMemGameData->ship[i].x, cThread->pSMemGameData->ship[i].y);
+			gotoxy(gameMsg->ship[i].x, gameMsg->ship[i].y);
 			_tprintf(TEXT("Â"));
 		}
-		ReleaseMutex(cThread->mhStructSync);
 	}
 
 	return 0;

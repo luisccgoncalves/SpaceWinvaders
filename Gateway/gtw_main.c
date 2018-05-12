@@ -120,6 +120,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	HANDLE shVacant;
 	HANDLE shOccupied;
+	HANDLE mhSemaph;
 
 	shVacant = CreateSemaphore(		//It starts with full vacancies
 		NULL,								//Security attributes
@@ -132,6 +133,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,									//Initial count
 		SMEM_BUFF,							//Maximum count
 		TEXT("OccupiedFields"));			//Semaphor name
+
+	mhSemaph = CreateMutex(
+		NULL,								//Security attributes
+		FALSE,								//Initial owner
+		TEXT("SemaphorMutex"));				//Mutex name
 
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {

@@ -316,7 +316,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
 
-	cThread.mhStructSync = CreateMutex(				//This a test
+	cThread.mhStructSync = CreateMutex(	
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		STRUCT_SYNC);								//Mutex name

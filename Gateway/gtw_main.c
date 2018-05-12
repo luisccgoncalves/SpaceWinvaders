@@ -118,20 +118,20 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,										//Inherit handle by child processes
 		STRUCT_SYNC);								//Event name
 
-	cThread.mhSemaph = OpenMutex(
+	cThread.mhProdConsMut = OpenMutex(
 		MUTEX_ALL_ACCESS,							//Security attributes
 		FALSE,										//Initial owner
-		TEXT("SemaphorMutex"));						//Mutex name
+		MUT_PRODCONS);								//Mutex name
 
 	cThread.shVacant = OpenSemaphore(				//It starts with full vacancies
 		NULL,										//Desired access
 		FALSE,										//Inherit handle by child processes
-		TEXT("VacantFields"));						//Semaphore name
+		SEM_VACANT);								//Semaphore name
 
 	cThread.shOccupied = OpenSemaphore(				//It starts without occupation
 		NULL,										//Desired access
 		FALSE,										//Inherit handle by child processes
-		TEXT("OccupiedFields"));					//Semaphore name
+		SEM_OCCUPIED);								//Semaphore name
 
 
 

@@ -118,6 +118,21 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,										//Inherit handle by child processes
 		STRUCT_SYNC);								//Event name
 
+	HANDLE shVacant;
+	HANDLE shOccupied;
+
+	shVacant = CreateSemaphore(		//It starts with full vacancies
+		NULL,								//Security attributes
+		SMEM_BUFF,							//Initial count
+		SMEM_BUFF,							//Maximum count
+		TEXT("VacantFields"));				//Semaphor name
+
+	shOccupied = CreateSemaphore(	//It starts without occupation
+		NULL,								//Security attributes
+		0,									//Initial count
+		SMEM_BUFF,							//Maximum count
+		TEXT("OccupiedFields"));			//Semaphor name
+
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());

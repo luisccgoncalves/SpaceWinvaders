@@ -55,7 +55,6 @@ typedef struct {
 	int		y_init;			//needed for relative coordinates
 
 	int		hp;				//ship hit points
-	int		bombrate;		//bomb drop rate
 	int		rand_path;		//true for random trajectory, false for zig-zag
 }invader;
 

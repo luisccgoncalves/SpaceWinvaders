@@ -338,7 +338,8 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 		//this is updating the structure either way ## rethink ##
 		//put it in respective place
 		WaitForSingleObject(mhStructSync,INFINITE);
-		((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner] = localship;
+		((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner].x = localship.x;
+		((SMCtrl*)tParam)->pSMemGameData->ship[localpacket.owner].y = localship.y;
 		ReleaseMutex(mhStructSync);
 	}
 

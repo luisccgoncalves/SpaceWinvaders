@@ -106,12 +106,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.hSMServerUpdate = OpenEvent(	//Opens the event to warn gateway that the shared memoy is mapped
 		EVENT_ALL_ACCESS, 							//Desired access
 		FALSE, 										//Inherit handle by child processes
-		EVE_SERV_UP);					//Event name
+		EVE_SERV_UP);								//Event name
 
 	cThread.hSMGatewayUpdate = OpenEvent(	//Opens the event to warn server that the shared memoy is mapped
 		EVENT_ALL_ACCESS, 							//Desired access
 		FALSE, 										//Inherit handle by child processes
-		EVE_GATE_UP);					//Event name
+		EVE_GATE_UP);								//Event name
 
 	cThread.mhStructSync = OpenMutex(				
 		MUTEX_ALL_ACCESS,							//Desired access

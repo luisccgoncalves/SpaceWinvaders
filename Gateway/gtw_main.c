@@ -168,12 +168,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 		MUT_PRODCONS);								//Event name
 
 	cThread.shVacant = OpenSemaphore(		//It starts with full vacancies
-		NULL,										//Desired access
+		SEMAPHORE_ALL_ACCESS,										//Desired access
 		FALSE,										//Inherit handle by child processes
 		SEM_VACANT);								//Semaphore name
 
 	cThread.shOccupied = OpenSemaphore(		//It starts without occupation
-		NULL,										//Desired access
+		SEMAPHORE_ALL_ACCESS,										//Desired access
 		FALSE,										//Inherit handle by child processes
 		SEM_OCCUPIED);								//Semaphore name
 

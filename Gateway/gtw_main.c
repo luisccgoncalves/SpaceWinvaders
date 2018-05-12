@@ -103,20 +103,20 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(hCanBootNow, INFINITE);
 	}
 
-	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
-		NULL, 										//Event attributes
+	cThread.hSMServerUpdate = OpenEvent(	//Creates the event to warn gateway that the shared memoy is mapped
+		EVENT_ALL_ACCESS, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
-		FALSE, 										//Initial state
+		//FALSE, 										//Initial state
 		TEXT("SMServerUpdate"));					//Event name
 
-	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn server that the shared memoy is mapped
-		NULL, 										//Event attributes
+	cThread.hSMGatewayUpdate = OpenEvent(	//Creates the event to warn server that the shared memoy is mapped
+		EVENT_ALL_ACCESS, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
-		FALSE, 										//Initial state
+		//FALSE, 										//Initial state
 		TEXT("SMGatewayUpdate"));					//Event name
 
-	cThread.mhStructSync = CreateMutex(				//This a test
-		NULL,										//Security attributes
+	cThread.mhStructSync = OpenMutex(				//This a test
+		MUTEX_ALL_ACCESS,										//Security attributes
 		FALSE,										//Initial owner
 		STRUCT_SYNC);								//Mutex name
 

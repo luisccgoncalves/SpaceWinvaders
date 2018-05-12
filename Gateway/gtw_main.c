@@ -118,26 +118,22 @@ int _tmain(int argc, LPTSTR argv[]) {
 		FALSE,										//Inherit handle by child processes
 		STRUCT_SYNC);								//Event name
 
-	HANDLE shVacant;
-	HANDLE shOccupied;
-	HANDLE mhSemaph;
+	cThread.mhSemaph = OpenMutex(
+		MUTEX_ALL_ACCESS,							//Security attributes
+		FALSE,										//Initial owner
+		TEXT("SemaphorMutex"));						//Mutex name
 
-	shVacant = CreateSemaphore(		//It starts with full vacancies
-		NULL,								//Security attributes
-		SMEM_BUFF,							//Initial count
-		SMEM_BUFF,							//Maximum count
-		TEXT("VacantFields"));				//Semaphor name
+	cThread.shVacant = OpenSemaphore(				//It starts with full vacancies
+		NULL,										//Desired access
+		FALSE,										//Inherit handle by child processes
+		TEXT("VacantFields"));						//Semaphore name
 
-	shOccupied = CreateSemaphore(	//It starts without occupation
-		NULL,								//Security attributes
-		0,									//Initial count
-		SMEM_BUFF,							//Maximum count
-		TEXT("OccupiedFields"));			//Semaphor name
+	cThread.shOccupied = OpenSemaphore(				//It starts without occupation
+		NULL,										//Desired access
+		FALSE,										//Inherit handle by child processes
+		TEXT("OccupiedFields"));					//Semaphore name
 
-	mhSemaph = CreateMutex(
-		NULL,								//Security attributes
-		FALSE,								//Initial owner
-		TEXT("SemaphorMutex"));				//Mutex name
+
 
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {

@@ -96,9 +96,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	cThread.ThreadMustGoOn = 1;
 
-	hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, TEXT("LetsBoot"));
+	hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_BOOT);
 	if (!hCanBootNow) {
-		hCanBootNow = CreateEvent(NULL, FALSE, FALSE, TEXT("LetsBoot"));
+		hCanBootNow = CreateEvent(NULL, FALSE, FALSE, EVE_BOOT);
 		_tprintf(TEXT("Waiting for server to boot.\n"));
 		WaitForSingleObject(hCanBootNow, INFINITE);
 	}
@@ -106,12 +106,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.hSMServerUpdate = OpenEvent(	//Opens the event to warn gateway that the shared memoy is mapped
 		EVENT_ALL_ACCESS, 							//Desired access
 		FALSE, 										//Inherit handle by child processes
-		TEXT("SMServerUpdate"));					//Event name
+		EVE_SERV_UP);					//Event name
 
 	cThread.hSMGatewayUpdate = OpenEvent(	//Opens the event to warn server that the shared memoy is mapped
 		EVENT_ALL_ACCESS, 							//Desired access
 		FALSE, 										//Inherit handle by child processes
-		TEXT("SMGatewayUpdate"));					//Event name
+		EVE_GATE_UP);					//Event name
 
 	cThread.mhStructSync = OpenMutex(				
 		MUTEX_ALL_ACCESS,							//Desired access

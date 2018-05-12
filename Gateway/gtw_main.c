@@ -107,8 +107,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE		htSReadMsg;
 	DWORD		tRSMsgID;
 
-	HANDLE		htSimulClient;
-	DWORD		tSimulClientID;
+	HANDLE		hSsendMessage;
+	DWORD		tSendMessageID;
 
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
@@ -211,13 +211,13 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,						//Creation flags
 		&tRSMsgID);				//gets thread ID to close it afterwards
 
-	htSimulClient = CreateThread(
+	hSsendMessage = CreateThread(
 		NULL,					//Thread security attributes
 		0,						//Stack size
 		sendMessage,			//Thread function name
 		(LPVOID)&cThread,		//Thread parameter struct
 		0,						//Creation flags
-		&tSimulClientID);		//gets thread ID to close it afterwards
+		&tSendMessageID);		//gets thread ID to close it afterwards
 
 	WaitForSingleObject(htSReadMsg, INFINITE);
 

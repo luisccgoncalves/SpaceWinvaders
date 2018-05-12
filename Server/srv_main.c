@@ -250,7 +250,6 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
 
-
 	packet		localpacket;
 	ship		localship;
 

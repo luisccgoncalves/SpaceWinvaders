@@ -28,7 +28,7 @@
 
 typedef struct {
 	int		id;
-	TCHAR	username[SMALL_BUFF];
+	//TCHAR	username[SMALL_BUFF];
 	int		high_score;
 }player;
 

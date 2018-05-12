@@ -13,7 +13,7 @@ void populate_structs(ship * d_ship) {
 	d_ship->owner.id = _getpid();
 	_tprintf(TEXT("ID: %d\n"), d_ship->owner.id);
 	_tprintf(TEXT("Username:"));
-	_tscanf_s(TEXT("%s"), d_ship->owner.username, (unsigned)_countof(d_ship->owner.username));
+	//_tscanf_s(TEXT("%s"), d_ship->owner.username, (unsigned)_countof(d_ship->owner.username));
 	_gettchar();
 }
 

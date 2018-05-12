@@ -280,7 +280,8 @@ void consumePacket(SMCtrl *tParam, int * nextOut, packet *localpacket) {
 	WaitForSingleObject(mhProdConsMut, INFINITE);
 
 	//copy buffer[nextout] to local
-	*localpacket = buffer[*nextOut];
+	CopyMemory(localpacket, &buffer[*nextOut], sizeof(localpacket));
+	//*localpacket = buffer[*nextOut];
 
 	//nextout++
 	*nextOut = (*nextOut + 1) % SMEM_BUFF;

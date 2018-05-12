@@ -303,7 +303,7 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	packet		localpacket;
 	ship		localship;
 
-	int	NextOut=0;
+	int	nextOut=0;
 	int maxXpos = XSIZE - 1;
 	int maxYpos = YSIZE - 1;
 	int minYpos = YSIZE - (YSIZE*0.2);
@@ -311,7 +311,7 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	while (*ThreadMustGoOn) {
 
 		//Consume item from buffer
-		consumePacket(tParam,&NextOut,&localpacket);
+		consumePacket(tParam,&nextOut,&localpacket);
 
 		//validate action
 		switch (localpacket.instruction) {

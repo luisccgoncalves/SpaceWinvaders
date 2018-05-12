@@ -6,20 +6,69 @@
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
-DWORD WINAPI simulClient(LPVOID tParam) {
+//DWORD WINAPI simulClient(LPVOID tParam) {
+//
+//	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
+//	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
+//	SMMessage	*message = ((SMCtrl*)tParam)->pSMemMessage;
+//
+//	srand((unsigned)time(NULL));
+//
+//	message->buffer[0].owner = 0;
+//
+//	while (*ThreadMustGoOn) {
+//		message->buffer[0].instruction = rand() % 4;
+//		SetEvent(hSMGatewayUpdate);
+//		Sleep(1000 * (*ThreadMustGoOn));
+//	}
+//
+//	return 0;
+//}
 
-	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
-	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
+void simulClient(packet * localpacket) {
+
+	localpacket->owner = 0;
+
+	localpacket->instruction = rand() % 4;
+
+	Sleep(500);
+	return;
+}
+
+DWORD WINAPI sendMessage(LPVOID tParam) {
+
+	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
+	HANDLE		*hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;	//Event for updates #### maybe not needed ###
+	HANDLE		*mhProdConsMut = ((SMCtrl*)tParam)->mhProdConsMut;			//Mutex to grant buffer exclusivity
+	HANDLE		*shVacant = ((SMCtrl*)tParam)->shVacant;					//Semaphore to count vacant places
+	HANDLE		*shOccupied = ((SMCtrl*)tParam)->shOccupied;				//Semaphore to count occupied places
 	SMMessage	*message = ((SMCtrl*)tParam)->pSMemMessage;
+	packet		*buffer = ((SMCtrl*)tParam)->pSMemMessage->buffer;
+
+	packet		localpacket;
+
+	int nextIn = 0;
 
 	srand((unsigned)time(NULL));
 
-	message->buffer[0].owner = 0;
-
 	while (*ThreadMustGoOn) {
-		message->buffer[0].instruction=rand() % 4;
-		SetEvent(hSMGatewayUpdate);
-		Sleep(1000*(*ThreadMustGoOn));
+
+		//Produces item
+		simulClient(&localpacket);
+
+		//Puts it in buffer
+		WaitForSingleObject(shVacant,INFINITE);
+
+		WaitForSingleObject(mhProdConsMut, INFINITE);
+
+		buffer[nextIn] = localpacket;
+
+		nextIn = (nextIn + 1) % SMEM_BUFF;
+
+		ReleaseMutex(mhProdConsMut);
+
+		ReleaseSemaphore(shVacant, 1, NULL);
+
 	}
 
 	return 0;
@@ -165,7 +214,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	htSimulClient = CreateThread(
 		NULL,					//Thread security attributes
 		0,						//Stack size
-		simulClient,			//Thread function name
+		sendMessage,			//Thread function name
 		(LPVOID)&cThread,		//Thread parameter struct
 		0,						//Creation flags
 		&tSimulClientID);		//gets thread ID to close it afterwards

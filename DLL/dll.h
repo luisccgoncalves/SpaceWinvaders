@@ -93,14 +93,14 @@ typedef struct {							//Message to use in the game data view
 	ship_shot		shot[25];				//temporary number of shots
 	powerup			pUp;					//One powerUp only at any given time
 
-	int xsize;						//max y size of play area
-	int ysize;						//max x size of play area
-	int invaders_speed;				//invaders speed
+	int xsize;								//max y size of play area
+	int ysize;								//max x size of play area
+	int invaders_speed;						//invaders speed
 	int invaders_bombs_speed;
-	int ship_shot_speed;			//defenders shot speed
-	int power_up_speed;				
+	int ship_shot_speed;					//defenders shot speed
+	int power_up_speed;						
 	
-	int num_players;				//number of players per game
+	int num_players;						//number of players per game
 	int max_invaders;
 	int max_bombs;
 
@@ -109,9 +109,9 @@ typedef struct {							//Message to use in the game data view
 typedef struct {
 	//int		msgID;						//probably unnecessary - event driven approach	
 	int		owner;							//player1, player2, server, gateway, etc..
-	int		instruction;					//movement, powerUp, shutdown, updateHighscore, etc...
-	int		details;						//up, down, right, left, highscore, etc...
+	int		instruction;					//up, down, right, left, fire, shutdown,etc...	
 
+	//maybe a string?
 	//if this aproach is to follow we may need to consider constants
 }packet;
 
@@ -135,7 +135,7 @@ typedef struct {
 	SMMessage		*pSMemMessage;			//Pointer to shared memory's structure gateway<>server
 
 	HANDLE			mhStructSync;			//Handle to mutex, grants pSMemGameData integrity
-	HANDLE			mhProdConsMut;				//Handle to mutex, grants psMemMsg integrity
+	HANDLE			mhProdConsMut;			//Handle to mutex, grants psMemMsg integrity
 	HANDLE			shVacant;				//Handle to vacants fields semaphor
 	HANDLE			shOccupied;				//Handle to occupied fields semaphor
 

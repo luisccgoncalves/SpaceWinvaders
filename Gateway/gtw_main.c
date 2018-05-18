@@ -37,11 +37,17 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
 	}
 }
 
+DWORD WINAPI instanceThread(LPVOID tParam) {
+	BOOL fSuccess = FALSE;
+
+	return 0;
+}
 
 DWORD CreatePipes(LPVOID tParam) {
 
 	HANDLE clients[MAXCLIENTS];
 	HANDLE hPipe;
+	LPTSTR	lpsPipeName = PIPE_NAME;
 	HANDLE hpThread;
 	HANDLE writeReady;
 
@@ -61,7 +67,7 @@ DWORD CreatePipes(LPVOID tParam) {
 	
 	while (1) {
 		hPipe = CreateNamedPipe(
-			"pipiforTest",
+			lpsPipeName,
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
 			PIPE_UNLIMITED_INSTANCES,
@@ -90,11 +96,7 @@ DWORD CreatePipes(LPVOID tParam) {
 
 }
 
-DWORD WINAPI instanceThread(LPVOID tParam) {
-	BOOL fSuccess = FALSE;
 
-	return 0;
-}
 //#########################################################################################
 
 void simulClient(packet * localpacket) {

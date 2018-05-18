@@ -123,12 +123,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	while (running) {
 
-		WaitNamedPipe(lpsPipeName, 10000);
+		//WaitNamedPipe(PIPE_NAME, 10000);
 
 		hPipe = CreateFile(
-			lpsPipeName,
+			PIPE_NAME,
 			GENERIC_READ | GENERIC_WRITE,
-			0,
+			0|FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL,
 			OPEN_EXISTING,
 			FILE_FLAG_OVERLAPPED,

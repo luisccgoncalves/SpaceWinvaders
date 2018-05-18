@@ -155,8 +155,8 @@ typedef struct {							//Game data to use in pipes
 } PipeGameData;
 
 typedef struct {							//Message to use in pipes
-	char		username[SMALL_BUFF];		//string		
-	char		password[SMALL_BUFF];		//string
+	TCHAR		username[SMALL_BUFF];		//string		
+	TCHAR		password[SMALL_BUFF];		//string
 	int			logged;						//BOOL
 	int			SGMsg;
 

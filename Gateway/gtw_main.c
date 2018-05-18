@@ -11,13 +11,7 @@
 //#########################################################################################
 #define BUFSIZE 2048
 
-void startClients(HANDLE *c) {
-	for (int i = 0; i < MAX_PLAYERS; i++) {
-		c[i] = NULL;
-	}
-}
-
-void addClient(HANDLE *c, HANDLE *newClient) {//how to detect connection?
+void addClient(HANDLE *c, HANDLE *newClient) {
 	for (int i = 0; i < MAX_PLAYERS; i++) {
 		if (c[i] == NULL) {
 			c[i] = newClient;
@@ -26,13 +20,17 @@ void addClient(HANDLE *c, HANDLE *newClient) {//how to detect connection?
 	}
 }
 
-void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
+void removeClient(HANDLE *c, HANDLE *oldClient) {
 	for (int i = 0; i < MAX_PLAYERS; i++) {
-		if (c[i] == oldClient) {				//thread must clear HANDLE
+		if (c[i] == oldClient) {				
 			c[i] = NULL;
 			return;
 		}
 	}
+}
+
+int writeGameData(HANDLE * hPipe) {
+
 }
 
 DWORD WINAPI instanceThread() {
@@ -43,14 +41,15 @@ DWORD WINAPI instanceThread() {
 
 DWORD WINAPI CreatePipes() {
 
-	HANDLE clients[MAX_PLAYERS];
-	HANDLE hPipe;
 	LPTSTR	lpsPipeName = PIPE_NAME;
-	HANDLE htPipeConnect;
+
+	HANDLE clients[MAX_PLAYERS] = {0};
+	HANDLE hPipe = INVALID_HANDLE_VALUE;
+	HANDLE htPipeConnect = NULL;
 	HANDLE writeReady;
 
 	BOOL fConnected = FALSE;
-	DWORD dwPipeThreadId;
+	DWORD dwPipeThreadId = 0;
 
 	writeReady = CreateEvent(			
 		NULL, 										//Event attributes
@@ -61,8 +60,7 @@ DWORD WINAPI CreatePipes() {
 		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
 		return -1;
 	}
-	startClients(clients);
-	
+
 	while (1) {
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
@@ -90,7 +88,12 @@ DWORD WINAPI CreatePipes() {
 			if (htPipeConnect == NULL) {
 				_tprintf(TEXT("[Error] Creating thread ConnectPipesThread (%d) at Gateway\n"), GetLastError());
 			}
-
+			else {
+				CloseHandle(htPipeConnect); //?
+			}
+		}
+		else {
+			CloseHandle(hPipe); //?
 		}
 
 	}
@@ -343,6 +346,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	WaitForSingleObject(htSReadMsg, INFINITE);
+	WaitForSingleObject(hSSendMessage, INFINITE);
 
 	UnmapViewOfFile(cThread.pSMemGameData);		//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.pSMemMessage);		//Unmaps view of shared memory

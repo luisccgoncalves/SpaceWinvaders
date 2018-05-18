@@ -41,8 +41,35 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
 DWORD CreatePipes() {
 
 	HANDLE clients[MAXCLIENTS];
+	HANDLE hPipe;
 	HANDLE writeReady;
 
+	writeReady = CreateEvent(			
+		NULL, 										//Event attributes
+		TRUE, 										//Manual reset (TRUE for auto-reset)
+		FALSE, 										//Initial state
+		NULL);										//Event name
+	if (writeReady == NULL) {
+		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
+		return -1;
+	}
+	startClients(clients);
+	
+	while (1) {
+		hPipe = CreateNamedPipe(
+			"pipiforTest",
+			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+			BUFSIZE,
+			BUFSIZE,
+			5000,
+			NULL);
+		if (hPipe == NULL) {
+			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
+			return -1;
+		}
+
+	}
 
 
 }

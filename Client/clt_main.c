@@ -20,7 +20,7 @@ void populate_structs(ship * d_ship) {
 int _tmain(int argc, LPTSTR argv[]) {
 
 	ship	d_ship;
-	char	playing = 1, k_stroke;
+	char	playing = 1, k_stroke, exk_stroke;
 	HANDLE	hStdout=GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
 	d_ship.x = d_ship.y = 20;
@@ -48,31 +48,51 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 		_tprintf(TEXT("Â"));
 		gotoxy(d_ship.x, d_ship.y);
-		k_stroke= _gettch();
+
+		k_stroke = _gettch();
+		_tprintf(TEXT(" "));
 
 		switch (k_stroke) {
 		case 'w':
-			_tprintf(TEXT(" "));
 			d_ship.y--;
 			gotoxy(d_ship.x, d_ship.y);
 			break;
 		case 's':
-			_tprintf(TEXT(" "));
 			d_ship.y++;
 			gotoxy(d_ship.x, d_ship.y);
 			break;
 		case 'a':
-			_tprintf(TEXT(" "));
 			d_ship.x--;
 			gotoxy(d_ship.x, d_ship.y);
 			break;
 		case 'd':
-			_tprintf(TEXT(" "));
 			d_ship.x++;
 			gotoxy(d_ship.x, d_ship.y);
 			break;
-		default:
+		case 27:
 			playing = 0;
+			break;
+		case -32:				//is an extended keystroke
+			switch (exk_stroke=_gettch()) {
+			case 72:
+				d_ship.y--;
+				gotoxy(d_ship.x, d_ship.y);
+				break;
+			case 80:
+				d_ship.y++;
+				gotoxy(d_ship.x, d_ship.y);
+				break;
+			case 75:
+				d_ship.x--;
+				gotoxy(d_ship.x, d_ship.y);
+				break;
+			case 77:
+				d_ship.x++;
+				gotoxy(d_ship.x, d_ship.y);
+				break;
+			}
+			break;
+		default:
 			break;
 		}
 

@@ -104,10 +104,12 @@
 
 DWORD WINAPI StartGame(LPVOID tParam) {
 
+	return 0;
 }
 
 int _tmain(int argc, LPTSTR argv[]) {
 
+	HANDLE	h1stPipeInst;
 	HANDLE	hPipe;				//Pipe handle
 	LPTSTR	lpsPipeName = PIPE_NAME;
 
@@ -121,9 +123,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	_tprintf(TEXT("Connecting to gateway...\n"));
 
-	while (running) {
+	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
+	if (!h1stPipeInst) {
+		h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_BOOT);
+		_tprintf(TEXT("No pipe instances found. Waiting...\n"));
+		WaitForSingleObject(h1stPipeInst, INFINITE);
+	}
 
-		//WaitNamedPipe(PIPE_NAME, 10000);
+	while (running) {
 
 		hPipe = CreateFile(
 			PIPE_NAME,
@@ -139,7 +146,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 			_tprintf(TEXT("ERROR opening pipe.\n"));
 			break;
 		}else if (hPipe == ERROR_PIPE_BUSY) {
-			_tprintf(TEXT("Server busy. TBI:RETRY CONNECTION\n"));
+			_tprintf(TEXT("Server busy. Waiting for 10 seconds\n"));
+			WaitNamedPipe(PIPE_NAME, 10000);
 			break;
 		}
 		else {

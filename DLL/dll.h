@@ -13,6 +13,7 @@
 #define SEM_OCCUPIED	TEXT("OccupiedFields")
 #define	MUT_PRODCONS	TEXT("ProdConsMutex")
 #define	EVE_BOOT		TEXT("LetsBoot")
+#define EVE_1ST_PIPE	TEXT("1stPipeInstance")
 #define	EVE_SERV_UP		TEXT("SMServerUpdate")
 #define	EVE_GATE_UP		TEXT("SMGatewayUpdate")
 

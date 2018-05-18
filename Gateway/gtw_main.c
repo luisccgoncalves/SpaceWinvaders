@@ -47,6 +47,7 @@ DWORD WINAPI CreatePipes() {
 	HANDLE hPipe = INVALID_HANDLE_VALUE;
 	HANDLE htPipeConnect = NULL;
 	HANDLE writeReady;
+	HANDLE h1stPipeInst;
 
 	BOOL fConnected = FALSE;
 	DWORD dwPipeThreadId = 0;
@@ -61,7 +62,18 @@ DWORD WINAPI CreatePipes() {
 		return -1;
 	}
 
+	h1stPipeInst = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
+		NULL,										//Event attributes
+		TRUE,										//Manual reset (TRUE for auto-reset)
+		FALSE,										//Initial state
+		EVE_1ST_PIPE);								//Event name
+	if (h1stPipeInst  == NULL) {
+		_tprintf(TEXT("[Error] Event 1st pipe instance (%d)\n"), GetLastError());
+		return -1;
+	}
+
 	while (1) {
+
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
@@ -75,6 +87,8 @@ DWORD WINAPI CreatePipes() {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
 			return -1;
 		}
+
+		SetEvent(h1stPipeInst);
 
 		fConnected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		if (fConnected) {

@@ -118,37 +118,40 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	DWORD	dwPipeMode;			//Stores pipe mode
 
-	BOOL	running = 1;		//Main cycle exit condition
+	BOOL	running = TRUE;		//Main cycle exit condition
 	BOOL	bSuccess;			
 
 	_tprintf(TEXT("Connecting to gateway...\n"));
 
 	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
 	if (!h1stPipeInst) {
-		h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_BOOT);
+		h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_1ST_PIPE);
 		_tprintf(TEXT("No pipe instances found. Waiting...\n"));
 		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
 	while (running) {
-
+		
 		hPipe = CreateFile(
 			PIPE_NAME,
 			GENERIC_READ | GENERIC_WRITE,
-			0|FILE_SHARE_READ|FILE_SHARE_WRITE,
+			0,
 			NULL,
 			OPEN_EXISTING,
 			FILE_FLAG_OVERLAPPED,
 			NULL
 			);
 
-		if (hPipe == INVALID_HANDLE_VALUE) {
-			_tprintf(TEXT("ERROR opening pipe.\n"));
-			break;
-		}else if (hPipe == ERROR_PIPE_BUSY) {
-			_tprintf(TEXT("Server busy. Waiting for 10 seconds\n"));
-			WaitNamedPipe(PIPE_NAME, 10000);
-			break;
+		if (GetLastError() == ERROR_PIPE_BUSY) {
+				_tprintf(TEXT("Server busy. Waiting for 10 seconds\n"));
+				WaitNamedPipe(PIPE_NAME, 10000);
+				return -1;
+
+		}else if (hPipe == INVALID_HANDLE_VALUE) {
+
+			_tprintf(TEXT("ERROR opening pipe. (%d)\n"), GetLastError());
+			return -1;
+
 		}
 		else {
 			_tprintf(TEXT("Pipe connected.\nChanging pipe mode...\n"));
@@ -168,7 +171,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 				NULL,										//Thread parameter struct
 				0,											//Creation flags
 				&tGameID);									//gets thread ID to close it afterwards
+
+			running = FALSE;
 		}
 
 	}
+
+	_tprintf(TEXT("All is OK, ENTER to quit.\n"));
+	_gettch();
+
+	return 0;
 }

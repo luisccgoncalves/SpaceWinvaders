@@ -8,8 +8,6 @@
 #include <fcntl.h>
 #include <time.h>
 
-//#include "algorithms.h"
-//#include "communication.h"
 #include "../DLL/dll.h"
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row

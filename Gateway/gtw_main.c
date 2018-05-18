@@ -6,6 +6,97 @@
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
+//#########################################################################################
+//############################   TEMP TEST   ##############################################
+//#########################################################################################
+#define BUFSIZE 2048
+#define MAXCLIENTS 10	//SUB THIS FOR MAXPLAYERS -> AND UPDATE MAXPLAYERS
+
+
+void startClients(HANDLE *c) {
+	for (int i = 0; i < MAXCLIENTS; i++) {
+		c[i] = NULL;
+	}
+}
+
+void addClient(HANDLE *c, HANDLE *newClient) {//how to detect connection?
+	for (int i = 0; i < MAXCLIENTS; i++) {
+		if (c[i] == NULL) {
+			c[i] = newClient;
+			return;
+		}
+	}
+}
+
+void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
+	for (int i = 0; i < MAXCLIENTS; i++) {
+		if (c[i] == oldClient) {				//thread must clear HANDLE
+			c[i] = NULL;
+			return;
+		}
+	}
+}
+
+
+DWORD CreatePipes(LPVOID tParam) {
+
+	HANDLE clients[MAXCLIENTS];
+	HANDLE hPipe;
+	HANDLE hpThread;
+	HANDLE writeReady;
+
+	BOOL fConnected = FALSE;
+	DWORD dwPipeThreadId;
+
+	writeReady = CreateEvent(			
+		NULL, 										//Event attributes
+		TRUE, 										//Manual reset (TRUE for auto-reset)
+		FALSE, 										//Initial state
+		NULL);										//Event name
+	if (writeReady == NULL) {
+		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
+		return -1;
+	}
+	startClients(clients);
+	
+	while (1) {
+		hPipe = CreateNamedPipe(
+			"pipiforTest",
+			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+			PIPE_UNLIMITED_INSTANCES,
+			BUFSIZE,
+			BUFSIZE,
+			5000,														//5k milisegundos
+			NULL);
+		if (hPipe == NULL) {
+			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
+			return -1;
+		}
+
+		fConnected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		if (fConnected) {
+			hpThread = CreateThread(
+				NULL,									//Thread security attributes
+				0,										//Stack size
+				instanceThread,							//Thread function name
+				tParam,									//Thread parameter struct
+				0,										//Creation flags
+				&dwPipeThreadId);						//gets thread ID to close it afterwards
+
+		}
+
+	}
+
+}
+
+DWORD WINAPI instanceThread(LPVOID tParam) {
+	BOOL fSuccess = FALSE;
+
+	return 0;
+}
+//#########################################################################################
+
 void simulClient(packet * localpacket) {
 
 	srand((unsigned)time(NULL));

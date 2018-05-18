@@ -16,6 +16,8 @@
 #define	EVE_SERV_UP		TEXT("SMServerUpdate")
 #define	EVE_GATE_UP		TEXT("SMGatewayUpdate")
 
+#define PIPE_NAME		TEXT("\\\\.\\pipe\\SpaceWPipe")
+
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define	SMEM_BUFF		10
 #define XSIZE			80							//Terminal max collumn number

@@ -37,13 +37,13 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
 	}
 }
 
-DWORD WINAPI instanceThread(LPVOID tParam) {
+DWORD WINAPI instanceThread() {
 	BOOL fSuccess = FALSE;
 
 	return 0;
 }
 
-DWORD CreatePipes(LPVOID tParam) {
+DWORD WINAPI CreatePipes() {
 
 	HANDLE clients[MAXCLIENTS];
 	HANDLE hPipe;
@@ -73,7 +73,7 @@ DWORD CreatePipes(LPVOID tParam) {
 			PIPE_UNLIMITED_INSTANCES,
 			BUFSIZE,
 			BUFSIZE,
-			5000,														//5k milisegundos
+			5000,														//5 segundos
 			NULL);
 		if (hPipe == NULL) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
@@ -86,7 +86,7 @@ DWORD CreatePipes(LPVOID tParam) {
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThread,							//Thread function name
-				tParam,									//Thread parameter struct
+				NULL,									//Thread parameter struct
 				0,										//Creation flags
 				&dwPipeThreadId);						//gets thread ID to close it afterwards
 
@@ -203,6 +203,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE		hSsendMessage;
 	DWORD		tSendMessageID;
 
+	HANDLE		htCreatePipes;
+	DWORD		tCreatePipesID;
+
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
 	SYSTEM_INFO	SysInfo;
@@ -216,6 +219,22 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.SMemSize.QuadPart			= cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	cThread.ThreadMustGoOn = 1;
+
+	//###############################################################################################################
+	//################################## WE SOULD MOVE THIS FURTHER DOWN... EVENTUALLY ##############################
+	//###############################################################################################################
+
+	htCreatePipes = CreateThread(
+		NULL,					//Thread security attributes
+		0,						//Stack size
+		CreatePipes,			//Thread function name
+		NULL,					//Thread parameter struct
+		0,						//Creation flags
+		&tCreatePipesID);		//gets thread ID to close it afterwards
+
+	WaitForSingleObject(htCreatePipes, INFINITE);
+
+	//###############################################################################################################
 
 	hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_BOOT);
 	if (!hCanBootNow) {
@@ -295,6 +314,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Mapping MsgView (%d)\n at Gateway"), GetLastError());
 		return -1;
 	}
+
 
 	htSReadMsg = CreateThread(
 		NULL,					//Thread security attributes

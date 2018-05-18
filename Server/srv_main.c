@@ -1,4 +1,5 @@
-#include "localStructs.h"
+#include "algorithms.h"
+#include "communication.h"
 
 
 DWORD WINAPI StartGame(LPVOID tParam) {
@@ -18,18 +19,18 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	srand((unsigned)time(NULL));					//Seeds the RNG
 
 	//Defines invader path
-	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		
-		if (i < (MAX_INVADER-RAND_INVADER))
+	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
+		if (i < (MAX_INVADER - RAND_INVADER))
 			lvl->invad[i].rand_path = 0;
 		else
 			lvl->invad[i].rand_path = 1;
 	}
 
 	//Populates invaders with coords
-	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		
+	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {
 
 		if (!(lvl->invad[i].rand_path)) {			//If regular path
-			
+
 			//deploys INVADER_BY_ROW invaders per line with a spacing of 2
 			lvl->invad[i].x = lvl->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
 
@@ -48,7 +49,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	}
 
 	//Kills a random invader ##### For testing purposes #####
-	lvl->invad[rand()%55].hp = 0;
+	lvl->invad[rand() % 55].hp = 0;
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < MAX_PLAYERS; i++) {
@@ -81,7 +82,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		0,											//Creation flags
 		&tInvadersBombID);							//gets thread ID to close it afterwards
 
-	WaitForSingleObject(htRegPathInvader,INFINITE);
+	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
 	WaitForSingleObject(htInvadersBomb, INFINITE);
 
@@ -90,7 +91,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 }
 
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
-	
+
 	GTickStruct		*sGTick;
 	sGTick = (GTickStruct*)tParam;
 
@@ -113,11 +114,11 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 int _tmain(int argc, LPTSTR argv[]) {
 
-	#ifdef UNICODE									//Sets console to unicode
-		_setmode(_fileno(stdin), _O_WTEXT);
-		_setmode(_fileno(stdout), _O_WTEXT);
-	#endif
-	
+#ifdef UNICODE									//Sets console to unicode
+	_setmode(_fileno(stdin), _O_WTEXT);
+	_setmode(_fileno(stdout), _O_WTEXT);
+#endif
+
 	//StartGame thread STRUCT/HANDLE/ID
 	SMCtrl			cThread;						//Thread parameter structure
 	HANDLE			htGame;							//Handle to the game thread
@@ -151,7 +152,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//#######################################################################################################################
 	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMGameData), sizeof(SMMessage));
 	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMGameData), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran);
-	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMMessage),dwSysGran,dwSysGran, dwSysGran, ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMMessage), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran);
 	_tprintf(TEXT("TestBigView:\t((%d/%d)*%d)+%d=%d\n"), 66000, dwSysGran, dwSysGran, dwSysGran, ((66000 / dwSysGran)*dwSysGran) + dwSysGran);
 	//#######################################################################################################################
 	//#######################################################################################################################
@@ -160,7 +161,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
 
-	cThread.mhStructSync = CreateMutex(	
+	cThread.mhStructSync = CreateMutex(
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		STRUCT_SYNC);								//Mutex name
@@ -243,7 +244,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part <GameDataView>
-	
+
 	if (mapGameDataView(&cThread, FILE_MAP_WRITE) == -1) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping GameData view (%d) at Server\n"), GetLastError());
 		return -1;
@@ -306,7 +307,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	SetEvent(cThread.hSMGatewayUpdate);				//Sets event to own process, this will iterate
 													//the thread main loop to check ThreadMustGoOn == 0
 	WaitForSingleObject(htGReadMsg, INFINITE);		//Waits for thread to exit
-	
+
 
 	UnmapViewOfFile(cThread.pSMemGameData);			//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.pSMemMessage);			//Unmaps view of shared memory

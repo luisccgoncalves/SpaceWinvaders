@@ -10,17 +10,9 @@
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
 #define BUFSIZE 2048
-#define MAXCLIENTS 10	//SUB THIS FOR MAXPLAYERS -> AND UPDATE MAXPLAYERS
 
-
-void startClients(HANDLE *c) {
-	for (int i = 0; i < MAXCLIENTS; i++) {
-		c[i] = NULL;
-	}
-}
-
-void addClient(HANDLE *c, HANDLE *newClient) {//how to detect connection?
-	for (int i = 0; i < MAXCLIENTS; i++) {
+void addClient(HANDLE *c, HANDLE *newClient) {
+	for (int i = 0; i < MAX_PLAYERS; i++) {
 		if (c[i] == NULL) {
 			c[i] = newClient;
 			return;
@@ -28,13 +20,17 @@ void addClient(HANDLE *c, HANDLE *newClient) {//how to detect connection?
 	}
 }
 
-void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
-	for (int i = 0; i < MAXCLIENTS; i++) {
-		if (c[i] == oldClient) {				//thread must clear HANDLE
+void removeClient(HANDLE *c, HANDLE *oldClient) {
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		if (c[i] == oldClient) {				
 			c[i] = NULL;
 			return;
 		}
 	}
+}
+
+int writeGameData(HANDLE * hPipe) {
+
 }
 
 DWORD WINAPI instanceThread() {
@@ -45,14 +41,15 @@ DWORD WINAPI instanceThread() {
 
 DWORD WINAPI CreatePipes() {
 
-	HANDLE clients[MAXCLIENTS];
-	HANDLE hPipe;
 	LPTSTR	lpsPipeName = PIPE_NAME;
-	HANDLE hpThread;
+
+	HANDLE clients[MAX_PLAYERS] = {0};
+	HANDLE hPipe = INVALID_HANDLE_VALUE;
+	HANDLE htPipeConnect = NULL;
 	HANDLE writeReady;
 
 	BOOL fConnected = FALSE;
-	DWORD dwPipeThreadId;
+	DWORD dwPipeThreadId = 0;
 
 	writeReady = CreateEvent(			
 		NULL, 										//Event attributes
@@ -63,14 +60,13 @@ DWORD WINAPI CreatePipes() {
 		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
 		return -1;
 	}
-	startClients(clients);
-	
+
 	while (1) {
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-			PIPE_UNLIMITED_INSTANCES,
+			MAX_PLAYERS,
 			BUFSIZE,
 			BUFSIZE,
 			5000,														//5 segundos
@@ -82,14 +78,22 @@ DWORD WINAPI CreatePipes() {
 
 		fConnected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		if (fConnected) {
-			hpThread = CreateThread(
+			htPipeConnect = CreateThread(
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThread,							//Thread function name
 				NULL,									//Thread parameter struct
 				0,										//Creation flags
 				&dwPipeThreadId);						//gets thread ID to close it afterwards
-
+			if (htPipeConnect == NULL) {
+				_tprintf(TEXT("[Error] Creating thread ConnectPipesThread (%d) at Gateway\n"), GetLastError());
+			}
+			else {
+				CloseHandle(htPipeConnect); //?
+			}
+		}
+		else {
+			CloseHandle(hPipe); //?
 		}
 
 	}
@@ -200,7 +204,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE		htSReadMsg;
 	DWORD		tRSMsgID;
 
-	HANDLE		hSsendMessage;
+	HANDLE		hSSendMessage;
 	DWORD		tSendMessageID;
 
 	HANDLE		htCreatePipes;
@@ -231,6 +235,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 		NULL,					//Thread parameter struct
 		0,						//Creation flags
 		&tCreatePipesID);		//gets thread ID to close it afterwards
+	if (htCreatePipes == NULL) {
+		_tprintf(TEXT("[Error] Creating thread CreatePipes (%d) at Gateway\n"), GetLastError());
+	}
 
 	WaitForSingleObject(htCreatePipes, INFINITE);
 
@@ -323,16 +330,23 @@ int _tmain(int argc, LPTSTR argv[]) {
 		(LPVOID)&cThread,		//Thread parameter struct
 		0,						//Creation flags
 		&tRSMsgID);				//gets thread ID to close it afterwards
+	if (htSReadMsg == NULL) {
+		_tprintf(TEXT("[Error] Creating thread ReadMsg (%d) at Gateway\n"), GetLastError());
+	}
 
-	hSsendMessage = CreateThread(
+	hSSendMessage = CreateThread(
 		NULL,					//Thread security attributes
 		0,						//Stack size
 		sendMessage,			//Thread function name
 		(LPVOID)&cThread,		//Thread parameter struct
 		0,						//Creation flags
 		&tSendMessageID);		//gets thread ID to close it afterwards
+	if (hSSendMessage == NULL) {
+		_tprintf(TEXT("[Error] Creating thread SendMessage (%d) at Gateway\n"), GetLastError());
+	}
 
 	WaitForSingleObject(htSReadMsg, INFINITE);
+	WaitForSingleObject(hSSendMessage, INFINITE);
 
 	UnmapViewOfFile(cThread.pSMemGameData);		//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.pSMemMessage);		//Unmaps view of shared memory

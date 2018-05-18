@@ -7,22 +7,46 @@
 #include "localStructs.h"
 #include "../DLL/dll.h"
 
+
+
+DWORD WINAPI InvadersBomb(LPVOID tParam) {
+
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+
+	/* generate random number between 1 and 50: */
+	int random = rand() % 50 + 1;
+
+	lvl->bomb[0].x = lvl->invad[random].x;
+	lvl->bomb[0].y = lvl->invad[random].y;
+	while (*ThreadMustGoOn && lvl->bomb[0].y <25/*&&bombColDetect(&bomb,tParam)*/) {
+		lvl->bomb[0].y++;
+		/*Sleep(lvl->bomb[0].speed * (*ThreadMustGoOn));*/
+		Sleep(250 * (*ThreadMustGoOn));
+	}
+
+	return 0;
+}
+
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
-	HANDLE		*mhInvader = ((SMCtrl *)tParam)->mhInvader;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
 	int sidestep = 4;
+	int totalsteps = (YSIZE - (MAX_INVADER / INVADER_BY_ROW)) * sidestep;
+	int regInvaderNr = (MAX_INVADER - RAND_INVADER);
+
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
-		for (i = 0; (i < ((YSIZE-(MAX_INVADER/INVADER_BY_ROW)) * sidestep)) && *ThreadMustGoOn; i++) {
+		for (i = 0; (i < totalsteps) && *ThreadMustGoOn; i++) {
 
-			WaitForSingleObject(mhInvader, INFINITE);
+			WaitForSingleObject(mhStructSync, INFINITE);
 
-			for (j = 0; (j < (MAX_INVADER - RAND_INVADER)) && *ThreadMustGoOn; j++) {
+			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn; j++) {
 
 				lvl->invad[j].y = (i / sidestep) + lvl->invad[j].y_init;				//Invader goes down after n sidesteps
 
@@ -32,7 +56,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					lvl->invad[j].x--;													//Invader goes left
 			}
 
-			ReleaseMutex(mhInvader);
+			ReleaseMutex(mhStructSync);
 
 			Sleep(INVADER_SPEED*(*ThreadMustGoOn));
 		}
@@ -44,15 +68,18 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
-	HANDLE		*mhInvader = ((SMCtrl *)tParam)->mhInvader;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 	int i;
+	int startIndex = MAX_INVADER - RAND_INVADER;
+	int maxXpos = XSIZE - 1;
+	int maxYpos = (int)((YSIZE - 1)*0.8);
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
-		WaitForSingleObject(mhInvader, INFINITE);
+		WaitForSingleObject(mhStructSync, INFINITE);
 
-		for (i = (MAX_INVADER - RAND_INVADER); (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
+		for (i= startIndex; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
 
 			switch (rand() % 4) {
 			case 0:
@@ -62,10 +89,10 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					lvl->invad[i].x=1;
 				break;
 			case 1:
-				if (lvl->invad[i].x < XSIZE-1)
+				if (lvl->invad[i].x < maxXpos)
 					lvl->invad[i].x++;
 				else
-					lvl->invad[i].x= XSIZE-2;
+					lvl->invad[i].x= maxXpos -1;
 				break;
 			case 2:
 				if (lvl->invad[i].y > 0)
@@ -74,15 +101,15 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					lvl->invad[i].y=1;
 				break;
 			case 3:
-				if (lvl->invad[i].y < YSIZE-1)
+				if (lvl->invad[i].y < maxYpos)
 					lvl->invad[i].y++;
 				else
-					lvl->invad[i].y= YSIZE-2;
+					lvl->invad[i].y= maxYpos -1;
 				break;
 			}
 		}
 
-		ReleaseMutex(mhInvader);
+		ReleaseMutex(mhStructSync);
 		Sleep((INVADER_SPEED/4)*(*ThreadMustGoOn));
 	}
 
@@ -92,28 +119,31 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMServer_MSG *lvl = ((SMCtrl *)tParam)->pSMemServer;
+	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
 	DWORD			tRandPathInvaderID;
 	HANDLE			htRandPathInvader;
+	DWORD			tInvadersBombID;
+	HANDLE			htInvadersBomb;
 
 	int i;
 
 	srand((unsigned)time(NULL));					//Seeds the RNG
-	_tprintf(TEXT("\n %d\n"), rand());
 
-	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		//Defines invader path
+	//Defines invader path
+	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {		
 		if (i < (MAX_INVADER-RAND_INVADER))
 			lvl->invad[i].rand_path = 0;
 		else
 			lvl->invad[i].rand_path = 1;
 	}
 
-	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		//Populates invaders with coords
+	//Populates invaders with coords
+	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {		
 
-		if (!(lvl->invad[i].rand_path)) {							//If regular path
+		if (!(lvl->invad[i].rand_path)) {			//If regular path
 			
 			//deploys INVADER_BY_ROW invaders per line with a spacing of 2
 			lvl->invad[i].x = lvl->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
@@ -124,8 +154,22 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		else {
 			lvl->invad[i].x = lvl->invad[i].x_init = rand() % XSIZE;
 			lvl->invad[i].y = lvl->invad[i].y_init = rand() % YSIZE;
-			_tprintf(TEXT("\nInvader no: %d\nX= %d\nY= %d\n%d\n"),i, lvl->invad[i].x, lvl->invad[i].y,rand());
 		}
+	}
+
+	//Populates invaders with HP
+	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {
+		lvl->invad[i].hp = 1;
+	}
+
+	//Kills a random invader ##### For testing purposes #####
+	lvl->invad[rand()%55].hp = 0;
+
+	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
+	for (i = 0; i < MAX_PLAYERS; i++) {
+
+		lvl->ship[i].x = 15;
+		lvl->ship[i].y = 23;
 	}
 
 	htRegPathInvader = CreateThread(
@@ -144,8 +188,17 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		0,											//Creation flags
 		&tRandPathInvaderID);						//gets thread ID to close it afterwards
 
+	htInvadersBomb = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		InvadersBomb,								//Thread function name
+		tParam,										//Thread parameter struct
+		0,											//Creation flags
+		&tInvadersBombID);							//gets thread ID to close it afterwards
+
 	WaitForSingleObject(htRegPathInvader,INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
+	WaitForSingleObject(htInvadersBomb, INFINITE);
 
 	return 0;
 
@@ -160,23 +213,88 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 		Sleep(100);
 		_tprintf(TEXT("."));
-		WaitForSingleObject(sGTick->mhInvader, INFINITE);
+		WaitForSingleObject(sGTick->mhStructSync, INFINITE);
 		SetEvent(sGTick->hTick);
 
-		ReleaseMutex(sGTick->mhInvader);
+		ReleaseMutex(sGTick->mhStructSync);
 	}
 
 	return 0;
 }
 
-DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {		//Warns gateway of structure updates
+void consumePacket(SMCtrl *tParam, int * nextOut, packet *localpacket) {
 
-	int * ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;
-	HANDLE * hSMGatewayUpdate = ((SMCtrl*)tParam)->hSMGatewayUpdate;
+	SMCtrl		*cThread = (SMCtrl*)tParam;
+
+	//wait occupied semaphore
+	WaitForSingleObject(cThread->shOccupied, INFINITE);
+
+	//wait mutex
+	WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
+
+	//copy buffer[nextout] to local
+	//CopyMemory(localpacket, &cThread->pSMemMessage->buffer[*nextOut], sizeof(localpacket));
+	*localpacket = cThread->pSMemMessage->buffer[*nextOut];
+
+	//nextout++
+	*nextOut = (*nextOut + 1) % SMEM_BUFF;
+
+	//release mutex
+	ReleaseMutex(cThread->mhProdConsMut);
+
+	//release semaphore vacant	
+	ReleaseSemaphore(cThread->shVacant,1,NULL);
+}
+
+DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
+	SMCtrl		*cThread = (SMCtrl*)tParam;
+	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
+
+	packet		localpacket;
+	ship		localship;
+
+	int	nextOut=0;
+	int maxXpos = XSIZE - 1;
+	int maxYpos = YSIZE - 1;
+	int minYpos = YSIZE - (YSIZE*0.2);
 
 	while (*ThreadMustGoOn) {
-		WaitForSingleObject(hSMGatewayUpdate, INFINITE);
-		_tprintf(TEXT(" g "));
+
+		//Consume item from buffer
+		consumePacket(tParam,&nextOut,&localpacket);
+
+		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+		localship = cThread->pSMemGameData->ship[localpacket.owner];
+		ReleaseMutex(cThread->mhStructSync);
+
+		//validate action
+		switch (localpacket.instruction) {
+		case 0:
+			if (localship.x<maxXpos)
+				localship.x++;
+			break;
+		case 1:
+			if (localship.y<maxYpos)
+				localship.y++;
+			break;
+		case 2:
+			if (localship.x>0)
+				localship.x--;
+			break;
+		case 3:
+			if (localship.y<minYpos)
+				localship.y--;
+			break;
+		default:
+			break;
+		}
+
+		//this is updating the structure either way ## rethink ##
+		//put it in respective place
+		WaitForSingleObject(cThread->mhStructSync,INFINITE);
+		cThread->pSMemGameData->ship[localpacket.owner].x = localship.x;
+		cThread->pSMemGameData->ship[localpacket.owner].y = localship.y;
+		ReleaseMutex(cThread->mhStructSync);
 	}
 
 	return 0;
@@ -212,17 +330,17 @@ int _tmain(int argc, LPTSTR argv[]) {
 	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
 	//Rounds view sizes to the neares granularity multiple
-	cThread.SMemViewServer.QuadPart = ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
-	cThread.SMemViewGateway.QuadPart = ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewServer.QuadPart = ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewGateway.QuadPart = ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran;
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	//#######################################################################################################################
 	//##################################### GRANULARITY TESTS//DELETE THIS ##################################################
 	//#######################################################################################################################
-	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMServer_MSG), sizeof(SMGateway_MSG));
-	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMServer_MSG), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMServer_MSG) / dwSysGran)*dwSysGran) + dwSysGran);
-	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMGateway_MSG),dwSysGran,dwSysGran, dwSysGran, ((sizeof(SMGateway_MSG) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMGameData), sizeof(SMMessage));
+	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMGameData), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMMessage),dwSysGran,dwSysGran, dwSysGran, ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran);
 	_tprintf(TEXT("TestBigView:\t((%d/%d)*%d)+%d=%d\n"), 66000, dwSysGran, dwSysGran, dwSysGran, ((66000 / dwSysGran)*dwSysGran) + dwSysGran);
 	//#######################################################################################################################
 	//#######################################################################################################################
@@ -231,31 +349,77 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
 
-	cThread.mhInvader = CreateMutex(				//This a test
+	cThread.mhStructSync = CreateMutex(	
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
-		NULL);										//Mutex name
+		STRUCT_SYNC);								//Mutex name
+	if (cThread.mhStructSync == NULL) {
+		_tprintf(TEXT("[Error] Mutex StructSync (%d)\n"), GetLastError());
+		return -1;
+	}
 
-	hCanBootNow = CreateEvent(						//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.mhProdConsMut = CreateMutex(
+		NULL,										//Security attributes
+		FALSE,										//Initial owner
+		MUT_PRODCONS);								//Mutex name
+	if (cThread.mhProdConsMut == NULL) {
+		_tprintf(TEXT("[Error] Mutex ProdCons (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	cThread.shVacant = CreateSemaphore(		//It starts with full vacancies
+		NULL,										//Security attributes
+		SMEM_BUFF,									//Initial count
+		SMEM_BUFF,									//Maximum count
+		SEM_VACANT);								//Semaphor name
+	if (cThread.shVacant == NULL) {
+		_tprintf(TEXT("[Error] Semaphore vacant (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	cThread.shOccupied = CreateSemaphore(	//It starts without occupation
+		NULL,										//Security attributes
+		0,											//Initial count
+		SMEM_BUFF,									//Maximum count
+		SEM_OCCUPIED);								//Semaphor name
+	if (cThread.shOccupied == NULL) {
+		_tprintf(TEXT("[Error] Semaphore occupied (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	hCanBootNow = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
 		FALSE,										//Manual reset (TRUE for auto-reset)
 		FALSE,										//Initial state
-		TEXT("LetsBoot"));							//Event name
+		EVE_BOOT);									//Event name
+	if (hCanBootNow == NULL) {
+		_tprintf(TEXT("[Error] Event boot order(%d)\n"), GetLastError());
+		return -1;
+	}
 
-	cThread.hSMServerUpdate = CreateEvent(			//Creates the event to warn gateway that the shared memoy is mapped
+
+	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
-		TEXT("SMServerUpdate"));					//Event name
+		EVE_SERV_UP);								//Event name
+	if (cThread.hSMServerUpdate == NULL) {
+		_tprintf(TEXT("[Error] Event server update (%d)\n"), GetLastError());
+		return -1;
+	}
 
-	cThread.hSMGatewayUpdate = CreateEvent(			//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
-		TEXT("SMGatewayUpdate"));					//Event name
+		EVE_GATE_UP);								//Event name
+	if (cThread.hSMGatewayUpdate == NULL) {
+		_tprintf(TEXT("[Error] Event gateway update (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	//Populate sGTick's pointers
-	sGTick.mhInvader = cThread.mhInvader;			//Copies Invader moving mutex to the GTick struct thread
+	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
 
 
@@ -267,17 +431,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Creates a view of the desired part <Server>
-	mapServerView(&cThread);
-	if (cThread.pSMemServer == NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping server view (%d)\n"), GetLastError());
+	//Creates a view of the desired part <GameDataView>
+	
+	if (mapGameDataView(&cThread, FILE_MAP_WRITE) == -1) {				//Checks for errors
+		_tprintf(TEXT("[Error] Mapping GameData view (%d) at Server\n"), GetLastError());
 		return -1;
 	}
 
-	//Creates a view of the desired part <Gateway>
-	mapGatewayView(&cThread);
-	if (cThread.pSMemGateway== NULL) {				//Checks for errors
-		_tprintf(TEXT("[Error] Mapping gateway view (%d)\n"), GetLastError());
+	//Creates a view of the desired part <MsgView>
+	if (mapMsgView(&cThread) == -1) {		//Checks for errors
+		_tprintf(TEXT("[Error] Mapping MsgView (%d)\n at Server"), GetLastError());
 		return -1;
 	}
 	//######################################################################################################################
@@ -334,8 +497,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htGReadMsg, INFINITE);		//Waits for thread to exit
 	
 
-	UnmapViewOfFile(cThread.pSMemServer);			//Unmaps view of shared memory
-	UnmapViewOfFile(cThread.pSMemGateway);			//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemGameData);			//Unmaps view of shared memory
+	UnmapViewOfFile(cThread.pSMemMessage);			//Unmaps view of shared memory
 	CloseHandle(cThread.hSMem);						//Closes shared memory
 
 	return 0;

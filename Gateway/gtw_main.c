@@ -6,6 +6,49 @@
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
+//#########################################################################################
+//############################   TEMP TEST   ##############################################
+//#########################################################################################
+#define BUFSIZE 2048
+#define MAXCLIENTS 10	//SUB THIS FOR MAXPLAYERS -> AND UPDATE MAXPLAYERS
+
+
+void startClients(HANDLE *c) {
+	for (int i = 0; i < MAXCLIENTS; i++) {
+		c[i] = NULL;
+	}
+}
+
+void addClient(HANDLE *c, HANDLE *newClient) {//how to detect connection?
+	for (int i = 0; i < MAXCLIENTS; i++) {
+		if (c[i] == NULL) {
+			c[i] = newClient;
+			return;
+		}
+	}
+}
+
+void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
+	for (int i = 0; i < MAXCLIENTS; i++) {
+		if (c[i] == oldClient) {				//thread must clear HANDLE
+			c[i] = NULL;
+			return;
+		}
+	}
+}
+
+
+DWORD CreatePipes() {
+
+	HANDLE clients[MAXCLIENTS];
+	HANDLE writeReady;
+
+
+
+}
+
+//#########################################################################################
+
 void simulClient(packet * localpacket) {
 
 	srand((unsigned)time(NULL));

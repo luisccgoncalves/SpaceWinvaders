@@ -38,11 +38,15 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {//how to detect connection?
 }
 
 
-DWORD CreatePipes() {
+DWORD CreatePipes(LPVOID tParam) {
 
 	HANDLE clients[MAXCLIENTS];
 	HANDLE hPipe;
+	HANDLE hpThread;
 	HANDLE writeReady;
+
+	BOOL fConnected = FALSE;
+	DWORD dwPipeThreadId;
 
 	writeReady = CreateEvent(			
 		NULL, 										//Event attributes
@@ -60,20 +64,37 @@ DWORD CreatePipes() {
 			"pipiforTest",
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+			PIPE_UNLIMITED_INSTANCES,
 			BUFSIZE,
 			BUFSIZE,
-			5000,
+			5000,														//5k milisegundos
 			NULL);
 		if (hPipe == NULL) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
 			return -1;
 		}
 
-	}
+		fConnected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		if (fConnected) {
+			hpThread = CreateThread(
+				NULL,									//Thread security attributes
+				0,										//Stack size
+				instanceThread,							//Thread function name
+				tParam,									//Thread parameter struct
+				0,										//Creation flags
+				&dwPipeThreadId);						//gets thread ID to close it afterwards
 
+		}
+
+	}
 
 }
 
+DWORD WINAPI instanceThread(LPVOID tParam) {
+	BOOL fSuccess = FALSE;
+
+	return 0;
+}
 //#########################################################################################
 
 void simulClient(packet * localpacket) {

@@ -159,6 +159,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 		(LPVOID)&sGTick,							//Thread parameter struct
 		0,											//Creation flags
 		&tGTickID);									//gets thread ID to close it afterwards
+	if (htGTick == NULL) {
+		_tprintf(TEXT("[Error] Creating thread GTick (%d) at Server\n"), GetLastError());
+	}
 
 	//Launches gateway message receiver thread
 	_tprintf(TEXT("Launching gateway message receiver thread...\n"));
@@ -169,6 +172,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
 		&tRGMsgID);									//gets thread ID to close it afterwards
+	if (htGReadMsg == NULL) {
+		_tprintf(TEXT("[Error] Creating thread GReadMsg (%d) at Server\n"), GetLastError());
+	}
 
 	//Launches Game thread
 	_tprintf(TEXT("Launching Game thread... ENTER to quit\n"));
@@ -180,6 +186,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
 		&tGameID);									//gets thread ID to close it afterwards
+	if (htGame == NULL) {
+		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
+	}
 
 	//Enter to end thread and exit
 	_gettchar();
@@ -190,7 +199,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	//If this gets bigger we should maybe move all handles into an array and waitformultipleobjects instead
 	WaitForSingleObject(htGame, INFINITE);			//Waits for thread to exit
-
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
 	SetEvent(cThread.hSMGatewayUpdate);				//Sets event to own process, this will iterate

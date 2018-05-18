@@ -29,8 +29,51 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {
 	}
 }
 
-int writeGameData(HANDLE * hPipe) {
+int writeGameData(HANDLE * hPipe, HANDLE *writeReady, PipeGameData *game) {
 
+	BOOL fSuccess = FALSE;
+	DWORD cbWriten = 0;
+
+	OVERLAPPED overlWrite = { 0 };
+	ResetEvent(writeReady);
+	overlWrite.hEvent = writeReady;
+
+	fSuccess = WriteFile(
+		hPipe,
+		&game,
+		sizeof(PipeGameData),
+		&cbWriten,
+		&overlWrite);
+
+	WaitForSingleObject(writeReady, INFINITE);
+
+	GetOverlappedResult(
+		hPipe, 
+		&overlWrite, 
+		&cbWriten, 
+		FALSE);
+	if (cbWriten < sizeof(PipeGameData)) {
+		_tprintf(TEXT("[Error] OVERLAPPED writeGameData (%d)\n"), GetLastError());
+		return 1;
+	}
+
+}
+
+//WIP
+//int writeMsg(HANDLE * hPipe, HANDLE *writeReady, MSG *msg) {
+//	/*
+//	This is for sending specific messages to a 
+//	single pipe.
+//	One exmaple may be player dead for the player
+//	*/
+//}
+
+int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) {
+	int numWrites = 0;
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		numWrites += writeGameData(clients[i], writeReady, game);
+	}
+	return numWrites;
 }
 
 DWORD WINAPI instanceThread() {

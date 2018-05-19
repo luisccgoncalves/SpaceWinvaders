@@ -8,6 +8,11 @@
 #include "../DLL/dll.h"
 #include "debug.h"
 
+typedef struct {
+	HANDLE	*hPipe;
+	int		ThreadMustGoOn;
+}ThreadCtrl;
+
 //void populate_structs(ship * d_ship) {
 //
 //	d_ship->owner.id = _getpid();
@@ -102,24 +107,36 @@
 //	return 0;
 //}
 
-DWORD WINAPI StartGame(LPVOID tParam) {
+DWORD WINAPI ReadGame(LPVOID tParam) {
+
+	int		*ThreadMustGoOn = &((ThreadCtrl*)tParam)->ThreadMustGoOn;
+	HANDLE	hPipe = &((ThreadCtrl*)tParam)->hPipe;
+
+	if (hPipe == NULL) {
+		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	while (*ThreadMustGoOn) {
+
+	}
 
 	return 0;
 }
 
 int _tmain(int argc, LPTSTR argv[]) {
 
-	HANDLE	h1stPipeInst;
-	HANDLE	hPipe;				//Pipe handle
-	LPTSTR	lpsPipeName = PIPE_NAME;
+	HANDLE		h1stPipeInst;
+	HANDLE		hPipe;						//Pipe handle
 
-	HANDLE	htGame;				//Game thread
-	DWORD	tGameID;			//Game thread ID
+	HANDLE		htReadGame;					//Game thread
+	DWORD		tReadGameID;				//Game thread ID
 
-	DWORD	dwPipeMode;			//Stores pipe mode
+	DWORD		dwPipeMode;					//Stores pipe mode
 
-	BOOL	running = TRUE;		//Main cycle exit condition
-	BOOL	bSuccess;			
+	BOOL		bSuccess;	
+
+	ThreadCtrl	cThreadRdGame;
 
 	_tprintf(TEXT("Connecting to gateway...\n"));
 
@@ -130,7 +147,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
-	while (running) {
+	while (1) {
 		
 		hPipe = CreateFile(
 			PIPE_NAME,
@@ -142,8 +159,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 			NULL
 			);
 
+		if (hPipe != INVALID_HANDLE_VALUE)
+			break;
+
 		if (GetLastError() == ERROR_PIPE_BUSY) {
-				_tprintf(TEXT("Server busy. Waiting for 30 seconds\n"));
+				_tprintf(TEXT("Server full. Waiting for 30 seconds\n"));
 
 				bSuccess=WaitNamedPipe(PIPE_NAME, 30000);
 
@@ -176,16 +196,27 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	htGame = CreateThread(
+	cThreadRdGame.hPipe = hPipe;
+	cThreadRdGame.ThreadMustGoOn = 1;
+
+	htReadGame = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size (0 for default)
-		StartGame,									//Thread function name
-		NULL,										//Thread parameter struct
+		ReadGame,									//Thread function name
+		(LPVOID)&cThreadRdGame,						//Thread parameter struct
 		0,											//Creation flags
-		&tGameID);									//gets thread ID to close it afterwards
+		&tReadGameID);								//gets thread ID to close it afterwards
+
+	if (htReadGame==NULL) {
+		_tprintf(TEXT("ERROR launching game thread. (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	_tprintf(TEXT("All is OK, ENTER to quit.\n"));
 	_gettch();
+
+	cThreadRdGame.ThreadMustGoOn = 0;
+	WaitForSingleObject(htReadGame, INFINITE);
 
 	return 0;
 }

@@ -143,7 +143,7 @@ DWORD WINAPI CreatePipes() {
 				instanceThread,							//Thread function name
 				NULL,									//Thread parameter struct
 				0,										//Creation flags
-				&dwPipeThreadId);				//gets thread ID to close it afterwards
+				&dwPipeThreadId);						//gets thread ID to close it afterwards
 			if (htPipeConnect == NULL) {
 				_tprintf(TEXT("[Error] Creating thread ConnectPipesThread (%d) at Gateway\n"), GetLastError());
 			}

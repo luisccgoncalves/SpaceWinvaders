@@ -132,7 +132,8 @@ DWORD WINAPI CreatePipes() {
 			return -1;
 		}
 
-		SetEvent(h1stPipeInst);
+		if(!threadn)
+			SetEvent(h1stPipeInst);
 
 		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		if (fConnected) {

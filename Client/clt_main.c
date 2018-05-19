@@ -143,9 +143,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 			);
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {
-				_tprintf(TEXT("Server busy. Waiting for 10 seconds\n"));
-				WaitNamedPipe(PIPE_NAME, 10000);
-				return -1;
+				_tprintf(TEXT("Server busy. Waiting for 30 seconds\n"));
+
+				bSuccess=WaitNamedPipe(PIPE_NAME, 30000);
+
+				if (bSuccess)
+					continue;
+				else
+					return -1;
 
 		}else if (hPipe == INVALID_HANDLE_VALUE) {
 
@@ -153,29 +158,31 @@ int _tmain(int argc, LPTSTR argv[]) {
 			return -1;
 
 		}
-		else {
-			_tprintf(TEXT("Pipe connected.\nChanging pipe mode...\n"));
-
-			dwPipeMode = PIPE_READMODE_MESSAGE;
-			bSuccess = SetNamedPipeHandleState(
-				hPipe,
-				&dwPipeMode,
-				NULL,
-				NULL
-			);
-
-			htGame = CreateThread(
-				NULL,										//Thread security attributes
-				0,											//Stack size (0 for default)
-				StartGame,									//Thread function name
-				NULL,										//Thread parameter struct
-				0,											//Creation flags
-				&tGameID);									//gets thread ID to close it afterwards
-
-			running = FALSE;
-		}
 
 	}
+
+	_tprintf(TEXT("Pipe connected.\nChanging pipe mode...\n"));
+
+	dwPipeMode = PIPE_READMODE_MESSAGE;
+	bSuccess = SetNamedPipeHandleState(
+		hPipe,
+		&dwPipeMode,
+		NULL,
+		NULL
+	);
+
+	if (!bSuccess) {
+		_tprintf(TEXT("ERROR setting pipe mode. (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	htGame = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size (0 for default)
+		StartGame,									//Thread function name
+		NULL,										//Thread parameter struct
+		0,											//Creation flags
+		&tGameID);									//gets thread ID to close it afterwards
 
 	_tprintf(TEXT("All is OK, ENTER to quit.\n"));
 	_gettch();

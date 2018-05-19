@@ -156,7 +156,7 @@ DWORD WINAPI CreatePipes() {
 
 	}
 
-	WaitForMultipleObjects(threadn, &htPipeConnect, TRUE, INFINITE);
+	WaitForMultipleObjects(threadn, htPipeConnect, TRUE, INFINITE);
 }
 
 

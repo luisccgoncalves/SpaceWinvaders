@@ -68,7 +68,7 @@ int writeGameData(HANDLE * hPipe, HANDLE *writeReady, PipeGameData *game) {
 //	*/
 //}
 
-int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) {
+int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) { //This needs to receive nr of connected players
 	int numWrites = 0;
 	for (int i = 0; i < MAX_PLAYERS; i++) {
 		numWrites += writeGameData(clients[i], writeReady, game);

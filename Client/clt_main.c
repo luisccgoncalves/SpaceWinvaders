@@ -135,7 +135,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		hPipe = CreateFile(
 			PIPE_NAME,
 			GENERIC_READ | GENERIC_WRITE,
-			0,
+			0|FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL,
 			OPEN_EXISTING,
 			FILE_FLAG_OVERLAPPED,

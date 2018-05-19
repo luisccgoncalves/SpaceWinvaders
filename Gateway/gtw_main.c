@@ -88,12 +88,13 @@ DWORD WINAPI CreatePipes() {
 
 	HANDLE clients[MAX_PLAYERS] = {0};
 	HANDLE hPipe = INVALID_HANDLE_VALUE;
-	HANDLE htPipeConnect = NULL;
+	HANDLE htPipeConnect[40] = { NULL }; //Update this
 	HANDLE writeReady;
 	HANDLE h1stPipeInst;
 
 	BOOL fConnected = FALSE;
-	DWORD dwPipeThreadId = 0;
+	DWORD dwPipeThreadId;
+	int  threadn = 0;
 
 	writeReady = CreateEvent(			
 		NULL, 										//Event attributes
@@ -115,7 +116,7 @@ DWORD WINAPI CreatePipes() {
 		return -1;
 	}
 
-	while (1) {
+	while (1/*threadmustgoon*/) {
 
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
@@ -133,20 +134,20 @@ DWORD WINAPI CreatePipes() {
 
 		SetEvent(h1stPipeInst);
 
-		fConnected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		if (fConnected) {
-			htPipeConnect = CreateThread(
+			htPipeConnect[threadn] = CreateThread(
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThread,							//Thread function name
 				NULL,									//Thread parameter struct
 				0,										//Creation flags
-				&dwPipeThreadId);						//gets thread ID to close it afterwards
+				&dwPipeThreadId);				//gets thread ID to close it afterwards
 			if (htPipeConnect == NULL) {
 				_tprintf(TEXT("[Error] Creating thread ConnectPipesThread (%d) at Gateway\n"), GetLastError());
 			}
 			else {
-				CloseHandle(htPipeConnect); //?
+				threadn++;
 			}
 		}
 		else {
@@ -155,6 +156,7 @@ DWORD WINAPI CreatePipes() {
 
 	}
 
+	WaitForMultipleObjects(threadn, &htPipeConnect, TRUE, INFINITE);
 }
 
 

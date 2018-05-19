@@ -109,16 +109,49 @@ typedef struct {
 
 DWORD WINAPI ReadGame(LPVOID tParam) {
 
-	int		*ThreadMustGoOn = &((ThreadCtrl*)tParam)->ThreadMustGoOn;
-	HANDLE	hPipe = &((ThreadCtrl*)tParam)->hPipe;
+	int			*ThreadMustGoOn = &((ThreadCtrl*)tParam)->ThreadMustGoOn;
+	HANDLE		hPipe = ((ThreadCtrl*)tParam)->hPipe;
+
+	PipeMsgs	msg;
+	DWORD		dwBytesRead = 0;
+	BOOL		bSuccess = FALSE;
+	OVERLAPPED	OvrRd = { 0 };
+
+	HANDLE		hReadReady;
 
 	if (hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
 
+	hReadReady = CreateEvent(
+		NULL,										//Event attributes
+		TRUE,										//Manual reset (TRUE for auto-reset)
+		FALSE,										//Initial state
+		NULL);										//Event name
+	if (hReadReady == NULL) {
+		_tprintf(TEXT("[Error] Event ReadReady(%d)\n"), GetLastError());
+		return -1;
+	}
+
+	_tprintf(TEXT("Listening...\n"));
+
 	while (*ThreadMustGoOn) {
 
+		ZeroMemory(&OvrRd, sizeof(OvrRd));
+		OvrRd.hEvent = hReadReady;
+		ResetEvent(hReadReady);
+
+		bSuccess = ReadFile(
+			hPipe,
+			&msg,
+			sizeof(msg),
+			&dwBytesRead,
+			&OvrRd
+		);
+
+		WaitForSingleObject(hReadReady, INFINITE);
+		_tprintf(TEXT("Got a Message!\n"));
 	}
 
 	return 0;
@@ -212,11 +245,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	_tprintf(TEXT("All is OK, ENTER to quit.\n"));
 	_gettch();
-
 	cThreadRdGame.ThreadMustGoOn = 0;
 	WaitForSingleObject(htReadGame, INFINITE);
+	CloseHandle(hPipe);
+
 
 	return 0;
 }

@@ -76,9 +76,35 @@ int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) { //T
 	return numWrites;
 }
 
-DWORD WINAPI instanceThread() {
-	BOOL fSuccess = FALSE;
+DWORD WINAPI instanceThread(LPVOID tParam) {
 
+	HANDLE *hPipe = &(HANDLE*)tParam;
+	BOOL fSuccess = FALSE;
+	OVERLAPPED	OvrWr = { 0 };
+
+	DWORD		dwBytesWritten = 0;
+
+	PipeMsgs	msg;
+
+	if (hPipe == NULL) {
+		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
+		return -1;
+	}
+
+
+	msg.logged = 123;
+	Sleep(1000);
+	_tprintf(TEXT("Sending...\n"));
+
+	fSuccess = WriteFile(
+		hPipe,
+		&msg,
+		sizeof(msg),
+		&dwBytesWritten,
+		&OvrWr
+	);
+
+	_tprintf(TEXT("Sent...\n"));
 	return 0;
 }
 
@@ -137,11 +163,12 @@ DWORD WINAPI CreatePipes() {
 
 		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		if (fConnected) {
+			_tprintf(TEXT("Someone connected!\n"));
 			htPipeConnect[threadn] = CreateThread(
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThread,							//Thread function name
-				NULL,									//Thread parameter struct
+				(LPVOID)&hPipe,							//Thread parameter struct
 				0,										//Creation flags
 				&dwPipeThreadId);						//gets thread ID to close it afterwards
 			if (htPipeConnect == NULL) {

@@ -153,7 +153,7 @@ DWORD WINAPI CreatePipes() {
 			BUFSIZE,
 			5000,														//5 segundos
 			NULL);
-		if (hPipe == NULL) {
+		if (hPipe == INVALID_HANDLE_VALUE) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
 			return -1;
 		}
@@ -162,8 +162,11 @@ DWORD WINAPI CreatePipes() {
 			SetEvent(h1stPipeInst);
 
 		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		
 		if (fConnected) {
+
 			_tprintf(TEXT("Someone connected!\n"));
+
 			htPipeConnect[threadn] = CreateThread(
 				NULL,									//Thread security attributes
 				0,										//Stack size
@@ -171,15 +174,16 @@ DWORD WINAPI CreatePipes() {
 				(LPVOID)&hPipe,							//Thread parameter struct
 				0,										//Creation flags
 				&dwPipeThreadId);						//gets thread ID to close it afterwards
-			if (htPipeConnect == NULL) {
+			if (htPipeConnect[threadn] == NULL) {
 				_tprintf(TEXT("[Error] Creating thread ConnectPipesThread (%d) at Gateway\n"), GetLastError());
+				return -1;
 			}
 			else {
 				threadn++;
 			}
 		}
 		else {
-			CloseHandle(hPipe); //?
+			CloseHandle(hPipe);							//Frees this thread instance
 		}
 
 	}

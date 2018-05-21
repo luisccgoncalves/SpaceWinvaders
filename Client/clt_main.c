@@ -9,7 +9,7 @@
 #include "debug.h"
 
 typedef struct {
-	HANDLE	*hPipe;
+	HANDLE	hPipe;
 	int		ThreadMustGoOn;
 }ThreadCtrl;
 
@@ -110,7 +110,8 @@ typedef struct {
 DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((ThreadCtrl*)tParam)->ThreadMustGoOn;
-	HANDLE		hPipe = ((ThreadCtrl*)tParam)->hPipe;
+	//HANDLE		hPipe = &((ThreadCtrl*)tParam)->hPipe;
+	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
 
 	PipeMsgs	msg;
 	DWORD		dwBytesRead = 0;
@@ -119,7 +120,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	HANDLE		hReadReady;
 
-	if (hPipe == NULL) {
+	if (cThreadRdGame->hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -143,13 +144,14 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 		ResetEvent(hReadReady);
 
 		bSuccess = ReadFile(
-			hPipe,
+			cThreadRdGame->hPipe,
 			&msg,
 			sizeof(msg),
 			&dwBytesRead,
 			&OvrRd
 		);
 
+		_tprintf(TEXT("Got this: %d\n", msg.logged));
 		WaitForSingleObject(hReadReady, INFINITE);
 		_tprintf(TEXT("Got a Message!\n"));
 	}

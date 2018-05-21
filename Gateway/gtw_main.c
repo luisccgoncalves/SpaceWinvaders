@@ -153,7 +153,7 @@ DWORD WINAPI CreatePipes() {
 			BUFSIZE,
 			5000,														//5 segundos
 			NULL);
-		if (hPipe == INVALID_HANDLE_VALUE) {
+		if ((hPipe == INVALID_HANDLE_VALUE)&&(GetLastError()!=231)) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
 			return -1;
 		}

@@ -151,7 +151,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 			&OvrRd
 		);
 
-		_tprintf(TEXT("Got this: %d\n", msg.logged));
+		_tprintf(TEXT("Got this: %d\n"), msg.logged);
 		WaitForSingleObject(hReadReady, INFINITE);
 		_tprintf(TEXT("Got a Message!\n"));
 	}
@@ -190,9 +190,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 			0|FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL,
 			OPEN_EXISTING,
-			FILE_FLAG_OVERLAPPED,
-			NULL
-			);
+			0|FILE_FLAG_OVERLAPPED,
+			NULL);
 
 		if (hPipe != INVALID_HANDLE_VALUE)
 			break;

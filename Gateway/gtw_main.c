@@ -93,16 +93,20 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 
 
 	msg.logged = 123;
-	Sleep(1000);
+	_gettch();
 	_tprintf(TEXT("Sending...\n"));
 
-	fSuccess = WriteFile(
-		hPipe,
-		&msg,
-		sizeof(msg),
-		&dwBytesWritten,
-		&OvrWr
-	);
+	while (1) {
+		fSuccess = WriteFile(
+			hPipe,
+			&msg,
+			sizeof(msg),
+			&dwBytesWritten,
+			&OvrWr
+		);
+
+	}
+
 
 	_tprintf(TEXT("Sent...\n"));
 	return 0;
@@ -161,7 +165,7 @@ DWORD WINAPI CreatePipes() {
 		if(!threadn)
 			SetEvent(h1stPipeInst);
 
-		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED?*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		
 		if (fConnected) {
 
@@ -183,7 +187,7 @@ DWORD WINAPI CreatePipes() {
 			}
 		}
 		else {
-			CloseHandle(hPipe);							//Frees this thread instance
+			CloseHandle(hPipe);							//Frees this pipe instance
 		}
 
 	}

@@ -148,12 +148,18 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 			&msg,
 			sizeof(msg),
 			&dwBytesRead,
-			&OvrRd
-		);
+			&OvrRd);
 
 		_tprintf(TEXT("Got this: %d\n"), msg.logged);
 		WaitForSingleObject(hReadReady, INFINITE);
 		_tprintf(TEXT("Got a Message!\n"));
+
+		GetOverlappedResult(cThreadRdGame->hPipe, &OvrRd, &dwBytesRead, FALSE);
+		if (dwBytesRead<sizeof(msg))
+			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
+
+		_tprintf(TEXT("Got this: %d\n"), msg.logged);
+
 	}
 
 	return 0;
@@ -222,8 +228,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		hPipe,
 		&dwPipeMode,
 		NULL,
-		NULL
-	);
+		NULL);
 
 	if (!bSuccess) {
 		_tprintf(TEXT("ERROR setting pipe mode. (%d)\n"), GetLastError());

@@ -10,44 +10,45 @@
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
 
-/*
-Implement the structure again, 
-put the createEvent again in the CreatePipe
-remove the global writeReady, 
-Redo the writeGameData
-Redo * and &
-Remove the DEBUG prints
-Duplicate Handle?!
+/* 
+ToDo List - Please clean after every point.
+
+-URGENT TO LG: read line 155
+-Implement the structure again, *not shore if done or not 
+-remove the global writeReady, 
+-Redo the writeGameData
+-Remove the DEBUG prints
 */
 
-//typedef struct {
-//	//HANDLE writeReady;
-//	//HANDLE hPipe;
-//} PipeComm;
+typedef struct {
+	HANDLE heWriteReady;
+	HANDLE heReadReady;
+	HANDLE hPipe;
+
+} PipeComm;
 
 
-HANDLE writeReady;
 #define BUFSIZE 2048
 
-void addClient(HANDLE *c, HANDLE *newClient) {
-	for (int i = 0; i < MAX_PLAYERS; i++) {
-		if (c[i] == NULL) {
-			c[i] = newClient;
-			return;
-		}
-	}
-}
+//void addClient(HANDLE *c, HANDLE *newClient) {
+//	for (int i = 0; i < MAX_PLAYERS; i++) {
+//		if (c[i] == NULL) {
+//			c[i] = newClient;
+//			return;
+//		}
+//	}
+//}
+//
+//void removeClient(HANDLE *c, HANDLE *oldClient) {
+//	for (int i = 0; i < MAX_PLAYERS; i++) {
+//		if (c[i] == oldClient) {				
+//			c[i] = NULL;
+//			return;
+//		}
+//	}
+//}
 
-void removeClient(HANDLE *c, HANDLE *oldClient) {
-	for (int i = 0; i < MAX_PLAYERS; i++) {
-		if (c[i] == oldClient) {				
-			c[i] = NULL;
-			return;
-		}
-	}
-}
-
-//int writeGameData(HANDLE * hPipe, HANDLE *writeReady, PipeGameData *game) {
+//int writeGameData(HANDLE hPipe, HANDLE *writeReady, PipeGameData *game) {
 //
 //	BOOL fSuccess = FALSE;
 //	DWORD cbWriten = 0;
@@ -78,11 +79,14 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {
 //}
 
 //WIP
-int writePipeMsg(HANDLE hPipe, PipeMsgs msg) {
+int writePipeMsg(HANDLE hPipe, HANDLE writeReady, PipeMsgs msg) {
 	/*
 	This is for sending specific messages to a 
 	single pipe.
 	One exmaple may be player dead for the player
+
+	Probably we will not be able to make the pipe send two different messages
+	it's easier to include THIS gtw msg on writeGameData
 	*/
 
 		BOOL fSuccess = FALSE;
@@ -122,6 +126,7 @@ int writePipeMsg(HANDLE hPipe, PipeMsgs msg) {
 		else {
 			_tprintf(TEXT("[DEBUG] Inside writePipeMsg cbWriten was OK \n"));
 		}
+		return 0;
 }
 
 //int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) { //This needs to receive nr of connected players
@@ -133,16 +138,36 @@ int writePipeMsg(HANDLE hPipe, PipeMsgs msg) {
 //}
 
 DWORD WINAPI instanceThread(LPVOID tParam) {
-
-	//PipeComm *pc = (PipeComm *)tParam;
-
-	HANDLE hPipe = (HANDLE)tParam;
-
-	BOOL fSuccess = FALSE;
+	
+	HANDLE		hPipe = (HANDLE)tParam;
+	//PipeComm	*pc = (PipeComm *)tParam;
+	PipeComm	pc;
+	BOOL		fSuccess = FALSE;
 	PipeMsgs	msg;
 
-	if (hPipe == NULL) {
+	pc.hPipe = hPipe;
+
+	if (pc.hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	/*
+	I moved the event creation here
+	because, and i might be wrong
+	we will need a event in every thread
+	and not just one global
+	...
+	I don't know anyway if isn't something missing.
+	*/
+
+	pc.heWriteReady = CreateEvent(			//Creates the event to signal access to write action
+		NULL, 										//Event attributes
+		TRUE, 										//Manual reset (TRUE for auto-reset)
+		FALSE, 										//Initial state
+		NULL);										//Event name
+	if (pc.heWriteReady == NULL) {
+		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
 		return -1;
 	}
 
@@ -150,8 +175,12 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 	//_gettch();
 	_tprintf(TEXT("Sending...\n"));
 
-	writePipeMsg(hPipe, msg);
+	/*
+	HERE comes the broadcast and not what is now
+	*/
+	writePipeMsg(pc.hPipe, pc.heWriteReady, msg);
 
+		//TO DELETE
 		//fSuccess = WriteFile(
 		//	hPipe,
 		//	&msg,
@@ -166,29 +195,18 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 
 DWORD WINAPI CreatePipes() {
 
-	HANDLE hPipe = INVALID_HANDLE_VALUE;
-
-	LPTSTR	lpsPipeName = PIPE_NAME;
-
-	HANDLE clients[MAX_PLAYERS] = {0};
-	//HANDLE hPipe = INVALID_HANDLE_VALUE;
-	HANDLE htPipeConnect[40] = { NULL }; //Update this
+	LPTSTR		lpsPipeName = PIPE_NAME;
+	HANDLE		clients[MAX_PLAYERS] = {0};
+	HANDLE		h1stPipeInst;
+	HANDLE		htPipeConnect[40] = { NULL }; //Update this
+	//PipeComm	*pc = malloc(sizeof(PipeComm));
+	//pc.hPipe = INVALID_HANDLE_VALUE;
 	//HANDLE writeReady;
-	HANDLE h1stPipeInst;
+	HANDLE		hPipe = INVALID_HANDLE_VALUE;
 
-	BOOL fConnected = FALSE;
-	DWORD dwPipeThreadId;
-	int  threadn = 0;
-
-	//pc.writeReady = CreateEvent(			
-	//	NULL, 										//Event attributes
-	//	TRUE, 										//Manual reset (TRUE for auto-reset)
-	//	FALSE, 										//Initial state
-	//	NULL);										//Event name
-	//if (pc.writeReady == NULL) {
-	//	_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
-	//	return -1;
-	//}
+	BOOL		fConnected = FALSE;
+	DWORD		dwPipeThreadId;
+	int			threadn = 0;
 
 	h1stPipeInst = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
@@ -201,7 +219,6 @@ DWORD WINAPI CreatePipes() {
 	}
 
 	while (1/*threadmustgoon*/) {
-
 	
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
@@ -395,15 +412,15 @@ int _tmain(int argc, LPTSTR argv[]) {
 	This was on CreatePipe - needs rethinking
 	*/
 
-	writeReady = CreateEvent(
-		NULL, 										//Event attributes
-		TRUE, 										//Manual reset (TRUE for auto-reset)
-		FALSE, 										//Initial state
-		NULL);										//Event name
-	if (writeReady == NULL) {
-		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
-		return -1;
-	}
+	//writeReady = CreateEvent(
+	//	NULL, 										//Event attributes
+	//	TRUE, 										//Manual reset (TRUE for auto-reset)
+	//	FALSE, 										//Initial state
+	//	NULL);										//Event name
+	//if (writeReady == NULL) {
+	//	_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
+	//	return -1;
+	//}
 
 	//###############################################################################################################
 

@@ -13,7 +13,7 @@
 /* 
 ToDo List - Please clean after every point.
 
--URGENT TO LG: read line 155
+
 -Implement the structure again, *not shore if done or not 
 -remove the global writeReady, 
 -Redo the writeGameData
@@ -140,7 +140,6 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, PipeMsgs msg) {
 DWORD WINAPI instanceThread(LPVOID tParam) {
 	
 	HANDLE		hPipe = (HANDLE)tParam;
-	//PipeComm	*pc = (PipeComm *)tParam;
 	PipeComm	pc;
 	BOOL		fSuccess = FALSE;
 	PipeMsgs	msg;
@@ -172,22 +171,13 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 	}
 
 	msg.logged = 8;
-	//_gettch();
+
 	_tprintf(TEXT("Sending...\n"));
 
 	/*
 	HERE comes the broadcast and not what is now
 	*/
 	writePipeMsg(pc.hPipe, pc.heWriteReady, msg);
-
-		//TO DELETE
-		//fSuccess = WriteFile(
-		//	hPipe,
-		//	&msg,
-		//	sizeof(msg),
-		//	&dwBytesWritten,
-		//	&OvrWr
-		//);
 
 	_tprintf(TEXT("Sent...\n"));
 	return 0;
@@ -222,12 +212,15 @@ DWORD WINAPI CreatePipes() {
 	
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
-			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+			PIPE_ACCESS_DUPLEX | 
+			FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_MESSAGE | 
+			PIPE_READMODE_MESSAGE | 
+			PIPE_WAIT,
 			MAX_PLAYERS,
 			BUFSIZE,
 			BUFSIZE,
-			5000,														//5 segundos
+			5000,														//5 secs timeout
 			NULL);
 		if ((hPipe == INVALID_HANDLE_VALUE)&&(GetLastError()!=231)) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
@@ -237,7 +230,7 @@ DWORD WINAPI CreatePipes() {
 		if(!threadn)
 			SetEvent(h1stPipeInst);
 
-		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED?*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		fConnected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		
 		if (fConnected) {
 

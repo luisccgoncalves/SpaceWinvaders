@@ -20,12 +20,12 @@ ToDo List - Please clean after every point.
 -Remove the DEBUG prints
 */
 
-typedef struct {
-	HANDLE heWriteReady;
-	HANDLE heReadReady;
-	HANDLE hPipe;
-
-} PipeComm;
+//typedef struct {				//Don't think this is needed (right now at least)
+//	HANDLE heWriteReady;
+//	HANDLE heReadReady;
+//	HANDLE hPipe;
+//
+//} PipeComm;
 
 
 #define BUFSIZE 2048
@@ -140,32 +140,21 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, PipeMsgs msg) {
 DWORD WINAPI instanceThread(LPVOID tParam) {
 	
 	HANDLE		hPipe = (HANDLE)tParam;
-	PipeComm	pc;
+	HANDLE		heWriteReady;
 	BOOL		fSuccess = FALSE;
 	PipeMsgs	msg;
 
-	pc.hPipe = hPipe;
-
-	if (pc.hPipe == NULL) {
+	if (hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	/*
-	I moved the event creation here
-	because, and i might be wrong
-	we will need a event in every thread
-	and not just one global
-	...
-	I don't know anyway if isn't something missing.
-	*/
-
-	pc.heWriteReady = CreateEvent(			//Creates the event to signal access to write action
+	heWriteReady = CreateEvent(			//Creates the event to signal access to write action
 		NULL, 										//Event attributes
 		TRUE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state
 		NULL);										//Event name
-	if (pc.heWriteReady == NULL) {
+	if (heWriteReady == NULL) {
 		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -177,21 +166,20 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 	/*
 	HERE comes the broadcast and not what is now
 	*/
-	writePipeMsg(pc.hPipe, pc.heWriteReady, msg);
+	writePipeMsg(hPipe, heWriteReady, msg);
 
 	_tprintf(TEXT("Sent...\n"));
 	return 0;
 }
 
-DWORD WINAPI CreatePipes() {
+DWORD WINAPI CreatePipes(LPVOID tParam) {
 
+	int			*ThreadMustGoOn = (int*)tParam;
 	LPTSTR		lpsPipeName = PIPE_NAME;
 	HANDLE		clients[MAX_PLAYERS] = {0};
 	HANDLE		h1stPipeInst;
 	HANDLE		htPipeConnect[40] = { NULL }; //Update this
-	//PipeComm	*pc = malloc(sizeof(PipeComm));
-	//pc.hPipe = INVALID_HANDLE_VALUE;
-	//HANDLE writeReady;
+
 	HANDLE		hPipe = INVALID_HANDLE_VALUE;
 
 	BOOL		fConnected = FALSE;
@@ -208,7 +196,7 @@ DWORD WINAPI CreatePipes() {
 		return -1;
 	}
 
-	while (1/*threadmustgoon*/) {
+	while (*ThreadMustGoOn) {
 	
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
@@ -222,7 +210,13 @@ DWORD WINAPI CreatePipes() {
 			BUFSIZE,
 			5000,														//5 secs timeout
 			NULL);
-		if ((hPipe == INVALID_HANDLE_VALUE)&&(GetLastError()!=231)) {
+
+		if (GetLastError() == ERROR_PIPE_BUSY) {
+			_tprintf(TEXT("Max players Reached\n"));
+			//WaitForSingleObject until threadn<MAX_PLAYERS
+			return -1;
+		}
+		if (hPipe == INVALID_HANDLE_VALUE) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
 			return -1;
 		}
@@ -230,7 +224,9 @@ DWORD WINAPI CreatePipes() {
 		if(!threadn)
 			SetEvent(h1stPipeInst);
 
-		fConnected = ConnectNamedPipe(hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		fConnected = ConnectNamedPipe(hPipe, NULL) ? 
+						TRUE : 
+						(GetLastError() == ERROR_PIPE_CONNECTED);
 		
 		if (fConnected) {
 
@@ -389,32 +385,18 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//###############################################################################################################
 
 	htCreatePipes = CreateThread(
-		NULL,					//Thread security attributes
-		0,						//Stack size
-		CreatePipes,			//Thread function name
-		NULL,					//Thread parameter struct
-		0,						//Creation flags
-		&tCreatePipesID);		//gets thread ID to close it afterwards
+		NULL,							//Thread security attributes
+		0,								//Stack size
+		CreatePipes,					//Thread function name
+		(LPVOID)&cThread.ThreadMustGoOn,//Thread parameter struct
+		0,								//Creation flags
+		&tCreatePipesID);				//gets thread ID to close it afterwards
 	if (htCreatePipes == NULL) {
 		_tprintf(TEXT("[Error] Creating thread CreatePipes (%d) at Gateway\n"), GetLastError());
 	}
 
+	//cThread.ThreadMustGoOn = 0;
 	WaitForSingleObject(htCreatePipes, INFINITE);
-
-	/*
-	This was on CreatePipe - needs rethinking
-	> now on instaceThread - needs to be discussed and if ok delete this
-	*/
-
-	//writeReady = CreateEvent(
-	//	NULL, 										//Event attributes
-	//	TRUE, 										//Manual reset (TRUE for auto-reset)
-	//	FALSE, 										//Initial state
-	//	NULL);										//Event name
-	//if (writeReady == NULL) {
-	//	_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
-	//	return -1;
-	//}
 
 	//###############################################################################################################
 

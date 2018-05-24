@@ -410,6 +410,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	/*
 	This was on CreatePipe - needs rethinking
+	> now on instaceThread - needs to be discussed and if ok delete this
 	*/
 
 	//writeReady = CreateEvent(

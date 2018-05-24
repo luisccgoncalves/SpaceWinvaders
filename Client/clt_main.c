@@ -107,58 +107,99 @@ typedef struct {
 //	return 0;
 //}
 
-DWORD WINAPI ReadGame(LPVOID tParam) {
+int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 
-	int			*ThreadMustGoOn = &((ThreadCtrl*)tParam)->ThreadMustGoOn;
-	//HANDLE		hPipe = &((ThreadCtrl*)tParam)->hPipe;
-	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
-
-	PipeMsgs	msg;
+	OVERLAPPED	OvrRd = { 0 };
 	DWORD		dwBytesRead = 0;
 	BOOL		bSuccess = FALSE;
-	OVERLAPPED	OvrRd = { 0 };
 
-	HANDLE		hReadReady;
+	PipeMsgs	msg;
+
+	//ZeroMemory(&OvrRd, sizeof(OvrRd));	//not needed because of {0} ?
+	OvrRd.hEvent = readReady;
+	ResetEvent(readReady);
+
+	bSuccess = ReadFile(
+		hPipe,
+		&msg,
+		sizeof(msg),
+		&dwBytesRead,
+		&OvrRd);
+
+	//_tprintf(TEXT("[DEBUG] Got this: %d\n"), msg.logged);
+	WaitForSingleObject(readReady, INFINITE);
+	_tprintf(TEXT("Got a Message!\n"));
+
+	GetOverlappedResult(
+		hPipe,
+		&OvrRd,
+		&dwBytesRead,
+		FALSE);
+
+	if (dwBytesRead<sizeof(msg))
+		_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
+
+	_tprintf(TEXT("[DEBUG] Got this: %d\n"), msg.logged);
+	/*
+	Here we should present to screen 
+	later...
+	*/
+
+
+}
+
+DWORD WINAPI ReadGame(LPVOID tParam) {
+
+	//int			*ThreadMustGoOn = &((ThreadCtrl*)tParam)->ThreadMustGoOn;
+	//HANDLE		hPipe = &((ThreadCtrl*)tParam)->hPipe;
+	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
+	HANDLE		heReadReady;
 
 	if (cThreadRdGame->hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	hReadReady = CreateEvent(
+	heReadReady = CreateEvent(
 		NULL,										//Event attributes
 		TRUE,										//Manual reset (TRUE for auto-reset)
 		FALSE,										//Initial state
 		NULL);										//Event name
-	if (hReadReady == NULL) {
+	if (heReadReady == NULL) {
 		_tprintf(TEXT("[Error] Event ReadReady(%d)\n"), GetLastError());
 		return -1;
 	}
 
 	_tprintf(TEXT("Listening...\n"));
 
-	while (*ThreadMustGoOn) {
+	while (cThreadRdGame->hPipe) {
+		readPipeMsg(cThreadRdGame->hPipe, heReadReady);
 
-		ZeroMemory(&OvrRd, sizeof(OvrRd));
-		OvrRd.hEvent = hReadReady;
-		ResetEvent(hReadReady);
+		////ZeroMemory(&OvrRd, sizeof(OvrRd));	//not needed because of {0} ?
+		//OvrRd.hEvent = hReadReady;
+		//ResetEvent(hReadReady);
 
-		bSuccess = ReadFile(
-			cThreadRdGame->hPipe,
-			&msg,
-			sizeof(msg),
-			&dwBytesRead,
-			&OvrRd);
+		//bSuccess = ReadFile(
+		//	cThreadRdGame->hPipe,
+		//	&msg,
+		//	sizeof(msg),
+		//	&dwBytesRead,
+		//	&OvrRd);
 
-		_tprintf(TEXT("Got this: %d\n"), msg.logged);
-		WaitForSingleObject(hReadReady, INFINITE);
-		_tprintf(TEXT("Got a Message!\n"));
+		////_tprintf(TEXT("[DEBUG] Got this: %d\n"), msg.logged);
+		//WaitForSingleObject(hReadReady, INFINITE);
+		//_tprintf(TEXT("Got a Message!\n"));
 
-		GetOverlappedResult(cThreadRdGame->hPipe, &OvrRd, &dwBytesRead, FALSE);
-		if (dwBytesRead<sizeof(msg))
-			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
+		//GetOverlappedResult(
+		//	cThreadRdGame->hPipe,
+		//	&OvrRd,
+		//	&dwBytesRead,
+		//	FALSE);
 
-		_tprintf(TEXT("Got this: %d\n"), msg.logged);
+		//if (dwBytesRead<sizeof(msg))
+		//	_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
+
+		//_tprintf(TEXT("[DEBUG] Got this: %d\n"), msg.logged);
 
 	}
 
@@ -188,7 +229,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
-	while (1) {
+	while (1/*ThreadMustGoOn*/) {
 		
 		hPipe = CreateFile(
 			PIPE_NAME,

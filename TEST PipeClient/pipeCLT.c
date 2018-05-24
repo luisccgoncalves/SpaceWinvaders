@@ -36,7 +36,7 @@ DWORD WINAPI ThreadClienteReader(LPVOID lpvParam);
 int DeveContinuar = 1; 
 int ReaderAlive = 0;
 
-int _tmain(int argc, TCHAR *argv[]) {
+int _oldmain(int argc, TCHAR *argv[]) {
 
 	HANDLE hPipe /*, hPipeDup*/;
 	BOOL	fSuccess = FALSE;

@@ -16,6 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pipeSRV.c">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="myPipeSRV.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

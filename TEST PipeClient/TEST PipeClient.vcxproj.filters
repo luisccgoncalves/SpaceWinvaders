@@ -16,6 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pipeCLT.c">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="myPipeCLT.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

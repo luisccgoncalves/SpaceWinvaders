@@ -111,7 +111,7 @@ int broadcastclientes(Msg msg) {
 	return numwrites;
 }
 
-int _tmain(VOID) {	// aplicação genérica quanto a char/Unicode
+int _oldmain(VOID) {	// aplicação genérica quanto a char/Unicode
 
 	BOOL	fConnected = FALSE;
 	DWORD	dwThreadId = 0;

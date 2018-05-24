@@ -10,10 +10,10 @@
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
 
-typedef struct {
-	//HANDLE writeReady;
-	HANDLE hPipe;
-} PipeComm;
+//typedef struct {
+//	//HANDLE writeReady;
+//	//HANDLE hPipe;
+//} PipeComm;
 
 
 HANDLE writeReady;
@@ -68,7 +68,7 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {
 //}
 
 //WIP
-int writePipeMsg(HANDLE * hPipe, MSG *msg) {
+int writePipeMsg(HANDLE hPipe, PipeMsgs msg) {
 	/*
 	This is for sending specific messages to a 
 	single pipe.
@@ -79,6 +79,7 @@ int writePipeMsg(HANDLE * hPipe, MSG *msg) {
 		DWORD cbWriten = 0;
 
 		OVERLAPPED overlWrite = { 0 };
+
 		ResetEvent(writeReady);
 		overlWrite.hEvent = writeReady;
 
@@ -87,7 +88,7 @@ int writePipeMsg(HANDLE * hPipe, MSG *msg) {
 		fSuccess = WriteFile(
 			hPipe,
 			&msg,
-			sizeof(PipeMsgs),
+			sizeof(msg),
 			&cbWriten,
 			&overlWrite);
 		if (!fSuccess) {
@@ -109,7 +110,7 @@ int writePipeMsg(HANDLE * hPipe, MSG *msg) {
 			&overlWrite,
 			&cbWriten,
 			FALSE);
-		if (cbWriten < sizeof(PipeMsgs)) {
+		if (cbWriten < sizeof(msg)) {
 			_tprintf(TEXT("[Error] OVERLAPPED writePipeMsgs (%d)\n"), GetLastError());
 			return 1;
 
@@ -129,14 +130,14 @@ int writePipeMsg(HANDLE * hPipe, MSG *msg) {
 
 DWORD WINAPI instanceThread(LPVOID tParam) {
 
-	PipeComm *pc = (PipeComm *)tParam;
+	//PipeComm *pc = (PipeComm *)tParam;
 
-	//HANDLE *hPipe = &(HANDLE*)tParam;
+	HANDLE hPipe = (HANDLE)tParam;
 
 	BOOL fSuccess = FALSE;
 	PipeMsgs	msg;
 
-	if (pc->hPipe == NULL) {
+	if (hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -145,7 +146,7 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 	//_gettch();
 	_tprintf(TEXT("Sending...\n"));
 
-	writePipeMsg(pc->hPipe, &msg);
+	writePipeMsg(hPipe, msg);
 
 		//fSuccess = WriteFile(
 		//	hPipe,
@@ -161,8 +162,7 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 
 DWORD WINAPI CreatePipes() {
 
-	PipeComm pc;
-	pc.hPipe = INVALID_HANDLE_VALUE;
+	HANDLE hPipe = INVALID_HANDLE_VALUE;
 
 	LPTSTR	lpsPipeName = PIPE_NAME;
 
@@ -198,7 +198,8 @@ DWORD WINAPI CreatePipes() {
 
 	while (1/*threadmustgoon*/) {
 
-		pc.hPipe = CreateNamedPipe(
+	
+		hPipe = CreateNamedPipe(
 			lpsPipeName,
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
@@ -207,7 +208,7 @@ DWORD WINAPI CreatePipes() {
 			BUFSIZE,
 			5000,														//5 segundos
 			NULL);
-		if ((pc.hPipe == INVALID_HANDLE_VALUE)&&(GetLastError()!=231)) {
+		if ((hPipe == INVALID_HANDLE_VALUE)&&(GetLastError()!=231)) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
 			return -1;
 		}
@@ -215,7 +216,7 @@ DWORD WINAPI CreatePipes() {
 		if(!threadn)
 			SetEvent(h1stPipeInst);
 
-		fConnected = ConnectNamedPipe(pc.hPipe, NULL/*OVERLAPPED?*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		fConnected = ConnectNamedPipe(hPipe, NULL/*OVERLAPPED?*/) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		
 		if (fConnected) {
 
@@ -225,7 +226,7 @@ DWORD WINAPI CreatePipes() {
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThread,							//Thread function name
-				(LPVOID)&pc,							//Thread parameter struct
+				(LPVOID)hPipe,							//Thread parameter struct
 				0,										//Creation flags
 				&dwPipeThreadId);						//gets thread ID to close it afterwards
 			if (htPipeConnect[threadn] == NULL) {
@@ -237,7 +238,7 @@ DWORD WINAPI CreatePipes() {
 			}
 		}
 		else {
-			CloseHandle(pc.hPipe);							//Frees this pipe instance
+			CloseHandle(hPipe);							//Frees this pipe instance
 		}
 
 	}

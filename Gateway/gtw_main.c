@@ -9,6 +9,24 @@
 //#########################################################################################
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
+
+/*
+Implement the structure again, 
+put the createEvent again in the CreatePipe
+remove the global writeReady, 
+Redo the writeGameData
+Redo * and &
+Remove the DEBUG prints
+Duplicate Handle?!
+*/
+
+//typedef struct {
+//	//HANDLE writeReady;
+//	//HANDLE hPipe;
+//} PipeComm;
+
+
+HANDLE writeReady;
 #define BUFSIZE 2048
 
 void addClient(HANDLE *c, HANDLE *newClient) {
@@ -29,61 +47,98 @@ void removeClient(HANDLE *c, HANDLE *oldClient) {
 	}
 }
 
-int writeGameData(HANDLE * hPipe, HANDLE *writeReady, PipeGameData *game) {
-
-	BOOL fSuccess = FALSE;
-	DWORD cbWriten = 0;
-
-	OVERLAPPED overlWrite = { 0 };
-	ResetEvent(writeReady);
-	overlWrite.hEvent = writeReady;
-
-	fSuccess = WriteFile(
-		hPipe,
-		&game,
-		sizeof(PipeGameData),
-		&cbWriten,
-		&overlWrite);
-
-	WaitForSingleObject(writeReady, INFINITE);
-
-	GetOverlappedResult(
-		hPipe, 
-		&overlWrite, 
-		&cbWriten, 
-		FALSE);
-	if (cbWriten < sizeof(PipeGameData)) {
-		_tprintf(TEXT("[Error] OVERLAPPED writeGameData (%d)\n"), GetLastError());
-		return 1;
-	}
-
-}
-
-//WIP
-//int writeMsg(HANDLE * hPipe, HANDLE *writeReady, MSG *msg) {
-//	/*
-//	This is for sending specific messages to a 
-//	single pipe.
-//	One exmaple may be player dead for the player
-//	*/
+//int writeGameData(HANDLE * hPipe, HANDLE *writeReady, PipeGameData *game) {
+//
+//	BOOL fSuccess = FALSE;
+//	DWORD cbWriten = 0;
+//
+//	OVERLAPPED overlWrite = { 0 };
+//	ResetEvent(writeReady);
+//	overlWrite.hEvent = writeReady;
+//
+//	fSuccess = WriteFile(
+//		hPipe,
+//		&game,
+//		sizeof(PipeGameData),
+//		&cbWriten,
+//		&overlWrite);
+//
+//	WaitForSingleObject(writeReady, INFINITE);
+//
+//	GetOverlappedResult(
+//		hPipe, 
+//		&overlWrite, 
+//		&cbWriten, 
+//		FALSE);
+//	if (cbWriten < sizeof(PipeGameData)) {
+//		_tprintf(TEXT("[Error] OVERLAPPED writeGameData (%d)\n"), GetLastError());
+//		return 1;
+//	}
+//
 //}
 
-int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) { //This needs to receive nr of connected players
-	int numWrites = 0;
-	for (int i = 0; i < MAX_PLAYERS; i++) {
-		numWrites += writeGameData(clients[i], writeReady, game);
-	}
-	return numWrites;
+//WIP
+int writePipeMsg(HANDLE hPipe, PipeMsgs msg) {
+	/*
+	This is for sending specific messages to a 
+	single pipe.
+	One exmaple may be player dead for the player
+	*/
+
+		BOOL fSuccess = FALSE;
+		DWORD cbWriten = 0;
+
+		OVERLAPPED overlWrite = { 0 };
+
+		ResetEvent(writeReady);
+		overlWrite.hEvent = writeReady;
+
+		_tprintf(TEXT("[DEBUG] Inside writePipeMsg \n"));
+
+		fSuccess = WriteFile(
+			hPipe,
+			&msg,
+			sizeof(msg),
+			&cbWriten,
+			&overlWrite);
+		if (!fSuccess) {
+			if (GetLastError() == ERROR_IO_INCOMPLETE)
+				return;
+			_tprintf(TEXT("[DEBUG] Inside writePipeMsg ERROR_IO_INCOMPLETE... WHY?!?!? \n"));
+		}
+		_tprintf(TEXT("[DEBUG] Inside writePipeMsg before WaitForSingleObject \n"));
+		WaitForSingleObject(writeReady, INFINITE);
+		_tprintf(TEXT("[DEBUG] Inside writePipeMsg after WaitForSingleObject \n"));
+		GetOverlappedResult(
+			hPipe,
+			&overlWrite,
+			&cbWriten,
+			FALSE);
+		if (cbWriten < sizeof(msg)) {
+			_tprintf(TEXT("[Error] OVERLAPPED writePipeMsgs (%d)\n"), GetLastError());
+			return 1;
+
+		}
+		else {
+			_tprintf(TEXT("[DEBUG] Inside writePipeMsg cbWriten was OK \n"));
+		}
 }
+
+//int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) { //This needs to receive nr of connected players
+//	int numWrites = 0;
+//	for (int i = 0; i < MAX_PLAYERS; i++) {
+//		numWrites += writeGameData(clients[i], writeReady, game);
+//	}
+//	return numWrites;
+//}
 
 DWORD WINAPI instanceThread(LPVOID tParam) {
 
-	HANDLE *hPipe = &(HANDLE*)tParam;
+	//PipeComm *pc = (PipeComm *)tParam;
+
+	HANDLE hPipe = (HANDLE)tParam;
+
 	BOOL fSuccess = FALSE;
-	OVERLAPPED	OvrWr = { 0 };
-
-	DWORD		dwBytesWritten = 0;
-
 	PipeMsgs	msg;
 
 	if (hPipe == NULL) {
@@ -91,22 +146,19 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 		return -1;
 	}
 
-
-	msg.logged = 123;
-	_gettch();
+	msg.logged = 8;
+	//_gettch();
 	_tprintf(TEXT("Sending...\n"));
 
-	while (1) {
-		fSuccess = WriteFile(
-			hPipe,
-			&msg,
-			sizeof(msg),
-			&dwBytesWritten,
-			&OvrWr
-		);
+	writePipeMsg(hPipe, msg);
 
-	}
-
+		//fSuccess = WriteFile(
+		//	hPipe,
+		//	&msg,
+		//	sizeof(msg),
+		//	&dwBytesWritten,
+		//	&OvrWr
+		//);
 
 	_tprintf(TEXT("Sent...\n"));
 	return 0;
@@ -114,27 +166,29 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 
 DWORD WINAPI CreatePipes() {
 
+	HANDLE hPipe = INVALID_HANDLE_VALUE;
+
 	LPTSTR	lpsPipeName = PIPE_NAME;
 
 	HANDLE clients[MAX_PLAYERS] = {0};
-	HANDLE hPipe = INVALID_HANDLE_VALUE;
+	//HANDLE hPipe = INVALID_HANDLE_VALUE;
 	HANDLE htPipeConnect[40] = { NULL }; //Update this
-	HANDLE writeReady;
+	//HANDLE writeReady;
 	HANDLE h1stPipeInst;
 
 	BOOL fConnected = FALSE;
 	DWORD dwPipeThreadId;
 	int  threadn = 0;
 
-	writeReady = CreateEvent(			
-		NULL, 										//Event attributes
-		TRUE, 										//Manual reset (TRUE for auto-reset)
-		FALSE, 										//Initial state
-		NULL);										//Event name
-	if (writeReady == NULL) {
-		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
-		return -1;
-	}
+	//pc.writeReady = CreateEvent(			
+	//	NULL, 										//Event attributes
+	//	TRUE, 										//Manual reset (TRUE for auto-reset)
+	//	FALSE, 										//Initial state
+	//	NULL);										//Event name
+	//if (pc.writeReady == NULL) {
+	//	_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
+	//	return -1;
+	//}
 
 	h1stPipeInst = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
@@ -148,6 +202,7 @@ DWORD WINAPI CreatePipes() {
 
 	while (1/*threadmustgoon*/) {
 
+	
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
@@ -175,7 +230,7 @@ DWORD WINAPI CreatePipes() {
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThread,							//Thread function name
-				(LPVOID)&hPipe,							//Thread parameter struct
+				(LPVOID)hPipe,							//Thread parameter struct
 				0,										//Creation flags
 				&dwPipeThreadId);						//gets thread ID to close it afterwards
 			if (htPipeConnect[threadn] == NULL) {
@@ -335,6 +390,20 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	WaitForSingleObject(htCreatePipes, INFINITE);
+
+	/*
+	This was on CreatePipe - needs rethinking
+	*/
+
+	writeReady = CreateEvent(
+		NULL, 										//Event attributes
+		TRUE, 										//Manual reset (TRUE for auto-reset)
+		FALSE, 										//Initial state
+		NULL);										//Event name
+	if (writeReady == NULL) {
+		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	//###############################################################################################################
 

@@ -10,6 +10,16 @@
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
 
+/*
+Implement the structure again, 
+put the createEvent again in the CreatePipe
+remove the global writeReady, 
+Redo the writeGameData
+Redo * and &
+Remove the DEBUG prints
+Duplicate Handle?!
+*/
+
 //typedef struct {
 //	//HANDLE writeReady;
 //	//HANDLE hPipe;
@@ -94,12 +104,6 @@ int writePipeMsg(HANDLE hPipe, PipeMsgs msg) {
 		if (!fSuccess) {
 			if (GetLastError() == ERROR_IO_INCOMPLETE)
 				return;
-			/*
-			The error is here
-			one sugestion from stackoverflow 
-			states that the hPipe might be filling with garbage
-			needs to be checked
-			*/
 			_tprintf(TEXT("[DEBUG] Inside writePipeMsg ERROR_IO_INCOMPLETE... WHY?!?!? \n"));
 		}
 		_tprintf(TEXT("[DEBUG] Inside writePipeMsg before WaitForSingleObject \n"));
@@ -386,6 +390,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	WaitForSingleObject(htCreatePipes, INFINITE);
+
+	/*
+	This was on CreatePipe - needs rethinking
+	*/
 
 	writeReady = CreateEvent(
 		NULL, 										//Event attributes

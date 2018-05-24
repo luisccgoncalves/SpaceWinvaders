@@ -219,7 +219,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	BOOL		bSuccess;	
 
 	ThreadCtrl	cThreadRdGame;
-	
+	cThreadRdGame.ThreadMustGoOn = 1;
+
 	_tprintf(TEXT("Connecting to gateway...\n"));
 
 	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
@@ -229,7 +230,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
-	for (;;) {
+	do{
 		
 		hPipe = CreateFile(
 			PIPE_NAME,
@@ -239,9 +240,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 			OPEN_EXISTING,
 			0|FILE_FLAG_OVERLAPPED,
 			NULL);
-
-		if (hPipe != INVALID_HANDLE_VALUE)
-			break;
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {
 				_tprintf(TEXT("Server full. Waiting for 30 seconds\n"));
@@ -257,9 +255,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 			_tprintf(TEXT("ERROR opening pipe. (%d)\n"), GetLastError());
 			return -1;
-
 		}
-	}
+		else
+			cThreadRdGame.ThreadMustGoOn = 0;
+
+	} while (cThreadRdGame.ThreadMustGoOn);
 
 	_tprintf(TEXT("Pipe connected.\nChanging pipe mode...\n"));
 

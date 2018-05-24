@@ -90,6 +90,17 @@ int writePipeMsg(HANDLE * hPipe, MSG *msg) {
 			sizeof(PipeMsgs),
 			&cbWriten,
 			&overlWrite);
+		if (!fSuccess) {
+			if (GetLastError() == ERROR_IO_INCOMPLETE)
+				return;
+			/*
+			The error is here
+			one sugestion from stackoverflow 
+			states that the hPipe might be filling with garbage
+			needs to be checked
+			*/
+			_tprintf(TEXT("[DEBUG] Inside writePipeMsg ERROR_IO_INCOMPLETE... WHY?!?!? \n"));
+		}
 		_tprintf(TEXT("[DEBUG] Inside writePipeMsg before WaitForSingleObject \n"));
 		WaitForSingleObject(writeReady, INFINITE);
 		_tprintf(TEXT("[DEBUG] Inside writePipeMsg after WaitForSingleObject \n"));

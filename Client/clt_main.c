@@ -219,6 +219,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	BOOL		bSuccess;	
 
 	ThreadCtrl	cThreadRdGame;
+	cThreadRdGame.ThreadMustGoOn = 1;
 
 	_tprintf(TEXT("Connecting to gateway...\n"));
 
@@ -229,7 +230,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
-	while (1/*ThreadMustGoOn*/) {
+	while (cThreadRdGame.ThreadMustGoOn) {
 		
 		hPipe = CreateFile(
 			PIPE_NAME,
@@ -239,9 +240,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 			OPEN_EXISTING,
 			0|FILE_FLAG_OVERLAPPED,
 			NULL);
-
-		if (hPipe != INVALID_HANDLE_VALUE)
-			break;
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {
 				_tprintf(TEXT("Server full. Waiting for 30 seconds\n"));
@@ -259,6 +257,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 			return -1;
 
 		}
+
+		if (hPipe != INVALID_HANDLE_VALUE)
+			cThreadRdGame.ThreadMustGoOn = 0;
 
 	}
 

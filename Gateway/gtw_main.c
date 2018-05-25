@@ -306,9 +306,9 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
-	SMGameData	*gameMsg;
+	GameData	*gameMsg;
 
-	gameMsg = malloc(sizeof(SMGameData));
+	gameMsg = malloc(sizeof(GameData));
 
 	int i;
 
@@ -319,7 +319,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
-		CopyMemory(gameMsg, cThread->pSMemGameData, sizeof(SMGameData));
+		CopyMemory(gameMsg, cThread->pSMemGameData, sizeof(GameData));
 		ReleaseMutex(cThread->mhStructSync);
 
 		cls(hStdout);
@@ -374,7 +374,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	GetSystemInfo(&SysInfo);									//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
 
-	cThread.SMemViewServer.QuadPart		= ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewServer.QuadPart		= ((sizeof(GameData) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.SMemViewGateway.QuadPart	= ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.SMemSize.QuadPart			= cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 

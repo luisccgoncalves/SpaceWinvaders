@@ -3,7 +3,7 @@
 DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 
 	/* generate random number between 1 and 50: */
 	int random = rand() % 50 + 1;
@@ -31,7 +31,7 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
@@ -68,7 +68,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 	int i;
 	int startIndex = MAX_INVADER - RAND_INVADER;

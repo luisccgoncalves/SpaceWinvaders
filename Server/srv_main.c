@@ -31,7 +31,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
 	//Rounds view sizes to the neares granularity multiple
-	cThread.SMemViewServer.QuadPart = ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran;
+	cThread.SMemViewServer.QuadPart = ((sizeof(GameData) / dwSysGran)*dwSysGran) + dwSysGran;
 	cThread.SMemViewGateway.QuadPart = ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran;
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
@@ -39,8 +39,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//#######################################################################################################################
 	//##################################### GRANULARITY TESTS//DELETE THIS ##################################################
 	//#######################################################################################################################
-	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(SMGameData), sizeof(SMMessage));
-	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMGameData), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMGameData) / dwSysGran)*dwSysGran) + dwSysGran);
+	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(GameData), sizeof(SMMessage));
+	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(GameData), dwSysGran, dwSysGran, dwSysGran, ((sizeof(GameData) / dwSysGran)*dwSysGran) + dwSysGran);
 	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMMessage), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran);
 	_tprintf(TEXT("TestBigView:\t((%d/%d)*%d)+%d=%d\n"), 66000, dwSysGran, dwSysGran, dwSysGran, ((66000 / dwSysGran)*dwSysGran) + dwSysGran);
 	//#######################################################################################################################
@@ -123,9 +123,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
 
-
-	//#####################################WAITING FOR PROFESSOR'S EMAIL REPLY##############################################
-
 	//Creates a mapped file
 	if (sharedMemory(&cThread.hSMem, &cThread.SMemSize) == -1) {
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
@@ -144,8 +141,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Mapping MsgView (%d)\n at Server"), GetLastError());
 		return -1;
 	}
-	//######################################################################################################################
-
 
 	SetEvent(hCanBootNow);							//Warns gateway that Shared memory is mapped
 

@@ -88,7 +88,7 @@ typedef struct {
 	int		speed;
 }ship_shot;
 
-typedef struct {							//Message to use in the game data view
+typedef struct {							//Game data to use in pipes
 	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	invaderbomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
 	ship			ship[MAX_PLAYERS];		//number of ships/players in game
@@ -97,6 +97,20 @@ typedef struct {							//Message to use in the game data view
 
 	int xsize;								//max y size of play area
 	int ysize;								//max x size of play area
+} GameData;
+
+typedef struct {							//Message to use in the game data view
+
+	//invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
+	//invaderbomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
+	//ship			ship[MAX_PLAYERS];			//number of ships/players in game
+	//ship_shot		shot[25];					//temporary number of shots
+	//powerup			pUp;					//One powerUp only at any given time
+
+	//int xsize;								//max y size of play area
+	//int ysize;								//max x size of play area
+
+	GameData game;						//Game data message to use in SM & Pipes
 	int invaders_speed;						//invaders speed
 	int invaders_bombs_speed;
 	int ship_shot_speed;					//defenders shot speed
@@ -106,7 +120,17 @@ typedef struct {							//Message to use in the game data view
 	int max_invaders;
 	int max_bombs;
 
-}SMGameData;
+	/*
+	Does this makes sense? 
+	if you need to calculate something
+	considering data from level above...
+
+	careful implementing!	
+	*/
+
+
+}Game;
+
 
 typedef struct {
 	//int		msgID;						//probably unnecessary - event driven approach	
@@ -133,7 +157,7 @@ typedef struct {
 	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
 	
-	SMGameData		*pSMemGameData;			//Pointer to shared memory's structure server>gateway
+	GameData		*pSMemGameData;			//Pointer to shared memory's structure server>gateway
 	SMMessage		*pSMemMessage;			//Pointer to shared memory's structure gateway<>server
 
 	HANDLE			mhStructSync;			//Handle to mutex, grants pSMemGameData integrity
@@ -143,17 +167,6 @@ typedef struct {
 
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 } SMCtrl;
-
-typedef struct {							//Game data to use in pipes
-	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
-	invaderbomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
-	ship			ship[MAX_PLAYERS];		//number of ships/players in game
-	ship_shot		shot[25];				//temporary number of shots
-	powerup			pUp;					//One powerUp only at any given time
-
-	int xsize;								//max y size of play area
-	int ysize;								//max x size of play area
-} PipeGameData;
 
 typedef struct {							//Message to use in pipes
 	TCHAR		username[SMALL_BUFF];		//string		

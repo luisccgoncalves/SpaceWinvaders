@@ -3,7 +3,7 @@
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMGameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;

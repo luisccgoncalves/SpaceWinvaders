@@ -1,6 +1,6 @@
 #include "communication.h"
 
-void consumePacket(SMCtrl *tParam, int * nextOut, packet *localpacket) {
+void consumePacket(SMCtrl *tParam, int *nextOut, packet *localpacket) {
 
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
@@ -26,7 +26,6 @@ void consumePacket(SMCtrl *tParam, int * nextOut, packet *localpacket) {
 
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	SMCtrl		*cThread = (SMCtrl*)tParam;
-	int			*ThreadMustGoOn = &((SMCtrl*)tParam)->ThreadMustGoOn;		//Exit condition
 
 	packet		localpacket;
 	ship		localship;
@@ -36,7 +35,7 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	int maxYpos = YSIZE - 1;
 	int minYpos = YSIZE - (YSIZE*0.2);
 
-	while (*ThreadMustGoOn) {
+	while (cThread->ThreadMustGoOn) {
 
 		//Consume item from buffer
 		consumePacket(tParam, &nextOut, &localpacket);
@@ -76,4 +75,12 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	}
 
 	return 0;
+}
+
+DWORD WINAPI WriteGatewayMsg(LPVOID tParam) {
+	/*
+	Here we will recieve either a copy
+	either a pointer to a Game or GameData 
+	object to send it!
+	*/
 }

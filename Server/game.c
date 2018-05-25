@@ -98,6 +98,11 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		Sleep(100);
 		_tprintf(TEXT("."));
 		WaitForSingleObject(sGTick->mhStructSync, INFINITE);
+		/*
+		Here we will write to the SharedMemory
+		...
+		working on it!
+		*/
 		SetEvent(sGTick->hTick);
 
 		ReleaseMutex(sGTick->mhStructSync);

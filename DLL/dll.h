@@ -34,7 +34,7 @@ typedef struct {
 	//TCHAR	username[SMALL_BUFF];		//probably needed for remote pipe usage
 	//TCHAR password[SMALL_BUFF];		//unhashed password
 	int		high_score;
-}player;
+} Player;
 
 typedef struct {
 	int		id;
@@ -42,7 +42,7 @@ typedef struct {
 	int		lives;			//ship is a one shot kill, but has several lives
 	int		x;				//ship x,y position
 	int		y;
-	player	owner;
+	Player	owner;
 
 	//powerups (only player specific)
 	int		shield;			//If shield is true, lives won't go down.
@@ -50,7 +50,7 @@ typedef struct {
 	int		turbo;			//Player will move faster. -------(?)-------
 	int		laser_shots;	//kills all invaders in sight
 							//add more
-}ship;
+} Ship;
 
 typedef struct {
 	int		x;				//ship x,y position
@@ -60,41 +60,41 @@ typedef struct {
 
 	int		hp;				//ship hit points
 	int		rand_path;		//true for random trajectory, false for zig-zag
-}invader;
+} Invader;
 
 //typedef struct {
 //	int		x;				//ship x,y position
 //	int		y;
 //	int		hp;
-//}barriers;
+//} Barriers;
 
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
 	int		fired;			//dead or alive
 	//int		speed;		//May not be sensible to have it here - RECONSIDER
-}powerup;
+} PowerUp;
 
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
 	int		fired;			//dead or alive
 	//int		speed;		//May not be sensible to have it here - RECONSIDER
-}invaderbomb;
+} InvaderBomb;
 
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
 	int		fired;			//dead or alive
 	int		speed;
-}ship_shot;
+} ShipShot;
 
 typedef struct {							//Game data to use in pipes
-	invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
-	invaderbomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
-	ship			ship[MAX_PLAYERS];		//number of ships/players in game
-	ship_shot		shot[25];				//temporary number of shots
-	powerup			pUp;					//One powerUp only at any given time
+	Invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
+	InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
+	Ship			ship[MAX_PLAYERS];		//number of ships/players in game
+	ShipShot		shot[25];				//temporary number of shots
+	PowerUp			pUp;					//One powerUp only at any given time
 
 	int xsize;								//max y size of play area
 	int ysize;								//max x size of play area
@@ -140,11 +140,11 @@ typedef struct {
 
 	//maybe a string?
 	//if this aproach is to follow we may need to consider constants
-}packet;
+}Packet;
 
 typedef struct {							//Message to use in the message view
 
-	packet	buffer[SMEM_BUFF];
+	Packet	buffer[SMEM_BUFF];
 
 }SMMessage;
 

@@ -395,7 +395,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//cThread.ThreadMustGoOn = 0;
-	WaitForSingleObject(htCreatePipes, INFINITE); //COMMENT HERE TO TEST GAME
+	//WaitForSingleObject(htCreatePipes, INFINITE); //COMMENT HERE TO TEST GAME
 
 	//###############################################################################################################
 

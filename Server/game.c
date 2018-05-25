@@ -5,6 +5,9 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 
+	lvl->xsize = XSIZE;
+	lvl->ysize = YSIZE;
+
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
 	DWORD			tRandPathInvaderID;

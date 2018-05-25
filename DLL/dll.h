@@ -22,7 +22,7 @@
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define	SMEM_BUFF		10
 #define XSIZE			80							//Terminal max collumn number
-#define YSIZE			25							//Terminal max row number
+#define YSIZE			30							//Terminal max row number
 
 #define MAX_PLAYERS		3							//Maximum number of concurrent players
 #define MAX_INVADER		57							//Maximum invaders by level
@@ -111,7 +111,7 @@ typedef struct {							//Message to use in the game data view
 	//int xsize;								//max y size of play area
 	//int ysize;								//max x size of play area
 
-	GameData game;						//Game data message to use in SM & Pipes
+	GameData gameData;						//Game data message to use in SM & Pipes
 	int invaders_speed;						//invaders speed
 	int invaders_bombs_speed;
 	int ship_shot_speed;					//defenders shot speed

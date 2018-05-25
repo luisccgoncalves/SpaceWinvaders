@@ -5,6 +5,9 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
 
+	lvl->xsize = XSIZE;
+	lvl->ysize = YSIZE;
+
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
 	DWORD			tRandPathInvaderID;
@@ -98,6 +101,11 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		Sleep(100);
 		_tprintf(TEXT("."));
 		WaitForSingleObject(sGTick->mhStructSync, INFINITE);
+		/*
+		Here we will write to the SharedMemory
+		...
+		working on it!
+		*/
 		SetEvent(sGTick->hTick);
 
 		ReleaseMutex(sGTick->mhStructSync);

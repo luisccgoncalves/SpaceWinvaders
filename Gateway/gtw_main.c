@@ -287,7 +287,7 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 //#########################################################################################
 
-void simulClient(packet * localpacket) {
+void simulClient(Packet * localpacket) {
 
 	srand((unsigned)time(NULL));
 
@@ -303,7 +303,7 @@ DWORD WINAPI sendMessage(LPVOID tParam) {
 
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
-	packet		localpacket;
+	Packet		localpacket;
 
 	int nextIn = 0;
 
@@ -424,7 +424,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//cThread.ThreadMustGoOn = 0;
-	WaitForSingleObject(htCreatePipes, INFINITE);
+	//WaitForSingleObject(htCreatePipes, INFINITE); //COMMENT HERE TO TEST GAME
 
 	//###############################################################################################################
 

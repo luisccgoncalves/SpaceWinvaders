@@ -3,7 +3,7 @@
 
 #include "localStructs.h"
 
-void consumePacket(SMCtrl *tParam, int * nextOut, packet *localpacket);
+void consumePacket(SMCtrl *tParam, int * nextOut, Packet *localpacket);
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam);
 
 #endif // COMMUNICATION_H

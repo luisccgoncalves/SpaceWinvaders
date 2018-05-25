@@ -30,8 +30,9 @@
 #define MAX_BOMBS		6							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 
 typedef struct {
-	int		id;
-	//TCHAR	username[SMALL_BUFF];
+	int		id;				//populated with pid of each client
+	//TCHAR	username[SMALL_BUFF];		//probably needed for remote pipe usage
+	//TCHAR password[SMALL_BUFF];		//unhashed password
 	int		high_score;
 }player;
 

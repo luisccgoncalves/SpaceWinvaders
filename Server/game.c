@@ -8,6 +8,10 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	lvl->xsize = XSIZE;
 	lvl->ysize = YSIZE;
 
+	/*
+	HERE we will need to CREATE a game and instantiate a lvl ands stuffs
+	*/
+
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
 	DWORD			tRandPathInvaderID;
@@ -111,5 +115,39 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		ReleaseMutex(sGTick->mhStructSync);
 	}
 
+	return 0;
+}
+
+int UpdateLocalShip(GameData *game, Packet *localpacket) {
+	//validate action
+
+	//_tprintf(TEXT("[DEBUG] UpdateLocalShip (%d) \n"), localpacket->instruction);
+
+	/*
+	this is recieving a value from 0 to 3
+	maybe this is not the final values
+	*/
+
+	switch (localpacket->instruction) {
+	case 0:
+		if (game->ship->x<(game->xsize - 1))
+			game->ship->x++;
+		break;
+	case 1:
+		if (game->ship->y<(game->ysize - 1))
+			game->ship->y++;
+		break;
+	case 2:
+		if (game->ship->x>0)
+			game->ship->x--;
+		break;
+	case 3:
+		if (game->ship->y>(game->ysize - (game->ysize*0.2)))
+			if (game->ship->y>(game->ysize - (game->ysize*0.2)))
+				game->ship->y--;
+		break;
+	default:
+		break;
+	}
 	return 0;
 }

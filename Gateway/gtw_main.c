@@ -79,7 +79,7 @@ ToDo List - Please clean after every point.
 //}
 
 //WIP
-int writePipeMsg(HANDLE hPipe, HANDLE writeReady, PipeMsgs msg) {
+int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 	/*
 	This is for sending specific messages to a 
 	single pipe.
@@ -142,7 +142,7 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 	HANDLE		hPipe = (HANDLE)tParam;
 	HANDLE		heWriteReady;
 	BOOL		fSuccess = FALSE;
-	PipeMsgs	msg;
+	GameData	clientMsg;
 
 	if (hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
@@ -159,13 +159,42 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 		return -1;
 	}
 
-	msg.logged = 8;
+
+
+	//###################################### DEBUG STUFF #################################################
+	srand((unsigned)time(NULL));					//Seeds the RNG
+
+													//Defines invader path
+	for (int i = 0; (i < MAX_INVADER); i++) {
+		if (i < (MAX_INVADER - 2))
+			clientMsg.invad[i].rand_path = 0;
+		else
+			clientMsg.invad[i].rand_path = 1;
+	}
+
+	for (int i = 0; (i < MAX_INVADER); i++) {
+
+		if (!(clientMsg.invad[i].rand_path)) {			//If regular path
+
+													//deploys INVADER_BY_ROW invaders per line with a spacing of 2
+			clientMsg.invad[i].x = clientMsg.invad[i].x_init = (i % 11) * 2;
+
+			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
+			clientMsg.invad[i].y = clientMsg.invad[i].y_init = i / 11;
+		}
+		else {
+			clientMsg.invad[i].x = clientMsg.invad[i].x_init = rand() % XSIZE;
+			clientMsg.invad[i].y = clientMsg.invad[i].y_init = rand() % YSIZE;
+		}
+	}
+	_tprintf(TEXT("\nSending a message!\n = %d"), clientMsg.invad[0].x);
+	//####################################################################################################
 
 	_tprintf(TEXT("Sending...\n"));
 
 	//get gamedata
 
-	writePipeMsg(hPipe, heWriteReady, msg);
+	writePipeMsg(hPipe, heWriteReady, clientMsg);
 
 	_tprintf(TEXT("Sent...\n"));
 	return 0;

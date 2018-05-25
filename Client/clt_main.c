@@ -107,13 +107,46 @@ typedef struct {
 //	return 0;
 //}
 
+void printGame(GameData msg) {
+
+	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	int i;
+	
+	cls(hStdout);
+	//for (i = 0; i < MAX_INVADER; i++) {
+	//	_tprintf(TEXT("(%d,%d) "), msg.invad[i].x, msg.invad[i].y);
+	//}
+	
+	for (i = 0; i < MAX_INVADER; i++) {
+		if (msg.invad[i].hp) {
+			gotoxy(msg.invad[i].x, msg.invad[i].y);
+			if (msg.invad[i].rand_path)
+				_tprintf(TEXT("X"));
+			else
+				_tprintf(TEXT("W"));
+		}
+		Sleep(100);
+	}
+
+	if (msg.bomb[0].y < 25) { //this needs another aproach (fired state?)
+		gotoxy(msg.bomb[0].x, msg.bomb[0].y);
+		_tprintf(TEXT("o"));
+		Sleep(2000);
+	}
+
+	for (i = 0; i < MAX_PLAYERS; i++) {
+		gotoxy(msg.ship[i].x, msg.ship[i].y);
+		_tprintf(TEXT("Â"));
+	}
+}
+
 int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 
 	OVERLAPPED	OvrRd = { 0 };
 	DWORD		dwBytesRead = 0;
 	BOOL		bSuccess = FALSE;
 
-	PipeMsgs	msg;
+	GameData	msg;
 
 	OvrRd.hEvent = readReady;
 	ResetEvent(readReady);
@@ -142,7 +175,9 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
 	}
 
-	_tprintf(TEXT("[DEBUG] Got this: %d\n"), msg.logged);
+	
+	_tprintf(TEXT("\nGot a message!\n = %d"), msg.invad[0].x);
+	printGame(msg);
 
 	return 0;
 }

@@ -122,6 +122,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//Populate sGTick's pointers
 	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
+	sGTick.cThread = &cThread;
 
 	//Creates a mapped file
 	if (sharedMemory(&cThread.hSMem, &cThread.SMemSize) == -1) {

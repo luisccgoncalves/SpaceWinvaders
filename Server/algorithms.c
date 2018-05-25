@@ -3,15 +3,16 @@
 DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	GameData *baseGame = &((SMCtrl *)tParam)->game.gameData;
+	/*GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;*/
 
 	/* generate random number between 1 and 50: */
 	int random = rand() % 50 + 1;
 
-	lvl->bomb[0].x = lvl->invad[random].x;
-	lvl->bomb[0].y = lvl->invad[random].y;
-	while (*ThreadMustGoOn && lvl->bomb[0].y <25/*&&bombColDetect(&bomb,tParam)*/) {
-		lvl->bomb[0].y++;
+	baseGame->bomb[0].x = baseGame->invad[random].x;
+	baseGame->bomb[0].y = baseGame->invad[random].y;
+	while (*ThreadMustGoOn && baseGame->bomb[0].y <25/*&&bombColDetect(&bomb,tParam)*/) {
+		baseGame->bomb[0].y++;
 		/*Sleep(lvl->bomb[0].speed * (*ThreadMustGoOn));*/
 		Sleep(250 * (*ThreadMustGoOn));
 	}
@@ -30,14 +31,17 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
+	SMCtrl *cT = (SMCtrl*)tParam;
+
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	Game *baseGame = &((SMCtrl *)tParam)->game;
+	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
 	int sidestep = 4;
-	int totalsteps = (YSIZE - (MAX_INVADER / INVADER_BY_ROW)) * sidestep;
-	int regInvaderNr = (MAX_INVADER - RAND_INVADER);
+	int totalsteps = (baseGame->gameData.ysize - (baseGame->max_invaders/ INVADER_BY_ROW)) * sidestep;
+	int regInvaderNr = (baseGame->max_invaders - baseGame->max_rand_invaders);
 
 
 	while (*ThreadMustGoOn) {						//Thread main loop
@@ -48,17 +52,19 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn; j++) {
 
-				lvl->invad[j].y = (i / sidestep) + lvl->invad[j].y_init;				//Invader goes down after n sidesteps
+				baseGame->gameData.invad[j].y = (i / sidestep) + baseGame->gameData.invad[j].y_init;				//Invader goes down after n sidesteps
 
 				if ((i % (sidestep * 2)) < sidestep)
-					lvl->invad[j].x = (i % (sidestep * 2)) + lvl->invad[j].x_init;		//Invader goes right
+					baseGame->gameData.invad[j].x = (i % (sidestep * 2)) + baseGame->gameData.invad[j].x_init;		//Invader goes right
 				else if ((i % (sidestep * 2)) > sidestep)
-					lvl->invad[j].x--;													//Invader goes left
+					baseGame->gameData.invad[j].x--;													//Invader goes left
 			}
+
+			CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
 
 			ReleaseMutex(mhStructSync);
 
-			Sleep(INVADER_SPEED*(*ThreadMustGoOn));
+			Sleep(baseGame->invaders_speed*(*ThreadMustGoOn));
 		}
 	}
 
@@ -67,50 +73,56 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
+	SMCtrl *cT = (SMCtrl*)tParam;
+	
+
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
+	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
+	Game *baseGame = &((SMCtrl *)tParam)->game;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
+
 	int i;
-	int startIndex = MAX_INVADER - RAND_INVADER;
-	int maxXpos = XSIZE - 1;
-	int maxYpos = (int)((YSIZE - 1)*0.8);
+	int startIndex = baseGame->max_invaders - baseGame->max_rand_invaders;
+	int maxXpos = baseGame->gameData.xsize - 1;
+	int maxYpos = (int)((baseGame->gameData.ysize - 1)*0.8);
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
 		WaitForSingleObject(mhStructSync, INFINITE);
 
-		for (i = startIndex; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
+		for (i = startIndex; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
 
 			switch (rand() % 4) {
 			case 0:
-				if (lvl->invad[i].x > 0)
-					lvl->invad[i].x--;
+				if (baseGame->gameData.invad[i].x > 0)
+					baseGame->gameData.invad[i].x--;
 				else
-					lvl->invad[i].x = 1;
+					baseGame->gameData.invad[i].x = 1;
 				break;
 			case 1:
-				if (lvl->invad[i].x < maxXpos)
-					lvl->invad[i].x++;
+				if (baseGame->gameData.invad[i].x < maxXpos)
+					baseGame->gameData.invad[i].x++;
 				else
-					lvl->invad[i].x = maxXpos - 1;
+					baseGame->gameData.invad[i].x = maxXpos - 1;
 				break;
 			case 2:
-				if (lvl->invad[i].y > 0)
-					lvl->invad[i].y--;
+				if (baseGame->gameData.invad[i].y > 0)
+					baseGame->gameData.invad[i].y--;
 				else
-					lvl->invad[i].y = 1;
+					baseGame->gameData.invad[i].y = 1;
 				break;
 			case 3:
-				if (lvl->invad[i].y < maxYpos)
-					lvl->invad[i].y++;
+				if (baseGame->gameData.invad[i].y < maxYpos)
+					baseGame->gameData.invad[i].y++;
 				else
-					lvl->invad[i].y = maxYpos - 1;
+					baseGame->gameData.invad[i].y = maxYpos - 1;
 				break;
 			}
 		}
+		CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
 
 		ReleaseMutex(mhStructSync);
-		Sleep((INVADER_SPEED / 4)*(*ThreadMustGoOn));
+		Sleep((baseGame->invaders_speed / 4)*(*ThreadMustGoOn));
 	}
 
 	return 0;

@@ -119,6 +119,7 @@ typedef struct {							//Message to use in the game data view
 	
 	int num_players;						//number of players per game
 	int max_invaders;
+	int max_rand_invaders;
 	int max_bombs;
 
 	/*

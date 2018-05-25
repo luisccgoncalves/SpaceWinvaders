@@ -41,8 +41,10 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 		ReleaseMutex(cThread->mhStructSync);
 
-		UpdateLocalShip(cThread->pSMemGameData, &localpacket);
-		//UpdateLocalShip(&cThread->game.gameData, &localpacket);
+		//UpdateLocalShip(cThread->pSMemGameData, &localpacket);
+		UpdateLocalShip(&cThread->game.gameData, &localpacket);
+
+		CopyMemory(cThread->pSMemGameData, &cThread->game.gameData, sizeof(GameData));
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 		ReleaseMutex(cThread->mhStructSync);

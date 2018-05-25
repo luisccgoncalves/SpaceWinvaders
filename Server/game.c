@@ -3,10 +3,10 @@
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;
-
-	lvl->xsize = XSIZE;
-	lvl->ysize = YSIZE;
+	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
+	
+	Game *baseGame = &((SMCtrl *)tParam)->game;
+	InstantiateGame(baseGame);
 
 	/*
 	HERE we will need to CREATE a game and instantiate a lvl ands stuffs
@@ -24,43 +24,43 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	srand((unsigned)time(NULL));					//Seeds the RNG
 
 													//Defines invader path
-	for (i = 0; (i < MAX_INVADER) && *ThreadMustGoOn; i++) {
-		if (i < (MAX_INVADER - RAND_INVADER))
-			lvl->invad[i].rand_path = 0;
+	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
+		if (i < (baseGame->max_invaders - baseGame->max_rand_invaders))
+			baseGame->gameData.invad[i].rand_path = 0;
 		else
-			lvl->invad[i].rand_path = 1;
+			baseGame->gameData.invad[i].rand_path = 1;
 	}
 
 	//Populates invaders with coords
-	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {
+	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 
-		if (!(lvl->invad[i].rand_path)) {			//If regular path
+		if (!(baseGame->gameData.invad[i].rand_path)) {			//If regular path
 
 													//deploys INVADER_BY_ROW invaders per line with a spacing of 2
-			lvl->invad[i].x = lvl->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
+			baseGame->gameData.invad[i].x = baseGame->gameData.invad[i].x_init = (i % INVADER_BY_ROW) * 2;
 
 			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
-			lvl->invad[i].y = lvl->invad[i].y_init = i / INVADER_BY_ROW;
+			baseGame->gameData.invad[i].y = baseGame->gameData.invad[i].y_init = i / INVADER_BY_ROW;
 		}
 		else {
-			lvl->invad[i].x = lvl->invad[i].x_init = rand() % XSIZE;
-			lvl->invad[i].y = lvl->invad[i].y_init = rand() % YSIZE;
+			baseGame->gameData.invad[i].x = baseGame->gameData.invad[i].x_init = rand() % baseGame->gameData.xsize;
+			baseGame->gameData.invad[i].y = baseGame->gameData.invad[i].y_init = rand() % baseGame->gameData.ysize;
 		}
 	}
 
 	//Populates invaders with HP
-	for (i = 0; ((i < MAX_INVADER) && *ThreadMustGoOn); i++) {
-		lvl->invad[i].hp = 1;
+	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
+		baseGame->gameData.invad[i].hp = 1;
 	}
 
 	//Kills a random invader ##### For testing purposes #####
-	lvl->invad[rand() % 55].hp = 0;
+	baseGame->gameData.invad[rand() % 55].hp = 0;
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < baseGame->max_invaders; i++) {
 
-		lvl->ship[i].x = 15;
-		lvl->ship[i].y = 23;
+		baseGame->gameData.ship[i].x = 15;
+		baseGame->gameData.ship[i].y = 23;
 	}
 
 	htRegPathInvader = CreateThread(
@@ -97,8 +97,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
-	GTickStruct		*sGTick;
-	sGTick = (GTickStruct*)tParam;
+	GTickStruct		*sGTick = (GTickStruct*)tParam;
 
 	while (sGTick->ThreadMustGoOn) {
 
@@ -149,5 +148,29 @@ int UpdateLocalShip(GameData *game, Packet *localpacket) {
 	default:
 		break;
 	}
+	return 0;
+}
+
+int InstantiateGame(Game *game) {
+
+	/*
+	this is for filling the game, 
+	that then will be altered later
+	...
+	another function?
+	*/
+
+	game->gameData.xsize = XSIZE;
+	game->gameData.ysize = YSIZE;
+
+	game->invaders_bombs_speed =	INVADER_SPEED;		// not correct
+	game->invaders_speed =			INVADER_SPEED;		// Base speed for invader
+	game->max_bombs =				MAX_BOMBS;			// Base max num of bombs at same time
+	game->max_invaders =			MAX_INVADER;		// Base num of invaders in the field
+	game->max_rand_invaders	=		RAND_INVADER;		// Base num of invaders in the field
+	game->num_players =				MAX_PLAYERS;		// Base num of players
+	game->power_up_speed =			INVADER_SPEED;		// Base speed for power up
+	game->ship_shot_speed =			INVADER_SPEED;		// Base speed for defender ship
+
 	return 0;
 }

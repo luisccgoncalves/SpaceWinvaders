@@ -163,9 +163,8 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 
 	_tprintf(TEXT("Sending...\n"));
 
-	/*
-	HERE comes the broadcast and not what is now
-	*/
+	//get gamedata
+
 	writePipeMsg(hPipe, heWriteReady, msg);
 
 	_tprintf(TEXT("Sent...\n"));

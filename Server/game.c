@@ -57,7 +57,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	baseGame->gameData.invad[rand() % 55].hp = 0;
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
-	for (i = 0; i < baseGame->max_invaders; i++) {
+	for (i = 0; i < baseGame->num_players; i++) {
 
 		baseGame->gameData.ship[i].x = 15;
 		baseGame->gameData.ship[i].y = 23;
@@ -98,6 +98,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;
+	
 
 	while (sGTick->ThreadMustGoOn) {
 

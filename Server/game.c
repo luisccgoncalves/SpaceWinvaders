@@ -146,8 +146,7 @@ int UpdateLocalShip(GameData *game, Packet *localpacket) {
 		break;
 	case 3:
 		if (game->ship[localpacket->owner].y>(game->ysize - (game->ysize*0.2)))
-			if (game->ship[localpacket->owner].y>(game->ysize - (game->ysize*0.2)))
-				game->ship[localpacket->owner].y--;
+			game->ship[localpacket->owner].y--;
 		break;
 	default:
 		break;

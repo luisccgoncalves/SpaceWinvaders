@@ -122,11 +122,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//Populate sGTick's pointers
 	//InstantiateGame(&cThread.game);
 
-	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
-	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
-	sGTick.localGameData = &cThread.game.gameData;
-	sGTick.smGameData = &cThread.pSMemGameData;
-
 	//Creates a mapped file
 	if (sharedMemory(&cThread.hSMem, &cThread.SMemSize) == -1) {
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());
@@ -145,6 +140,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Mapping MsgView (%d)\n at Server"), GetLastError());
 		return -1;
 	}
+
+	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
+	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
+	sGTick.localGameData = &cThread.game.gameData;
+	sGTick.smGameData = cThread.pSMemGameData;
 
 	SetEvent(hCanBootNow);							//Warns gateway that Shared memory is mapped
 

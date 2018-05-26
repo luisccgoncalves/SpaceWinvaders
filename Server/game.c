@@ -114,6 +114,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		working on it!
 		*/
 
+		//This needs rethinking, struct sync should be process specific(?)
 		SetEvent(sGTick->hTick);
 		ReleaseMutex(sGTick->mhStructSync);
 	}

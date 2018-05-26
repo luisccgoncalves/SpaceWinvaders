@@ -184,4 +184,11 @@ typedef struct {							//Message to use in pipes
 	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl);							//Maps Msg area - ALL ACCESS
 	DLL_IMP_API int mapGameDataView(SMCtrl *smCtrl, DWORD permission);	//Maps GameData area - READ/WRITE
 
+	/**/
+	DLL_IMP_API HANDLE createGameDataMutex();
+	DLL_IMP_API int createProdConsMutex();
+	DLL_IMP_API int createOccupiedSemaphore();
+	DLL_IMP_API int createVacantSemaphore();
 
+	DLL_IMP_API int readSMMsg();
+	DLL_IMP_API int writeSMMsg();

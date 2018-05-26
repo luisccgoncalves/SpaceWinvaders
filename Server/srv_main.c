@@ -23,6 +23,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	DWORD			tRGMsgID;						//Stores the ID of the Gateway Message thread
 
 	HANDLE			hCanBootNow;					//Handle to event. Warns the gateway the shared memory is mapped
+	
+	HANDLE			GameDataMutex;					//Handle to mutex to control GameData read and write
 
 	SYSTEM_INFO		SysInfo;						//System info structure; Needed to extract dwAllocationGranularity
 	DWORD			dwSysGran;						//Stores system granularity (usually arround 65KB)
@@ -38,6 +40,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
+
+	GameDataMutex = createGameDataMutex();			//Mutex to sync read and write of gameData
+	if (GameDataMutex == NULL) {
+		_tprintf(TEXT("[Error] Mutex GameDataMutex (%d)\n"), GetLastError());
+		return -1;
+	}
 
 	cThread.mhStructSync = CreateMutex(				//Used for game structure integrity
 		NULL,										//Security attributes

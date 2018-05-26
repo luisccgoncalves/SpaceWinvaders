@@ -399,6 +399,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
+	HANDLE			GameDataMutex;					//Handle to mutex to control GameData read and write
+
 	SYSTEM_INFO	SysInfo;
 	DWORD		dwSysGran;
 
@@ -436,6 +438,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 		hCanBootNow = CreateEvent(NULL, FALSE, FALSE, EVE_BOOT);
 		_tprintf(TEXT("Waiting for server to boot.\n"));
 		WaitForSingleObject(hCanBootNow, INFINITE);
+	}
+
+	GameDataMutex = createGameDataMutex();			//Mutex to sync read and write of gameData
+	if (GameDataMutex == NULL) {
+		_tprintf(TEXT("[Error] Mutex GameDataMutex (%d)\n"), GetLastError());
+		return -1;
 	}
 
 	cThread.mhStructSync = OpenMutex(				

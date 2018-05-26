@@ -399,8 +399,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
-	HANDLE			GameDataMutex;					//Handle to mutex to control GameData read and write
-
 	SYSTEM_INFO	SysInfo;
 	DWORD		dwSysGran;
 
@@ -440,8 +438,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(hCanBootNow, INFINITE);
 	}
 
-	GameDataMutex = createGameDataMutex();			//Mutex to sync read and write of gameData
-	if (GameDataMutex == NULL) {
+	cThread.mhGameData = createGameDataMutex();			//Mutex to sync read and write of gameData
+	if (cThread.mhGameData == NULL) {
 		_tprintf(TEXT("[Error] Mutex GameDataMutex (%d)\n"), GetLastError());
 		return -1;
 	}

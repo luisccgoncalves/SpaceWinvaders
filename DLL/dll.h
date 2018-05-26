@@ -144,6 +144,7 @@ typedef struct {
 	SMMessage		*pSMemMessage;			//Pointer to shared memory's structure gateway<>server
 
 	HANDLE			mhStructSync;			//Handle to mutex, grants pSMemGameData integrity
+	HANDLE			mhGameData;				//Handle to mutex to control GameData read and write
 	HANDLE			mhProdConsMut;			//Handle to mutex, grants psMemMsg integrity
 	HANDLE			shVacant;				//Handle to vacants fields semaphor
 	HANDLE			shOccupied;				//Handle to occupied fields semaphor

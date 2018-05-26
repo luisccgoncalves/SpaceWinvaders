@@ -164,7 +164,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	htGReadMsg = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size (0 for default)
-		ReadGatewayMsg,								//Thread function name
+		ShipInstruction,								//Thread function name
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
 		&tRGMsgID);									//gets thread ID to close it afterwards

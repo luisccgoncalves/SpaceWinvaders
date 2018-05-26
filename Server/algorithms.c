@@ -118,5 +118,30 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	return 0;
 }
 
+DWORD WINAPI ShipInstruction(LPVOID tParam) {
+	SMCtrl		*cThread = (SMCtrl*)tParam;
+
+	Packet		localpacket;
+	Ship		localship;
+
+	int	nextOut = 0;
+
+
+	while (cThread->ThreadMustGoOn) {
+
+		//Consume item from buffer
+		localpacket = consumePacket(cThread, &nextOut);  //Problem here: No exit condition
+
+		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+
+		UpdateLocalShip(&cThread->gameData, &localpacket);
+
+		ReleaseMutex(cThread->mhStructSync);
+
+	}
+
+	return 0;
+}
+
 
 

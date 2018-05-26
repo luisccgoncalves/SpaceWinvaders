@@ -148,7 +148,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="algorithms.c" />
-    <ClCompile Include="communication.c" />
     <ClCompile Include="game.c" />
     <ClCompile Include="srv_main.c" />
   </ItemGroup>
@@ -159,7 +158,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algorithms.h" />
-    <ClInclude Include="communication.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="localStructs.h" />
   </ItemGroup>

@@ -416,28 +416,19 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cThread.mhProdConsMut = OpenMutex(
-		MUTEX_ALL_ACCESS,							//Desired access
-		FALSE,										//Inherit handle by child processes
-		MUT_PRODCONS);								//Event name
+	cThread.mhProdConsMut = createProdConsMutex();
 	if (cThread.mhProdConsMut == NULL) {
 		_tprintf(TEXT("[Error] Mutex ProdCons (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	cThread.shVacant = OpenSemaphore(		//It starts with full vacancies
-		SEMAPHORE_ALL_ACCESS,						//Desired access
-		FALSE,										//Inherit handle by child processes
-		SEM_VACANT);								//Semaphore name
+	cThread.shVacant = createVacantSemaphore();
 	if (cThread.shVacant == NULL) {
 		_tprintf(TEXT("[Error] Semaphore vacant (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	cThread.shOccupied = OpenSemaphore(		//It starts without occupation
-		SEMAPHORE_ALL_ACCESS,						//Desired access
-		FALSE,										//Inherit handle by child processes
-		SEM_OCCUPIED);								//Semaphore name
+	cThread.shOccupied = createOccupiedSemaphore();
 	if (cThread.shOccupied == NULL) {
 		_tprintf(TEXT("[Error] Semaphore occupied (%d)\n"), GetLastError());
 		return -1;

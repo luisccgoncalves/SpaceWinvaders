@@ -8,10 +8,7 @@
 #endif
 
 #define SMEM_NAME		TEXT("SWInvadersMem")		//Name of the shared memory
-#define STRUCT_SYNC		TEXT("Structsync")			//Name of the struct sync mutex name
-#define SEM_VACANT		TEXT("VacantFields")
-#define SEM_OCCUPIED	TEXT("OccupiedFields")
-#define	MUT_PRODCONS	TEXT("ProdConsMutex")
+#define STRUCT_SYNC		TEXT("Structsync")			//Name of the struct sync mutex 
 #define	EVE_BOOT		TEXT("LetsBoot")
 #define EVE_1ST_PIPE	TEXT("1stPipeInstance")
 #define	EVE_SERV_UP		TEXT("SMServerUpdate")
@@ -170,9 +167,9 @@ typedef struct {							//Message to use in pipes
 
 	/**/
 	DLL_IMP_API HANDLE createGameDataMutex();
-	DLL_IMP_API int createProdConsMutex();
-	DLL_IMP_API int createOccupiedSemaphore();
-	DLL_IMP_API int createVacantSemaphore();
+	DLL_IMP_API HANDLE createProdConsMutex();
+	DLL_IMP_API HANDLE createOccupiedSemaphore();
+	DLL_IMP_API HANDLE createVacantSemaphore();
 
 	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);
 	DLL_IMP_API int writeSMMsg();

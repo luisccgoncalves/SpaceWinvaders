@@ -54,30 +54,19 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cThread.mhProdConsMut = CreateMutex(			//Producer consumer buffer integrity
-		NULL,										//Security attributes
-		FALSE,										//Initial owner
-		MUT_PRODCONS);								//Mutex name
+	cThread.mhProdConsMut = createProdConsMutex();
 	if (cThread.mhProdConsMut == NULL) {
 		_tprintf(TEXT("[Error] Mutex ProdCons (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	cThread.shVacant = CreateSemaphore(		//It starts with full vacancies
-		NULL,										//Security attributes
-		SMEM_BUFF,									//Initial count
-		SMEM_BUFF,									//Maximum count
-		SEM_VACANT);								//Semaphor name
+	cThread.shVacant = createVacantSemaphore();
 	if (cThread.shVacant == NULL) {
 		_tprintf(TEXT("[Error] Semaphore vacant (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	cThread.shOccupied = CreateSemaphore(	//It starts without occupation
-		NULL,										//Security attributes
-		0,											//Initial count
-		SMEM_BUFF,									//Maximum count
-		SEM_OCCUPIED);								//Semaphor name
+	cThread.shOccupied = createOccupiedSemaphore();
 	if (cThread.shOccupied == NULL) {
 		_tprintf(TEXT("[Error] Semaphore occupied (%d)\n"), GetLastError());
 		return -1;

@@ -36,21 +36,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
-	//#######################################################################################################################
-	//##################################### GRANULARITY TESTS//DELETE THIS ##################################################
-	//#######################################################################################################################
-	_tprintf(TEXT("Sysgran: %d bytes\nSize of servstruct: %d\nSize of gateway: %d\n"), dwSysGran, sizeof(GameData), sizeof(SMMessage));
-	_tprintf(TEXT("ServerView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(GameData), dwSysGran, dwSysGran, dwSysGran, ((sizeof(GameData) / dwSysGran)*dwSysGran) + dwSysGran);
-	_tprintf(TEXT("GatewayView:\t((%d/%d)*%d)+%d=%d\n"), sizeof(SMMessage), dwSysGran, dwSysGran, dwSysGran, ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran);
-	_tprintf(TEXT("TestBigView:\t((%d/%d)*%d)+%d=%d\n"), 66000, dwSysGran, dwSysGran, dwSysGran, ((66000 / dwSysGran)*dwSysGran) + dwSysGran);
-	//#######################################################################################################################
-	//#######################################################################################################################
-	//#######################################################################################################################
-
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
 
-	cThread.mhStructSync = CreateMutex(
+	cThread.mhStructSync = CreateMutex(				//Used for game structure integrity
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		STRUCT_SYNC);								//Mutex name
@@ -59,7 +48,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cThread.mhProdConsMut = CreateMutex(
+	cThread.mhProdConsMut = CreateMutex(			//Producer consumer buffer integrity
 		NULL,										//Security attributes
 		FALSE,										//Initial owner
 		MUT_PRODCONS);								//Mutex name
@@ -109,6 +98,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
+
+	//##############################################################################################################
+	//This does not make sense, only gametick and gateway will use this, no need to be on cThread anymore... I think
 	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
@@ -142,15 +134,14 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
-	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates
-	sGTick.localGameData = &cThread.game.gameData;
-	sGTick.smGameData = cThread.pSMemGameData;
+	sGTick.hTick = cThread.hSMServerUpdate;				//Copies Event to warn gateway of memory updates  
+	sGTick.localGameData = &cThread.game.gameData;		//Copies gameData address to GTick
+	sGTick.smGameData = cThread.pSMemGameData;			//Copies the sharedmemory pointer to GTick
 
-	SetEvent(hCanBootNow);							//Warns gateway that Shared memory is mapped
+	SetEvent(hCanBootNow);								//Warns gateway that Shared memory is mapped
 
 	//Launches game tick thread
 	_tprintf(TEXT("Launching game tick thread...\n"));
-
 	htGTick = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size (0 for default)

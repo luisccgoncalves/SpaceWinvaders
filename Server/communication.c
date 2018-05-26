@@ -38,11 +38,11 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 		//Consume item from buffer
 		consumePacket(tParam, &nextOut, &localpacket);  //Problem here: No exit condition
 
-		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+		WaitForSingleObject(cThread->mhGameData, INFINITE);
 
 		UpdateLocalShip(&cThread->gameData, &localpacket);
 		
-		ReleaseMutex(cThread->mhStructSync);
+		ReleaseMutex(cThread->mhGameData);
 
 	}
 

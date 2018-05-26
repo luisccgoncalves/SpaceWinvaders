@@ -30,20 +30,17 @@
 #define MAX_BOMBS		6							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 
 typedef struct {
-	int		id;				//populated with pid of each client
-	//TCHAR	username[SMALL_BUFF];		//probably needed for remote pipe usage
-	//TCHAR password[SMALL_BUFF];		//unhashed password
-	int		high_score;
-} Player;
 
-typedef struct {
-	int		id;
+	int		id;							//populated with pid of each client
+	TCHAR	username[SMALL_BUFF];		//probably needed for remote pipe usage
+	TCHAR	password[SMALL_BUFF];		//unhashed password
+	int		high_score;
+
 	int		score;
 	int		lives;			//ship is a one shot kill, but has several lives
 	int		x;				//ship x,y position
 	int		y;
-	Player	owner;
-
+	
 	//powerups (only player specific)
 	int		shield;			//If shield is true, lives won't go down.
 	int		drunk;			//If true, controls are inverted.

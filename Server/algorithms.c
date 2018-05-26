@@ -31,8 +31,6 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
-	SMCtrl *cT = (SMCtrl*)tParam;
-
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	Game *baseGame = &((SMCtrl *)tParam)->game;
 	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
@@ -60,8 +58,6 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					baseGame->gameData.invad[j].x--;													//Invader goes left
 			}
 
-			//CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
-
 			ReleaseMutex(mhStructSync);
 
 			Sleep(baseGame->invaders_speed*(*ThreadMustGoOn));
@@ -72,9 +68,6 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 }
 
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
-
-	SMCtrl *cT = (SMCtrl*)tParam;
-	
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
@@ -119,8 +112,6 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				break;
 			}
 		}
-		//CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
-
 		ReleaseMutex(mhStructSync);
 		Sleep((baseGame->invaders_speed / 4)*(*ThreadMustGoOn));
 	}

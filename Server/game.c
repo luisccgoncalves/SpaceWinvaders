@@ -130,6 +130,10 @@ int UpdateLocalShip(GameData *game, Packet *localpacket) {
 	/*
 	this is recieving a value from 0 to 3
 	maybe this is not the final values
+	...
+	[IMPORTANT] Consider that we don't know if localpacket->owner
+	correspond to the correct array index.
+
 	*/
 
 	switch (localpacket->instruction) {

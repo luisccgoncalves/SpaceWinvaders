@@ -48,11 +48,3 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 
 	return 0;
 }
-
-DWORD WINAPI WriteGatewayMsg(LPVOID tParam) {
-	/*
-	Here we will recieve either a copy
-	either a pointer to a Game or GameData
-	object to send it!
-	*/
-}

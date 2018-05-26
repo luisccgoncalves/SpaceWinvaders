@@ -95,41 +95,25 @@ typedef struct {							//Game data to use in pipes
 
 	int xsize;								//max y size of play area
 	int ysize;								//max x size of play area
-} GameData;
 
-typedef struct {							//Message to use in the game data view
-
-	//invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
-	//invaderbomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
-	//ship			ship[MAX_PLAYERS];			//number of ships/players in game
-	//ship_shot		shot[25];					//temporary number of shots
-	//powerup			pUp;					//One powerUp only at any given time
-
-	//int xsize;								//max y size of play area
-	//int ysize;								//max x size of play area
-
-	GameData gameData;						//Game data message to use in SM & Pipes
+	/*This are needed on server only*/
 	int invaders_speed;						//invaders speed
+	int ship_speed;							//ship speed
+
+	int projectiles_speed;					//bombs, shots and powerUps base speed
+
+	/*Eventualy find a way to use them from projectiles speed*/
 	int invaders_bombs_speed;
 	int ship_shot_speed;					//defenders shot speed
-	int power_up_speed;						
-	
+	int power_up_speed;
+	/**/
+
 	int num_players;						//number of players per game
-	int max_invaders;
-	int max_rand_invaders;
-	int max_bombs;
+	int max_invaders;						//total of invaders
+	int max_rand_invaders;					//number of rand invaders
+	int max_bombs;							//max boms on game (%invaders?)
 
-	/*
-	Does this makes sense? 
-	if you need to calculate something
-	considering data from level above...
-
-	careful implementing!	
-	*/
-
-
-}Game;
-
+} GameData;
 
 typedef struct {
 	//int		msgID;						//probably unnecessary - event driven approach	
@@ -165,7 +149,7 @@ typedef struct {
 	HANDLE			shOccupied;				//Handle to occupied fields semaphor
 
 	int				ThreadMustGoOn;			//Flag for thread shutdown
-	Game			game;					//structure that holds the local game
+	GameData		gameData;					//structure that holds the local game
 } SMCtrl;
 
 typedef struct {							//Message to use in pipes

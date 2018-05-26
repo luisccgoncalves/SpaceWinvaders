@@ -5,7 +5,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
 	
-	Game *baseGame = &((SMCtrl *)tParam)->game;
+	GameData *baseGame = &((SMCtrl *)tParam)->gameData;
 	InstantiateGame(baseGame);
 
 	/*
@@ -26,41 +26,41 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	//Defines invader path
 	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
 		if (i < (baseGame->max_invaders - baseGame->max_rand_invaders))
-			baseGame->gameData.invad[i].rand_path = 0;
+			baseGame->invad[i].rand_path = 0;
 		else
-			baseGame->gameData.invad[i].rand_path = 1;
+			baseGame->invad[i].rand_path = 1;
 	}
 
 	//Populates invaders with coords
 	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 
-		if (!(baseGame->gameData.invad[i].rand_path)) {			//If regular path
+		if (!(baseGame->invad[i].rand_path)) {			//If regular path
 
 													//deploys INVADER_BY_ROW invaders per line with a spacing of 2
-			baseGame->gameData.invad[i].x = baseGame->gameData.invad[i].x_init = (i % INVADER_BY_ROW) * 2;
+			baseGame->invad[i].x = baseGame->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
 
 			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
-			baseGame->gameData.invad[i].y = baseGame->gameData.invad[i].y_init = i / INVADER_BY_ROW;
+			baseGame->invad[i].y = baseGame->invad[i].y_init = i / INVADER_BY_ROW;
 		}
 		else {
-			baseGame->gameData.invad[i].x = baseGame->gameData.invad[i].x_init = rand() % baseGame->gameData.xsize;
-			baseGame->gameData.invad[i].y = baseGame->gameData.invad[i].y_init = rand() % baseGame->gameData.ysize;
+			baseGame->invad[i].x = baseGame->invad[i].x_init = rand() % baseGame->xsize;
+			baseGame->invad[i].y = baseGame->invad[i].y_init = rand() % baseGame->ysize;
 		}
 	}
 
 	//Populates invaders with HP
 	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
-		baseGame->gameData.invad[i].hp = 1;
+		baseGame->invad[i].hp = 1;
 	}
 
 	//Kills a random invader ##### For testing purposes #####
-	baseGame->gameData.invad[rand() % 55].hp = 0;
+	baseGame->invad[rand() % 55].hp = 0;
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < baseGame->num_players; i++) {
 
-		baseGame->gameData.ship[i].x = 15;
-		baseGame->gameData.ship[i].y = 23;
+		baseGame->ship[i].x = 15;
+		baseGame->ship[i].y = 23;
 	}
 
 	htRegPathInvader = CreateThread(
@@ -159,7 +159,7 @@ int UpdateLocalShip(GameData *game, Packet *localpacket) {
 	return 0;
 }
 
-int InstantiateGame(Game *game) {
+int InstantiateGame(GameData *game) {
 
 	/*
 	this is for filling the game, 
@@ -168,8 +168,8 @@ int InstantiateGame(Game *game) {
 	another function?
 	*/
 
-	game->gameData.xsize = XSIZE;
-	game->gameData.ysize = YSIZE;
+	game->xsize = XSIZE;
+	game->ysize = YSIZE;
 
 	game->invaders_bombs_speed =	INVADER_SPEED;		// not correct
 	game->invaders_speed =			INVADER_SPEED;		// Base speed for invader

@@ -1,28 +1,28 @@
 #include "communication.h"
 
-void consumePacket(SMCtrl *tParam, int *nextOut, Packet *localpacket) {
-
-	SMCtrl		*cThread = (SMCtrl*)tParam;
-
-	//wait occupied semaphore
-	WaitForSingleObject(cThread->shOccupied, INFINITE);
-
-	//wait mutex
-	WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
-
-	//copy buffer[nextout] to local
-	//CopyMemory(localpacket, &cThread->pSMemMessage->buffer[*nextOut], sizeof(localpacket));
-	*localpacket = cThread->pSMemMessage->buffer[*nextOut];
-
-	//nextout++
-	*nextOut = (*nextOut + 1) % SMEM_BUFF;
-
-	//release mutex
-	ReleaseMutex(cThread->mhProdConsMut);
-
-	//release semaphore vacant	
-	ReleaseSemaphore(cThread->shVacant, 1, NULL);
-}
+//void consumePacket(SMCtrl *tParam, int *nextOut, Packet *localpacket) {
+//
+//	SMCtrl		*cThread = (SMCtrl*)tParam;
+//
+//	//wait occupied semaphore
+//	WaitForSingleObject(cThread->shOccupied, INFINITE);
+//
+//	//wait mutex
+//	WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
+//
+//	//copy buffer[nextout] to local
+//	//CopyMemory(localpacket, &cThread->pSMemMessage->buffer[*nextOut], sizeof(localpacket));
+//	*localpacket = cThread->pSMemMessage->buffer[*nextOut];
+//
+//	//nextout++
+//	*nextOut = (*nextOut + 1) % SMEM_BUFF;
+//
+//	//release mutex
+//	ReleaseMutex(cThread->mhProdConsMut);
+//
+//	//release semaphore vacant	
+//	ReleaseSemaphore(cThread->shVacant, 1, NULL);
+//}
 
 DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	SMCtrl		*cThread = (SMCtrl*)tParam;
@@ -36,15 +36,23 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 	while (cThread->ThreadMustGoOn) {
 
 		//Consume item from buffer
-		consumePacket(tParam, &nextOut, &localpacket);  //Problem here: No exit condition
+		localpacket = consumePacket(cThread, &nextOut);  //Problem here: No exit condition
 
-		WaitForSingleObject(cThread->mhGameData, INFINITE);
+		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
 		UpdateLocalShip(&cThread->gameData, &localpacket);
 		
-		ReleaseMutex(cThread->mhGameData);
+		ReleaseMutex(cThread->mhStructSync);
 
 	}
 
 	return 0;
+}
+
+DWORD WINAPI WriteGatewayMsg(LPVOID tParam) {
+	/*
+	Here we will recieve either a copy
+	either a pointer to a Game or GameData
+	object to send it!
+	*/
 }

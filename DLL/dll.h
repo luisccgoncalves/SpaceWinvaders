@@ -150,7 +150,9 @@ typedef struct {
 	HANDLE			shOccupied;				//Handle to occupied fields semaphor
 
 	int				ThreadMustGoOn;			//Flag for thread shutdown
-	GameData		gameData;					//structure that holds the local game
+
+	GameData		gameData;				//structure that holds the local game
+	SMMessage		msg;					//structure that holds the local msg
 } SMCtrl;
 
 typedef struct {							//Message to use in pipes
@@ -172,5 +174,5 @@ typedef struct {							//Message to use in pipes
 	DLL_IMP_API int createOccupiedSemaphore();
 	DLL_IMP_API int createVacantSemaphore();
 
-	DLL_IMP_API int readSMMsg();
+	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);
 	DLL_IMP_API int writeSMMsg();

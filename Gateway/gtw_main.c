@@ -6,6 +6,17 @@
 #include "../DLL/dll.h"
 #include "../Client/debug.h"
 
+
+typedef struct {
+	
+	HANDLE		hPipe;
+	int			*ThreadMustGoOn;
+
+	HANDLE		*hSMServerUpdate;
+	GameData	*gameData;
+
+}PipeInst;
+
 //#########################################################################################
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
@@ -97,8 +108,6 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 		ResetEvent(writeReady);
 		overlWrite.hEvent = writeReady;
 
-		_tprintf(TEXT("[DEBUG] Inside writePipeMsg \n"));
-
 		fSuccess = WriteFile(
 			hPipe,
 			&msg,
@@ -108,11 +117,10 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 		if (!fSuccess) {
 			if (GetLastError() == ERROR_IO_INCOMPLETE)
 				return;
-			_tprintf(TEXT("[DEBUG] Inside writePipeMsg ERROR_IO_INCOMPLETE... WHY?!?!? \n"));
 		}
-		_tprintf(TEXT("[DEBUG] Inside writePipeMsg before WaitForSingleObject \n"));
+
 		WaitForSingleObject(writeReady, INFINITE);
-		_tprintf(TEXT("[DEBUG] Inside writePipeMsg after WaitForSingleObject \n"));
+
 		GetOverlappedResult(
 			hPipe,
 			&overlWrite,
@@ -121,11 +129,8 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 		if (cbWriten < sizeof(msg)) {
 			_tprintf(TEXT("[Error] OVERLAPPED writePipeMsgs (%d)\n"), GetLastError());
 			return 1;
+		}
 
-		}
-		else {
-			_tprintf(TEXT("[DEBUG] Inside writePipeMsg cbWriten was OK \n"));
-		}
 		return 0;
 }
 
@@ -139,12 +144,12 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 
 DWORD WINAPI instanceThread(LPVOID tParam) {
 	
-	HANDLE		hPipe = (HANDLE)tParam;
+	PipeInst	pipeStruct = *(PipeInst*)tParam;
 	HANDLE		heWriteReady;
 	BOOL		fSuccess = FALSE;
 	GameData	clientMsg;
 
-	if (hPipe == NULL) {
+	if (pipeStruct.hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
@@ -158,51 +163,20 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
 		return -1;
 	}
+	while (pipeStruct.ThreadMustGoOn) {
 
+		WaitForSingleObject(pipeStruct.hSMServerUpdate,INFINITE);
+		writePipeMsg(pipeStruct.hPipe, heWriteReady, *pipeStruct.gameData);
 
-
-	//###################################### DEBUG STUFF #################################################
-	srand((unsigned)time(NULL));					//Seeds the RNG
-
-													//Defines invader path
-	for (int i = 0; (i < MAX_INVADER); i++) {
-		if (i < (MAX_INVADER - 2))
-			clientMsg.invad[i].rand_path = 0;
-		else
-			clientMsg.invad[i].rand_path = 1;
 	}
-
-	for (int i = 0; (i < MAX_INVADER); i++) {
-
-		if (!(clientMsg.invad[i].rand_path)) {			//If regular path
-
-													//deploys INVADER_BY_ROW invaders per line with a spacing of 2
-			clientMsg.invad[i].x = clientMsg.invad[i].x_init = (i % 11) * 2;
-
-			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
-			clientMsg.invad[i].y = clientMsg.invad[i].y_init = i / 11;
-		}
-		else {
-			clientMsg.invad[i].x = clientMsg.invad[i].x_init = rand() % XSIZE;
-			clientMsg.invad[i].y = clientMsg.invad[i].y_init = rand() % YSIZE;
-		}
-	}
-	_tprintf(TEXT("\nSending a message!\n = %d"), clientMsg.invad[0].x);
-	//####################################################################################################
-
-	_tprintf(TEXT("Sending...\n"));
-
-	//get gamedata
-
-	writePipeMsg(hPipe, heWriteReady, clientMsg);
-
+	
 	_tprintf(TEXT("Sent...\n"));
 	return 0;
 }
 
 DWORD WINAPI CreatePipes(LPVOID tParam) {
 
-	int			*ThreadMustGoOn = (int*)tParam;
+	SMCtrl		*cThread= (SMCtrl*)tParam;
 	LPTSTR		lpsPipeName = PIPE_NAME;
 	HANDLE		clients[MAX_PLAYERS] = {0};
 	HANDLE		h1stPipeInst;
@@ -214,6 +188,12 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 	DWORD		dwPipeThreadId;
 	int			threadn = 0;
 
+	PipeInst	pipeStruct;
+
+	pipeStruct.ThreadMustGoOn = cThread->ThreadMustGoOn;
+	pipeStruct.gameData = &cThread->gameData;
+	pipeStruct.hSMServerUpdate = cThread->hSMServerUpdate;
+
 	h1stPipeInst = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
 		NULL,										//Event attributes
 		TRUE,										//Manual reset (TRUE for auto-reset)
@@ -224,7 +204,7 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 		return -1;
 	}
 
-	while (*ThreadMustGoOn) {
+	while (cThread->ThreadMustGoOn) {
 	
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
@@ -260,11 +240,13 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 			_tprintf(TEXT("Someone connected!\n"));
 
+			pipeStruct.hPipe = hPipe;
+
 			htPipeConnect[threadn] = CreateThread(
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThread,							//Thread function name
-				(LPVOID)hPipe,							//Thread parameter struct
+				(LPVOID)&pipeStruct,						//Thread parameter struct
 				0,										//Creation flags
 				&dwPipeThreadId);						//gets thread ID to close it afterwards
 			if (htPipeConnect[threadn] == NULL) {
@@ -334,9 +316,9 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
-	GameData	*gameMsg;
-
-	gameMsg = malloc(sizeof(GameData));
+	
+	//GameData	*gameMsg;
+	//gameMsg = malloc(sizeof(GameData));
 
 	int i;
 
@@ -348,16 +330,17 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
-		gameMsg = cThread->pSMemGameData;
-		//CopyMemory(gameMsg, cThread->pSMemGameData, sizeof(GameData));
+		//gameMsg = cThread->pSMemGameData;
+		//Copies shared memory to a local data structure
+		cThread->gameData = *cThread->pSMemGameData;
 		
 		ReleaseMutex(cThread->mhStructSync);
 
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
-			if (gameMsg->invad[i].hp) {
-				gotoxy(gameMsg->invad[i].x, gameMsg->invad[i].y);
-				if (gameMsg->invad[i].rand_path)
+			if (cThread->gameData.invad[i].x) {
+				gotoxy(cThread->gameData.invad[i].x, cThread->gameData.invad[i].y);
+				if (cThread->gameData.invad[i].rand_path)
 					_tprintf(TEXT("X"));
 				else
 					_tprintf(TEXT("W"));
@@ -365,12 +348,12 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 		}
 
 		if (cThread->pSMemGameData->bomb[0].y < 25) { //this needs another aproach (fired state?)
-			gotoxy(gameMsg->bomb[0].x, gameMsg->bomb[0].y);
+			gotoxy(cThread->gameData.bomb[0].x, cThread->gameData.bomb[0].y);
 			_tprintf(TEXT("o"));
 		}
 
 		for (i = 0; i < MAX_PLAYERS; i++) {
-			gotoxy(gameMsg->ship[i].x, gameMsg->ship[i].y);
+			gotoxy(cThread->gameData.ship[i].x, cThread->gameData.ship[i].y);
 			_tprintf(TEXT("Â"));
 		}
 	}
@@ -410,26 +393,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.SMemSize.QuadPart			= cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
 	cThread.ThreadMustGoOn = 1;
-
-	//###############################################################################################################
-	//################################## WE SOULD MOVE THIS FURTHER DOWN... EVENTUALLY ##############################
-	//###############################################################################################################
-
-	htCreatePipes = CreateThread(
-		NULL,							//Thread security attributes
-		0,								//Stack size
-		CreatePipes,					//Thread function name
-		(LPVOID)&cThread.ThreadMustGoOn,//Thread parameter struct
-		0,								//Creation flags
-		&tCreatePipesID);				//gets thread ID to close it afterwards
-	if (htCreatePipes == NULL) {
-		_tprintf(TEXT("[Error] Creating thread CreatePipes (%d) at Gateway\n"), GetLastError());
-	}
-
-	//cThread.ThreadMustGoOn = 0;
-	//WaitForSingleObject(htCreatePipes, INFINITE); //COMMENT HERE TO TEST GAME
-
-	//###############################################################################################################
 
 	hCanBootNow = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_BOOT);
 	if (!hCanBootNow) {
@@ -516,6 +479,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
+	htCreatePipes = CreateThread(
+		NULL,							//Thread security attributes
+		0,								//Stack size
+		CreatePipes,					//Thread function name
+		(LPVOID)&cThread,				//Thread parameter struct
+		0,								//Creation flags
+		&tCreatePipesID);				//gets thread ID to close it afterwards
+	if (htCreatePipes == NULL) {
+		_tprintf(TEXT("[Error] Creating thread CreatePipes (%d) at Gateway\n"), GetLastError());
+	}
 
 	htSReadMsg = CreateThread(
 		NULL,					//Thread security attributes
@@ -539,8 +512,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Creating thread SendMessage (%d) at Gateway\n"), GetLastError());
 	}
 
+	//cThread.ThreadMustGoOn = 0;
+
 	WaitForSingleObject(htSReadMsg, INFINITE);
 	WaitForSingleObject(hSSendMessage, INFINITE);
+	WaitForSingleObject(htCreatePipes, INFINITE);
 
 	UnmapViewOfFile(cThread.pSMemGameData);		//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.pSMemMessage);		//Unmaps view of shared memory

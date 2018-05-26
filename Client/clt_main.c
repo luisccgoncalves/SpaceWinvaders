@@ -125,13 +125,11 @@ void printGame(GameData msg) {
 			else
 				_tprintf(TEXT("W"));
 		}
-		Sleep(100);
 	}
 
 	if (msg.bomb[0].y < 25) { //this needs another aproach (fired state?)
 		gotoxy(msg.bomb[0].x, msg.bomb[0].y);
 		_tprintf(TEXT("o"));
-		Sleep(2000);
 	}
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
@@ -175,8 +173,6 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
 	}
 
-	
-	_tprintf(TEXT("\nGot a message!\n = %d"), msg.invad[0].x);
 	printGame(msg);
 
 	return 0;
@@ -202,8 +198,6 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 		return -1;
 	}
 
-	_tprintf(TEXT("Listening...\n"));
-
 	while (cThreadRdGame->ThreadMustGoOn) {
 
 		readPipeMsg(cThreadRdGame->hPipe, heReadReady);
@@ -219,6 +213,11 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 }
 
 int _tmain(int argc, LPTSTR argv[]) {
+
+#ifdef UNICODE
+	_setmode(_fileno(stdin), _O_WTEXT);
+	_setmode(_fileno(stdout), _O_WTEXT);
+#endif
 
 	HANDLE		h1stPipeInst;
 	HANDLE		hPipe;						//Pipe handle

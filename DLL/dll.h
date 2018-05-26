@@ -150,7 +150,7 @@ typedef struct {
 	HANDLE			shOccupied;				//Handle to occupied fields semaphor
 
 	int				ThreadMustGoOn;			//Flag for thread shutdown
-	GameData		gameData;					//structure that holds the local game
+	GameData		gameData;				//structure that holds the local game
 } SMCtrl;
 
 typedef struct {							//Message to use in pipes

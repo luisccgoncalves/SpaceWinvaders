@@ -120,7 +120,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Populate sGTick's pointers
-	InstantiateGame(&cThread.game);
+	//InstantiateGame(&cThread.game);
 
 	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread.hSMServerUpdate;			//Copies Event to warn gateway of memory updates

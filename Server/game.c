@@ -6,7 +6,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
 	
 	Game *baseGame = &((SMCtrl *)tParam)->game;
-	//InstantiateGame(baseGame);
+	InstantiateGame(baseGame);
 
 	/*
 	HERE we will need to CREATE a game and instantiate a lvl ands stuffs
@@ -23,7 +23,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	srand((unsigned)time(NULL));					//Seeds the RNG
 
-													//Defines invader path
+	//Defines invader path
 	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
 		if (i < (baseGame->max_invaders - baseGame->max_rand_invaders))
 			baseGame->gameData.invad[i].rand_path = 0;
@@ -98,7 +98,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;
-	GameData *local = sGTick->localGameData;
+	//GameData *local = sGTick->localGameData;
 
 	while (sGTick->ThreadMustGoOn) {
 
@@ -106,14 +106,15 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		_tprintf(TEXT("."));
 		WaitForSingleObject(sGTick->mhStructSync, INFINITE);
 
-		CopyMemory(sGTick->smGameData, local, sizeof(GameData));
+		CopyMemory(sGTick->smGameData, sGTick->localGameData, sizeof(GameData));
+		
 		/*
 		Here we will write to the SharedMemory
 		...
 		working on it!
 		*/
-		SetEvent(sGTick->hTick);
 
+		SetEvent(sGTick->hTick);
 		ReleaseMutex(sGTick->mhStructSync);
 	}
 
@@ -132,21 +133,21 @@ int UpdateLocalShip(GameData *game, Packet *localpacket) {
 
 	switch (localpacket->instruction) {
 	case 0:
-		if (game->ship->x<(game->xsize - 1))
-			game->ship->x++;
+		if (game->ship[localpacket->owner].x<(game->xsize - 1))
+			game->ship[localpacket->owner].x++;
 		break;
 	case 1:
-		if (game->ship->y<(game->ysize - 1))
-			game->ship->y++;
+		if (game->ship[localpacket->owner].y<(game->ysize - 1))
+			game->ship[localpacket->owner].y++;
 		break;
 	case 2:
-		if (game->ship->x>0)
-			game->ship->x--;
+		if (game->ship[localpacket->owner].x>0)
+			game->ship[localpacket->owner].x--;
 		break;
 	case 3:
-		if (game->ship->y>(game->ysize - (game->ysize*0.2)))
-			if (game->ship->y>(game->ysize - (game->ysize*0.2)))
-				game->ship->y--;
+		if (game->ship[localpacket->owner].y>(game->ysize - (game->ysize*0.2)))
+			if (game->ship[localpacket->owner].y>(game->ysize - (game->ysize*0.2)))
+				game->ship[localpacket->owner].y--;
 		break;
 	default:
 		break;

@@ -12,7 +12,7 @@ void consumePacket(SMCtrl *tParam, int *nextOut, Packet *localpacket) {
 
 	//copy buffer[nextout] to local
 	//CopyMemory(localpacket, &cThread->pSMemMessage->buffer[*nextOut], sizeof(localpacket));
-	*localpacket = cThread->pSMemMessage->buffer[*nextOut];
+	localpacket = &cThread->pSMemMessage->buffer[*nextOut];
 
 	//nextout++
 	*nextOut = (*nextOut + 1) % SMEM_BUFF;
@@ -44,7 +44,7 @@ DWORD WINAPI ReadGatewayMsg(LPVOID tParam) {
 		//UpdateLocalShip(cThread->pSMemGameData, &localpacket);
 		UpdateLocalShip(&cThread->game.gameData, &localpacket);
 
-		CopyMemory(cThread->pSMemGameData, &cThread->game.gameData, sizeof(GameData));
+		//CopyMemory(cThread->pSMemGameData, &cThread->game.gameData, sizeof(GameData));
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 		ReleaseMutex(cThread->mhStructSync);

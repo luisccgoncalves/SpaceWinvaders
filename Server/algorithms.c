@@ -60,7 +60,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					baseGame->gameData.invad[j].x--;													//Invader goes left
 			}
 
-			CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
+			//CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
 
 			ReleaseMutex(mhStructSync);
 
@@ -119,7 +119,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				break;
 			}
 		}
-		CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
+		//CopyMemory(cT->pSMemGameData, &baseGame->gameData, sizeof(GameData));
 
 		ReleaseMutex(mhStructSync);
 		Sleep((baseGame->invaders_speed / 4)*(*ThreadMustGoOn));

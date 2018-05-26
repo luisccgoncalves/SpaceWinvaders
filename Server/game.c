@@ -6,7 +6,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
 	
 	Game *baseGame = &((SMCtrl *)tParam)->game;
-	InstantiateGame(baseGame);
+	//InstantiateGame(baseGame);
 
 	/*
 	HERE we will need to CREATE a game and instantiate a lvl ands stuffs
@@ -98,13 +98,15 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;
-	
+	GameData *local = sGTick->localGameData;
 
 	while (sGTick->ThreadMustGoOn) {
 
 		Sleep(100);
 		_tprintf(TEXT("."));
 		WaitForSingleObject(sGTick->mhStructSync, INFINITE);
+
+		CopyMemory(sGTick->smGameData, local, sizeof(GameData));
 		/*
 		Here we will write to the SharedMemory
 		...

@@ -191,8 +191,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htGame, INFINITE);			//Waits for thread to exit
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
-	SetEvent(cThread.hSMGatewayUpdate);				//Sets event to own process, this will iterate
-													//the thread main loop to check ThreadMustGoOn == 0
+	SetEvent(cThread.hSMGatewayUpdate);				//This isn't used anymore ##############################
+	//needs to interrupt prodcons algorithm
 	WaitForSingleObject(htGReadMsg, INFINITE);		//Waits for thread to exit
 
 

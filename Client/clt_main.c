@@ -127,9 +127,11 @@ void printGame(GameData msg) {
 		}
 	}
 
-	if (msg.bomb[0].y < 25) { //this needs another aproach (fired state?)
-		gotoxy(msg.bomb[0].x, msg.bomb[0].y);
-		_tprintf(TEXT("o"));
+	for (i = 0; i < MAX_BOMBS; i++) {
+		if (msg.bomb[i].fired) { 
+			gotoxy(msg.bomb[i].x, msg.bomb[i].y);
+			_tprintf(TEXT("o"));
+		}
 	}
 
 	for (i = 0; i < MAX_PLAYERS; i++) {

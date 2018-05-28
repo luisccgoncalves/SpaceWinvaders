@@ -6,22 +6,42 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 
 	int invPosition = -1;
+	int bombNum = -1;
+
+	for (int i = 0; i < baseGame->max_bombs; i++) {
+		if (!baseGame->bomb[i].fired) {
+		bombNum = i;
+			break;
+		}
+		//if (baseGame->bomb[i].y >= baseGame->ysize) {
+		//	bombNum = i;
+		//	break;
+		//}
+	}
 
 	do {
 		invPosition = rand() % baseGame->max_invaders + 1;
 	} while (baseGame->invad[invPosition].hp == 0);
 
-	baseGame->bomb[0].x = baseGame->invad[invPosition].x;
-	baseGame->bomb[0].y = baseGame->invad[invPosition].y;
+	if (bombNum > -1) {
 
-	while (*ThreadMustGoOn && baseGame->bomb[invPosition].y < baseGame->ysize/*&&bombColDetect(&bomb,tParam)*/) {
-		baseGame->bomb[0].y++;
+		baseGame->bomb[bombNum].x = baseGame->invad[invPosition].x;
+		baseGame->bomb[bombNum].y = baseGame->invad[invPosition].y;
+		baseGame->bomb[bombNum].fired = 1;
 
-		Sleep((baseGame->invaders_bombs_speed) * (*ThreadMustGoOn));
+		while (*ThreadMustGoOn && baseGame->bomb[bombNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
+			if (baseGame->bomb[bombNum].y < baseGame->ysize) {
+				baseGame->bomb[bombNum].y++;
+
+				Sleep(((baseGame->invaders_bombs_speed)/3) * (*ThreadMustGoOn));
+			}
+			else {
+				baseGame->bomb[bombNum].x = baseGame->xsize + 1;
+				baseGame->bomb[bombNum].y = baseGame->ysize + 1;
+				baseGame->bomb[bombNum].fired = 0;
+			}
+		}
 	}
-
-
-	return 0;
 	/*
 
 	This needs to be a diferent thread. 
@@ -35,31 +55,46 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 DWORD WINAPI BombMovement(LPVOID tParam) {
 
-	/*
-	Missing:
-	bomb[0] - need this zero to be a variable
-	so either i run a cicle here
-	or a send it as an argument
-	*/
-
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 
 	int invPosition = -1;
+	int bombNum = -1;
+
+	for (int i = 0; i < baseGame->max_bombs; i++) {
+		//if (!baseGame->bomb[i].fired) {
+		//bombNum = i;
+		//	break;
+		//}
+		if (baseGame->bomb[i].y >= baseGame->ysize) {
+			bombNum = i;
+			break;
+		}
+	}
 
 	do {
 		invPosition = rand() % baseGame->max_invaders + 1;
-	} while (baseGame->invad[invPosition].hp==0);
+	} while (baseGame->invad[invPosition].hp == 0);
 
-	baseGame->bomb[0].x = baseGame->invad[invPosition].x;
-	baseGame->bomb[0].y = baseGame->invad[invPosition].y;
+	if (bombNum > -1) {
 
-	while (*ThreadMustGoOn && baseGame->bomb[invPosition].y < baseGame->ysize/*&&bombColDetect(&bomb,tParam)*/) {
-		baseGame->bomb[0].y++;
+		baseGame->bomb[bombNum].x = baseGame->invad[invPosition].x;
+		baseGame->bomb[bombNum].y = baseGame->invad[invPosition].y;
+		baseGame->bomb[bombNum].fired = 1;
 
-		Sleep((baseGame->invaders_bombs_speed) * (*ThreadMustGoOn));
+		while (*ThreadMustGoOn && baseGame->bomb[bombNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
+			if (baseGame->bomb[bombNum].y < baseGame->ysize) {
+				baseGame->bomb[bombNum].y++;
+
+				Sleep(((baseGame->invaders_bombs_speed) / 3) * (*ThreadMustGoOn));
+			}
+			else {
+				baseGame->bomb[bombNum].x = baseGame->xsize + 1;
+				baseGame->bomb[bombNum].y = baseGame->ysize + 1;
+				baseGame->bomb[bombNum].fired = 0;
+			}
+		}
 	}
-
 }
 
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {

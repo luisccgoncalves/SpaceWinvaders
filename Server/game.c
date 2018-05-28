@@ -175,5 +175,11 @@ int InstantiateGame(GameData *game) {
 	game->power_up_speed =			INVADER_SPEED;		// Base speed for power up
 	game->ship_shot_speed =			INVADER_SPEED;		// Base speed for defender ship
 
+	for (int i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status
+		game->bomb[i].x = game->xsize + 1;
+		game->bomb[i].y = game->ysize + 1;
+		game->bomb[i].fired = 0;
+	}
+
 	return 0;
 }

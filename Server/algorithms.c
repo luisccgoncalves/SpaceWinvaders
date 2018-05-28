@@ -4,18 +4,22 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
-	/*GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;*/
 
-	/* generate random number between 1 and 50: */
-	int random = rand() % 50 + 1;
+	int invPosition = -1;
 
-	baseGame->bomb[0].x = baseGame->invad[random].x;
-	baseGame->bomb[0].y = baseGame->invad[random].y;
-	while (*ThreadMustGoOn && baseGame->bomb[0].y <25/*&&bombColDetect(&bomb,tParam)*/) {
+	do {
+		invPosition = rand() % baseGame->max_invaders + 1;
+	} while (baseGame->invad[invPosition].hp == 0);
+
+	baseGame->bomb[0].x = baseGame->invad[invPosition].x;
+	baseGame->bomb[0].y = baseGame->invad[invPosition].y;
+
+	while (*ThreadMustGoOn && baseGame->bomb[invPosition].y < baseGame->ysize/*&&bombColDetect(&bomb,tParam)*/) {
 		baseGame->bomb[0].y++;
-		/*Sleep(lvl->bomb[0].speed * (*ThreadMustGoOn));*/
-		Sleep(250 * (*ThreadMustGoOn));
+
+		Sleep((baseGame->invaders_bombs_speed) * (*ThreadMustGoOn));
 	}
+
 
 	return 0;
 	/*
@@ -27,6 +31,35 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 	Tther starts the trajectory of a bomb untill desapearing or collision
 
 	*/
+}
+
+DWORD WINAPI BombMovement(LPVOID tParam) {
+
+	/*
+	Missing:
+	bomb[0] - need this zero to be a variable
+	so either i run a cicle here
+	or a send it as an argument
+	*/
+
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+
+	int invPosition = -1;
+
+	do {
+		invPosition = rand() % baseGame->max_invaders + 1;
+	} while (baseGame->invad[invPosition].hp==0);
+
+	baseGame->bomb[0].x = baseGame->invad[invPosition].x;
+	baseGame->bomb[0].y = baseGame->invad[invPosition].y;
+
+	while (*ThreadMustGoOn && baseGame->bomb[invPosition].y < baseGame->ysize/*&&bombColDetect(&bomb,tParam)*/) {
+		baseGame->bomb[0].y++;
+
+		Sleep((baseGame->invaders_bombs_speed) * (*ThreadMustGoOn));
+	}
+
 }
 
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {

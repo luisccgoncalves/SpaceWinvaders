@@ -13,7 +13,7 @@ typedef struct {
 	int			*ThreadMustGoOn;
 
 	HANDLE		*hSMServerUpdate;
-	GameData	*gameData;
+	GameData	*localGameData;
 
 }PipeInst;
 
@@ -166,7 +166,7 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 	while (pipeStruct.ThreadMustGoOn) {
 
 		WaitForSingleObject(pipeStruct.hSMServerUpdate,INFINITE);
-		writePipeMsg(pipeStruct.hPipe, heWriteReady, *pipeStruct.gameData);
+		writePipeMsg(pipeStruct.hPipe, heWriteReady, *pipeStruct.localGameData);
 
 	}
 	
@@ -191,7 +191,7 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 	PipeInst	pipeStruct;
 
 	pipeStruct.ThreadMustGoOn = cThread->ThreadMustGoOn;
-	pipeStruct.gameData = &cThread->gameData;
+	pipeStruct.localGameData = &cThread->localGameData;
 	pipeStruct.hSMServerUpdate = cThread->hSMServerUpdate;
 
 	h1stPipeInst = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
@@ -327,21 +327,21 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 
 
-		cThread->gameData = consumeGameData(cThread->pSMemGameData, cThread->mhGameData);
+		cThread->localGameData = consumeGameData(cThread->pSMemGameData, cThread->mhGameData);
 
 		//WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
 		////gameMsg = cThread->pSMemGameData;
 		////Copies shared memory to a local data structure
-		//cThread->gameData = *cThread->pSMemGameData;
+		//cThread->localGameData = *cThread->pSMemGameData;
 		//
 		//ReleaseMutex(cThread->mhStructSync);
 
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
-			if (cThread->gameData.invad[i].x) {
-				gotoxy(cThread->gameData.invad[i].x, cThread->gameData.invad[i].y);
-				if (cThread->gameData.invad[i].rand_path)
+			if (cThread->localGameData.invad[i].x) {
+				gotoxy(cThread->localGameData.invad[i].x, cThread->localGameData.invad[i].y);
+				if (cThread->localGameData.invad[i].rand_path)
 					_tprintf(TEXT("X"));
 				else
 					_tprintf(TEXT("W"));
@@ -349,12 +349,12 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 		}
 
 		if (cThread->pSMemGameData->bomb[0].y < 25) { //this needs another aproach (fired state?)
-			gotoxy(cThread->gameData.bomb[0].x, cThread->gameData.bomb[0].y);
+			gotoxy(cThread->localGameData.bomb[0].x, cThread->localGameData.bomb[0].y);
 			_tprintf(TEXT("o"));
 		}
 
 		for (i = 0; i < MAX_PLAYERS; i++) {
-			gotoxy(cThread->gameData.ship[i].x, cThread->gameData.ship[i].y);
+			gotoxy(cThread->localGameData.ship[i].x, cThread->localGameData.ship[i].y);
 			_tprintf(TEXT("Â"));
 		}
 	}
@@ -402,7 +402,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(hCanBootNow, INFINITE);
 	}
 
-	cThread.mhGameData = createGameDataMutex();			//Mutex to sync read and write of gameData
+	cThread.mhGameData = createGameDataMutex();			//Mutex to sync read and write of localGameData
 	if (cThread.mhGameData == NULL) {
 		_tprintf(TEXT("[Error] Mutex GameDataMutex (%d)\n"), GetLastError());
 		return -1;

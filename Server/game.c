@@ -5,7 +5,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
 	
-	GameData *baseGame = &((SMCtrl *)tParam)->gameData;
+	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 	InstantiateGame(baseGame);
 
 	/*

@@ -3,7 +3,7 @@
 DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->gameData;
+	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 	/*GameData *lvl = ((SMCtrl *)tParam)->pSMemGameData;*/
 
 	/* generate random number between 1 and 50: */
@@ -32,7 +32,7 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->gameData;
+	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
@@ -70,7 +70,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->gameData;
+	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i;
@@ -134,7 +134,7 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
-		UpdateLocalShip(&cThread->gameData, &localpacket);
+		UpdateLocalShip(&cThread->localGameData, &localpacket);
 
 		ReleaseMutex(cThread->mhStructSync);
 

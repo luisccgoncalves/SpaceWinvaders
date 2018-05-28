@@ -148,8 +148,8 @@ typedef struct {
 
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 
-	GameData		gameData;				//structure that holds the local game
-	SMMessage		msg;					//structure that holds the local msg
+	GameData		localGameData;				//structure that holds the local game
+	//maybe a local Packet?
 } SMCtrl;
 
 typedef struct {							//Message to use in pipes
@@ -162,17 +162,18 @@ typedef struct {							//Message to use in pipes
 
 	DLL_IMP_API int sharedMemory(HANDLE * hSMem, LARGE_INTEGER * SMemSize);
 
-	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl);							//Maps Msg area - ALL ACCESS
-	DLL_IMP_API int mapGameDataView(SMCtrl *smCtrl, DWORD permission);	//Maps GameData area - READ/WRITE
+	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl);													//Maps Msg area - ALL ACCESS
+	DLL_IMP_API int mapGameDataView(SMCtrl *smCtrl, DWORD permission);							//Maps GameData area - READ/WRITE
 
-	/**/
+	/* This section creates the mutexes and semaphores needed to */
+	/* Semi-abstract the send and read funcions below */
 	DLL_IMP_API HANDLE createGameDataMutex();
 	DLL_IMP_API HANDLE createProdConsMutex();
 	DLL_IMP_API HANDLE createOccupiedSemaphore();
 	DLL_IMP_API HANDLE createVacantSemaphore();
 
-	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);
-	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);
+	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);								//Read from Consumer-Productor style array
+	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);				//Write(copy) in to Consumer-Productor style array
 
-	DLL_IMP_API GameData consumeGameData(HANDLE *sharedMemory, HANDLE *mutex);
-	DLL_IMP_API int writeGameData(HANDLE *sharedMemory, HANDLE *localGame, HANDLE *mutex);
+	DLL_IMP_API GameData consumeGameData(HANDLE *sharedMemory, HANDLE *mutex);					//Read from shared memory
+	DLL_IMP_API int writeGameData(HANDLE *sharedMemory, HANDLE *localGame, HANDLE *mutex);		//Write(copy) in to shared memory

@@ -174,4 +174,5 @@ typedef struct {							//Message to use in pipes
 	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);
 	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);
 
+	DLL_IMP_API GameData consumeGameData();
 	DLL_IMP_API int writeGameData(HANDLE *sharedMemory, HANDLE *localGame, HANDLE *mutex);

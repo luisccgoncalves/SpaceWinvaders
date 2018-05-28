@@ -325,13 +325,17 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 	while (cThread->ThreadMustGoOn) {
 
 		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
-		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
-		//gameMsg = cThread->pSMemGameData;
-		//Copies shared memory to a local data structure
-		cThread->gameData = *cThread->pSMemGameData;
-		
-		ReleaseMutex(cThread->mhStructSync);
+
+		cThread->gameData = consumeGameData(cThread->pSMemGameData, cThread->mhGameData);
+
+		//WaitForSingleObject(cThread->mhStructSync, INFINITE);
+
+		////gameMsg = cThread->pSMemGameData;
+		////Copies shared memory to a local data structure
+		//cThread->gameData = *cThread->pSMemGameData;
+		//
+		//ReleaseMutex(cThread->mhStructSync);
 
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {

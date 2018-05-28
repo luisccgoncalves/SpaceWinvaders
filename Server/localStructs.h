@@ -16,7 +16,7 @@
 typedef struct {
 	HANDLE			*hTick;							//Handle to event. Warns gateway about updates in shared memory
 	int				ThreadMustGoOn;
-	HANDLE			*mhStructSync;
+	HANDLE			*mhGameData;
 
 	GameData		*localGameData;
 	GameData		*smGameData;

@@ -294,18 +294,15 @@ DWORD WINAPI sendMessage(LPVOID tParam) {
 		//Produces item
 		simulClient(&localpacket);
 
+		writePacket(cThread, &nextIn, localpacket);
+
 		//Puts it in buffer
-		WaitForSingleObject(cThread->shVacant,INFINITE);
-
-		WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
-
-		cThread->pSMemMessage->buffer[nextIn] = localpacket;
-
-		nextIn = (nextIn + 1) % SMEM_BUFF;
-
-		ReleaseMutex(cThread->mhProdConsMut);
-
-		ReleaseSemaphore(cThread->shOccupied, 1, NULL);
+		//WaitForSingleObject(cThread->shVacant,INFINITE);
+		//WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
+		//cThread->pSMemMessage->buffer[nextIn] = localpacket;
+		//nextIn = (nextIn + 1) % SMEM_BUFF;
+		//ReleaseMutex(cThread->mhProdConsMut);
+		//ReleaseSemaphore(cThread->shOccupied, 1, NULL);
 
 	}
 

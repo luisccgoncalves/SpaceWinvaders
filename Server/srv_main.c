@@ -128,7 +128,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	sGTick.mhStructSync = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
+	sGTick.mhGameData = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread.hSMServerUpdate;				//Copies Event to warn gateway of memory updates  
 	sGTick.localGameData = &cThread.gameData;			//Copies gameData address to GTick
 	sGTick.smGameData = cThread.pSMemGameData;			//Copies the sharedmemory pointer to GTick

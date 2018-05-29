@@ -43,7 +43,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 	while (*ThreadMustGoOn) {
 
 		num = RandomValue(10);
-		Sleep(500 * num);
+		Sleep(500 * (num+1));
 
 		for (int i = 0; i < baseGame->max_bombs; i++) {						//cicle to check if there is available slots to fire a bomb
 			if (!baseGame->bomb[i].fired) {
@@ -242,7 +242,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 	while (*ThreadMustGoOn) {
 
 		num = RandomValue(10);
-		Sleep(1000 * num);
+		Sleep(1000 * (num+1));
 		
 		for (int i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a bomb
 			if (!baseGame->shot[i].fired) {

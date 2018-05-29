@@ -64,7 +64,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 			baseGame->bomb[bombNum].fired = 1;								//update bomb status
 
 			while (*ThreadMustGoOn && baseGame->bomb[bombNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
-				if (baseGame->bomb[bombNum].y < baseGame->ysize) {			//if bomb has not reached the end of the play area
+				if (baseGame->bomb[bombNum].y < baseGame->ysize-1) {			//if bomb has not reached the end of the play area
 					baseGame->bomb[bombNum].y++;							//update it's position, an wait for next tick 
 
 					Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));

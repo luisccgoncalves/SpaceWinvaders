@@ -8,6 +8,8 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 	InstantiateGame(baseGame);
 
+	//srand((unsigned)time(NULL));
+
 	/*
 	HERE we will need to CREATE a game and instantiate a lvl ands stuffs
 	*/

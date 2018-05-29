@@ -8,7 +8,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 #endif
 
 	//#####
-	srand((unsigned)time(NULL));					//Seeds the RNG
+	/*srand((unsigned)time(NULL));*/					//Seeds the RNG
 	//#####
 
 	//StartGame thread STRUCT/HANDLE/ID

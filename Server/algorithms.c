@@ -11,9 +11,13 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 	
 	DWORD			tBombLauncherID;
 	HANDLE			htBombLauncher[MAX_BOMBS];
-
-
-	for (int i = 0; i < MAX_BOMBS; i++) {
+	int num;
+	/*
+	There is a discrepancy here!
+	we can iterate up the number of handles (threads with bombs)
+	but there is no way for now to get them down
+	*/
+	for (int i = 0; i < MAX_INVADER; i++) {
 
 
 		htBombLauncher[i] = CreateThread(
@@ -27,15 +31,9 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"),i, GetLastError());
 			return -1;
 		}
-		/*
-		Here there is a massive problem. 
-		Bomb movement is always getting the same invader bomb number, 
-		"Answer to the Ultimate Question of Life, the Universe, and Everything" - 42
-		either in game, either every time i run the damned thing. 
-		So i am out of ideas. For now!
-		*/
 
-		Sleep(5000);
+		num = RandomValue(5);
+		Sleep(500*num);
 	}
 	WaitForMultipleObjects(MAX_BOMBS, htBombLauncher,TRUE, INFINITE);
 }
@@ -56,9 +54,9 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 	}
 
 	do {																//find a random invader to send the bomb from
-		invPosition = rand() % baseGame->max_invaders + 1;
-		//invPosition = RandomValue(baseGame->max_invaders);
-	} while (baseGame->invad[invPosition].hp == 0);
+		//invPosition = rand() % baseGame->max_invaders + 1;
+		invPosition = RandomValue(baseGame->max_invaders);
+	} while (baseGame->invad[invPosition].hp ==0);
 
 	if (bombNum > -1) {
 
@@ -70,7 +68,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 			if (baseGame->bomb[bombNum].y < baseGame->ysize) {			//if bomb has not reached the end of the play area
 				baseGame->bomb[bombNum].y++;							//update it's position, an wait for next tick 
 
-				Sleep(((baseGame->invaders_bombs_speed) / 3) * (*ThreadMustGoOn));
+				Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));
 			}
 			else {														//reset bomb to out of screen
 				baseGame->bomb[bombNum].x = baseGame->xsize + 1;
@@ -197,12 +195,7 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	return 0;
 }
 
-int RandomValue(int value) {
 
-	int num = rand() % value + 1;
-
-	return num;
-}
 
 
 

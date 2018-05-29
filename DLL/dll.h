@@ -1,5 +1,9 @@
+#define _CRT_RAND_S
+#include <stdlib.h>
+
 #include <windows.h>
 #include <tchar.h>
+
 
 #ifdef DLL_EXPORTS
 #define DLL_IMP_API __declspec(dllexport)
@@ -84,6 +88,13 @@ typedef struct {
 } ShipShot;
 
 typedef struct {							//Game data to use in pipes
+
+	/*
+	problem here, structures are created with diferent values from possible...
+
+	talk / discuss this
+	*/
+
 	Invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
 	Ship			ship[MAX_PLAYERS];		//number of ships/players in game
@@ -177,3 +188,5 @@ typedef struct {							//Message to use in pipes
 
 	DLL_IMP_API GameData consumeGameData(HANDLE *sharedMemory, HANDLE *mutex);					//Read from shared memory
 	DLL_IMP_API int writeGameData(HANDLE *sharedMemory, HANDLE *localGame, HANDLE *mutex);		//Write(copy) in to shared memory
+
+	DLL_IMP_API int RandomValue(int value);

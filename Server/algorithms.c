@@ -27,6 +27,13 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"),i, GetLastError());
 			return -1;
 		}
+		/*
+		Here there is a massive problem. 
+		Bomb movement is always getting the same invader bomb number, 
+		"Answer to the Ultimate Question of Life, the Universe, and Everything" - 42
+		either in game, either every time i run the damned thing. 
+		So i am out of ideas. For now!
+		*/
 
 		Sleep(5000);
 	}

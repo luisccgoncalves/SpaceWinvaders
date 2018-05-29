@@ -1,4 +1,3 @@
-#include "communication.h"
 #include "game.h"
 
 int _tmain(int argc, LPTSTR argv[]) {
@@ -7,6 +6,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_setmode(_fileno(stdin), _O_WTEXT);
 	_setmode(_fileno(stdout), _O_WTEXT);
 #endif
+
+	//#####
+	srand((unsigned)time(NULL));					//Seeds the RNG
+	//#####
 
 	//StartGame thread STRUCT/HANDLE/ID
 	SMCtrl			cThread;						//Thread parameter structure

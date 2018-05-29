@@ -21,7 +21,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int i;
 
-	srand((unsigned)time(NULL));					//Seeds the RNG
+	
 
 	//Defines invader path
 	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {

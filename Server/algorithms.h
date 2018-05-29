@@ -7,5 +7,7 @@ DWORD WINAPI InvadersBomb(LPVOID tParam);
 DWORD WINAPI RegPathInvaders(LPVOID tParam);
 DWORD WINAPI RandPathInvaders(LPVOID tParam);
 DWORD WINAPI ShipInstruction(LPVOID tParam);
+DWORD WINAPI BombMovement(LPVOID tParam);
+int RandomValue(int value);
 
 #endif /* ALGORITHMS_H */

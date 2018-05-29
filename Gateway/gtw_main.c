@@ -339,7 +339,7 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 
 		cls(hStdout);
 		for (i = 0; i < MAX_INVADER; i++) {
-			if (cThread->localGameData.invad[i].x) {
+			if (cThread->localGameData.invad[i].hp) {
 				gotoxy(cThread->localGameData.invad[i].x, cThread->localGameData.invad[i].y);
 				if (cThread->localGameData.invad[i].rand_path)
 					_tprintf(TEXT("X"));

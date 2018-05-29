@@ -275,7 +275,7 @@ void simulClient(Packet * localpacket) {
 
 	localpacket->owner = 0;
 
-	localpacket->instruction = rand() % 4;
+	localpacket->instruction = rand() % 5;
 
 	Sleep(500);
 	return;

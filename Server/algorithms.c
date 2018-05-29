@@ -43,7 +43,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 	while (*ThreadMustGoOn) {
 
 		num = RandomValue(10);
-		Sleep(500 * num);
+		Sleep(500 * (num+1));
 
 		for (int i = 0; i < baseGame->max_bombs; i++) {						//cicle to check if there is available slots to fire a bomb
 			if (!baseGame->bomb[i].fired) {
@@ -172,8 +172,9 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
-	Packet		localpacket;
-	Ship		localship;
+	ClientMoves move;
+	move.game = &cThread->localGameData;
+	move.TheadmustGoOn = &cThread->ThreadMustGoOn;
 
 	int	nextOut = 0;
 
@@ -181,11 +182,11 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	while (cThread->ThreadMustGoOn) {
 
 		//Consume item from buffer
-		localpacket = consumePacket(cThread, &nextOut);  //Problem here: No exit condition
+		move.localPacket = consumePacket(cThread, &nextOut);  //Problem here: No exit condition
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
-		UpdateLocalShip(&cThread->localGameData, &localpacket);
+		UpdateLocalShip(move);
 
 		ReleaseMutex(cThread->mhStructSync);
 
@@ -203,38 +204,39 @@ This is experimental code, the code must be adapted to identify and launch when 
 
 */
 
-DWORD WINAPI ShipShots(LPVOID tParam) {
-
-	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
-
-	DWORD			tShotLauncherID;
-	HANDLE			htShotLauncher[MAX_SHOTS];  //### THIS NEEDS A CONSTANTE VALUE
-
-	for (int i = 0; i < MAX_SHOTS; i++) {
-
-
-		htShotLauncher[i] = CreateThread(
-			NULL,										//Thread security attributes
-			0,											//Stack size
-			ShotMovement,								//Thread function name
-			tParam,										//Thread parameter struct
-			0,											//Creation flags
-			&tShotLauncherID);							//gets thread ID to close it afterwards
-		if (htShotLauncher[i] == NULL) {
-			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
-			return -1;
-		}
-
-
-	}
-	WaitForMultipleObjects(MAX_SHOTS, htShotLauncher, TRUE, INFINITE);
-}
+//DWORD WINAPI ShipShots(LPVOID tParam) {
+//
+//	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+//	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+//
+//	DWORD			tShotLauncherID;
+//	HANDLE			htShotLauncher[MAX_SHOTS];  //### THIS NEEDS A CONSTANTE VALUE
+//
+//	for (int i = 0; i < MAX_SHOTS; i++) {
+//
+//
+//		htShotLauncher[i] = CreateThread(
+//			NULL,										//Thread security attributes
+//			0,											//Stack size
+//			ShotMovement,								//Thread function name
+//			tParam,										//Thread parameter struct
+//			0,											//Creation flags
+//			&tShotLauncherID);							//gets thread ID to close it afterwards
+//		if (htShotLauncher[i] == NULL) {
+//			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
+//			return -1;
+//		}
+//
+//
+//	}
+//	WaitForMultipleObjects(MAX_SHOTS, htShotLauncher, TRUE, INFINITE);
+//}
 
 DWORD WINAPI ShotMovement(LPVOID tParam) {
 
-	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+	int * ThreadMustGoOn = ((ClientMoves *)tParam)->TheadmustGoOn;
+	GameData *baseGame = ((ClientMoves *)tParam)->game;
+	int owner = ((ClientMoves*)tParam)->localPacket.owner;
 
 	int shotNum = -1;
 	int num = -1;
@@ -242,9 +244,9 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 	while (*ThreadMustGoOn) {
 
 		num = RandomValue(10);
-		Sleep(1000 * num);
+		Sleep(1000 * (num+1));
 		
-		for (int i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a bomb
+		for (int i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a shot
 			if (!baseGame->shot[i].fired) {
 				shotNum = i;
 				break;
@@ -253,19 +255,19 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 		if (shotNum > -1) {
 
-			baseGame->shot[shotNum].x = baseGame->ship[0].x;		//#### HARDCODED -> CHANGE
-			baseGame->shot[shotNum].y = baseGame->ship[0].y;
+			baseGame->shot[shotNum].x = baseGame->ship[owner].x;		
+			baseGame->shot[shotNum].y = baseGame->ship[owner].y;
 			baseGame->shot[shotNum].fired = 1;								
 
 			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
-				if (baseGame->shot[shotNum].y > 0) {			//if bomb has not reached the end of the play area
+				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
 
 					Sleep(((baseGame->invaders_bombs_speed)) * (*ThreadMustGoOn));
 				}
 				else {														//reset bomb to out of screen
-					baseGame->shot[shotNum].x = 0;
-					baseGame->shot[shotNum].y = 0;
+					baseGame->shot[shotNum].x = -1;
+					baseGame->shot[shotNum].y = -1;
 					baseGame->shot[shotNum].fired = 0;						//resets fired state
 				}
 			}

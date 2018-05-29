@@ -22,4 +22,10 @@ typedef struct {
 	GameData		*smGameData;
 }GTickStruct;
 
+typedef struct {
+	GameData	*game;
+	Packet		localPacket;
+	int			*TheadmustGoOn;
+} ClientMoves;
+
 #endif /* LOCALSTRUCTS_H */

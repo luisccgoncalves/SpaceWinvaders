@@ -91,18 +91,18 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		0,											//Creation flags
 		&tInvadersBombID);							//gets thread ID to close it afterwards
 
-	htShipShots = CreateThread(
-		NULL,										//Thread security attributes
-		0,											//Stack size
-		ShipShots,								//Thread function name
-		tParam,										//Thread parameter struct
-		0,											//Creation flags
-		&tShipShotsID);							//gets thread ID to close it afterwards
+	//htShipShots = CreateThread(
+	//	NULL,										//Thread security attributes
+	//	0,											//Stack size
+	//	ShipShots,								//Thread function name
+	//	tParam,										//Thread parameter struct
+	//	0,											//Creation flags
+	//	&tShipShotsID);							//gets thread ID to close it afterwards
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
 	WaitForSingleObject(htInvadersBomb, INFINITE);
-	WaitForSingleObject(htShipShots, INFINITE);
+	//WaitForSingleObject(htShipShots, INFINITE);
 
 	return 0;
 
@@ -130,36 +130,43 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	return 0;
 }
 
-int UpdateLocalShip(GameData *game, Packet *localpacket) {
+int UpdateLocalShip(ClientMoves *move) {
+
+	DWORD			tShotLauncherID;
+	HANDLE			htShotLauncher;  //### THIS NEEDS A CONSTANTE VALUE
+
 	//validate action
-
-	//_tprintf(TEXT("[DEBUG] UpdateLocalShip (%d) \n"), localpacket->instruction);
-
-	/*
-	this is recieving a value from 0 to 3
-	maybe this is not the final values
-	...
-	[IMPORTANT] Consider that we don't know if localpacket->owner
-	correspond to the correct array index.
-
-	*/
-
-	switch (localpacket->instruction) {
+	switch (move->localPacket.instruction) {
 	case 0:
-		if (game->ship[localpacket->owner].x<(game->xsize - 1))
-			game->ship[localpacket->owner].x++;
+		if (move->game->ship[move->localPacket.owner].x<(move->game->xsize - 1))
+			move->game->ship[move->localPacket.owner].x++;
 		break;
 	case 1:
-		if (game->ship[localpacket->owner].y<(game->ysize - 1))
-			game->ship[localpacket->owner].y++;
+		if (move->game->ship[move->localPacket.owner].y<(move->game->ysize - 1))
+			move->game->ship[move->localPacket.owner].y++;
 		break;
 	case 2:
-		if (game->ship[localpacket->owner].x>0)
-			game->ship[localpacket->owner].x--;
+		if (move->game->ship[move->localPacket.owner].x>0)
+			move->game->ship[move->localPacket.owner].x--;
 		break;
 	case 3:
-		if (game->ship[localpacket->owner].y>(game->ysize - (game->ysize*0.2)))
-			game->ship[localpacket->owner].y--;
+		if (move->game->ship[move->localPacket.owner].y>(move->game->ysize - (move->game->ysize*0.2)))
+			move->game->ship[move->localPacket.owner].y--;
+		break;
+	case 4:
+
+		htShotLauncher = CreateThread(
+			NULL,										//Thread security attributes
+			0,											//Stack size
+			ShotMovement,								//Thread function name
+			move,										//Thread parameter struct
+			0,											//Creation flags
+			&tShotLauncherID);							//gets thread ID to close it afterwards
+		if (htShotLauncher == NULL) {
+			_tprintf(TEXT("[Error] Creating thread htBombLauncher (%d) at server\n"), GetLastError());
+			return -1;
+		}
+
 		break;
 	default:
 		break;

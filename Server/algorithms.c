@@ -7,17 +7,10 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 
-	//int bombs;
-	
 	DWORD			tBombLauncherID;
-	HANDLE			htBombLauncher[MAX_BOMBS];
-	int num;
-	/*
-	There is a discrepancy here!
-	we can iterate up the number of handles (threads with bombs)
-	but there is no way for now to get them down
-	*/
-	for (int i = 0; i < MAX_INVADER; i++) {
+	HANDLE			htBombLauncher[MAX_BOMBS];  //### THIS NEEDS A CONSTANTE VALUE
+
+	for (int i = 0; i < baseGame->max_bombs; i++) {
 
 
 		htBombLauncher[i] = CreateThread(
@@ -32,8 +25,7 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 			return -1;
 		}
 
-		num = RandomValue(5);
-		Sleep(500*num);
+
 	}
 	WaitForMultipleObjects(MAX_BOMBS, htBombLauncher,TRUE, INFINITE);
 }
@@ -45,39 +37,46 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 
 	int invPosition = -1;
 	int bombNum = -1;
+	int num = -1;
 
-	for (int i = 0; i < baseGame->max_bombs; i++) {						//cicle to check if there is available slots to fire a bomb
-		if (!baseGame->bomb[i].fired) {
-			bombNum = i;
-			break;
-		}
-	}
 
-	do {																//find a random invader to send the bomb from
-		//invPosition = rand() % baseGame->max_invaders + 1;
-		invPosition = RandomValue(baseGame->max_invaders);
-	} while (baseGame->invad[invPosition].hp ==0);
+	while (*ThreadMustGoOn) {
 
-	if (bombNum > -1) {
+		num = RandomValue(10);
+		Sleep(500 * num);
 
-		baseGame->bomb[bombNum].x = baseGame->invad[invPosition].x;		//give invaders coords to bomb
-		baseGame->bomb[bombNum].y = baseGame->invad[invPosition].y;
-		baseGame->bomb[bombNum].fired = 1;								//update bomb status
-
-		while (*ThreadMustGoOn && baseGame->bomb[bombNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
-			if (baseGame->bomb[bombNum].y < baseGame->ysize) {			//if bomb has not reached the end of the play area
-				baseGame->bomb[bombNum].y++;							//update it's position, an wait for next tick 
-
-				Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));
-			}
-			else {														//reset bomb to out of screen
-				baseGame->bomb[bombNum].x = baseGame->xsize + 1;
-				baseGame->bomb[bombNum].y = baseGame->ysize + 1;
-				baseGame->bomb[bombNum].fired = 0;						//resets fired state
+		for (int i = 0; i < baseGame->max_bombs; i++) {						//cicle to check if there is available slots to fire a bomb
+			if (!baseGame->bomb[i].fired) {
+				bombNum = i;
+				break;
 			}
 		}
-	}
 
+		do {																//find a random invader to send the bomb from
+			//invPosition = rand() % baseGame->max_invaders + 1;
+			invPosition = RandomValue(baseGame->max_invaders);
+		} while (baseGame->invad[invPosition].hp == 0);
+
+		if (bombNum > -1) {
+
+			baseGame->bomb[bombNum].x = baseGame->invad[invPosition].x;		//give invaders coords to bomb
+			baseGame->bomb[bombNum].y = baseGame->invad[invPosition].y;
+			baseGame->bomb[bombNum].fired = 1;								//update bomb status
+
+			while (*ThreadMustGoOn && baseGame->bomb[bombNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
+				if (baseGame->bomb[bombNum].y < baseGame->ysize) {			//if bomb has not reached the end of the play area
+					baseGame->bomb[bombNum].y++;							//update it's position, an wait for next tick 
+
+					Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));
+				}
+				else {														//reset bomb to out of screen
+					baseGame->bomb[bombNum].x = baseGame->xsize + 1;
+					baseGame->bomb[bombNum].y = baseGame->ysize + 1;
+					baseGame->bomb[bombNum].fired = 0;						//resets fired state
+				}
+			}
+		}
+	}
 	return 0;
 }
 

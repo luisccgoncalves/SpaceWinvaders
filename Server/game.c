@@ -20,6 +20,8 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	HANDLE			htRandPathInvader;
 	DWORD			tInvadersBombID;
 	HANDLE			htInvadersBomb;
+	DWORD			tShipShotsID;
+	HANDLE			htShipShots;
 
 	int i;
 
@@ -89,9 +91,18 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		0,											//Creation flags
 		&tInvadersBombID);							//gets thread ID to close it afterwards
 
+	htShipShots = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		ShipShots,								//Thread function name
+		tParam,										//Thread parameter struct
+		0,											//Creation flags
+		&tShipShotsID);							//gets thread ID to close it afterwards
+
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
 	WaitForSingleObject(htInvadersBomb, INFINITE);
+	WaitForSingleObject(htShipShots, INFINITE);
 
 	return 0;
 
@@ -181,6 +192,12 @@ int InstantiateGame(GameData *game) {
 		game->bomb[i].x = game->xsize + 1;
 		game->bomb[i].y = game->ysize + 1;
 		game->bomb[i].fired = 0;
+	}
+
+	for (int i = 0; i < MAX_SHOTS; i++) {			//Instantiates all bombs outside of game and updates the status
+		game->shot[i].x = -1;		//maybe -1
+		game->shot[i].y = -1;		//maybe -1
+		game->shot[i].fired = 0;
 	}
 
 	return 0;

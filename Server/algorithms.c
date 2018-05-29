@@ -194,6 +194,86 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	return 0;
 }
 
+/*
+ATENTION!
+
+FROM HERE DOWN:
+
+This is experimental code, the code must be adapted to identify and launch when the "space" key arrives!
+
+*/
+
+DWORD WINAPI ShipShots(LPVOID tParam) {
+
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+
+	DWORD			tShotLauncherID;
+	HANDLE			htShotLauncher[MAX_SHOTS];  //### THIS NEEDS A CONSTANTE VALUE
+
+	for (int i = 0; i < MAX_SHOTS; i++) {
+
+
+		htShotLauncher[i] = CreateThread(
+			NULL,										//Thread security attributes
+			0,											//Stack size
+			ShotMovement,								//Thread function name
+			tParam,										//Thread parameter struct
+			0,											//Creation flags
+			&tShotLauncherID);							//gets thread ID to close it afterwards
+		if (htShotLauncher[i] == NULL) {
+			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
+			return -1;
+		}
+
+
+	}
+	WaitForMultipleObjects(MAX_SHOTS, htShotLauncher, TRUE, INFINITE);
+}
+
+DWORD WINAPI ShotMovement(LPVOID tParam) {
+
+	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+
+	int shotNum = -1;
+	int num = -1;
+
+	while (*ThreadMustGoOn) {
+
+		num = RandomValue(10);
+		Sleep(1000 * num);
+		
+		for (int i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a bomb
+			if (!baseGame->shot[i].fired) {
+				shotNum = i;
+				break;
+			}
+		}
+
+		if (shotNum > -1) {
+
+			baseGame->shot[shotNum].x = baseGame->ship[0].x;		//#### HARDCODED -> CHANGE
+			baseGame->shot[shotNum].y = baseGame->ship[0].y;
+			baseGame->shot[shotNum].fired = 1;								
+
+			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
+				if (baseGame->shot[shotNum].y > 0) {			//if bomb has not reached the end of the play area
+					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
+
+					Sleep(((baseGame->invaders_bombs_speed)) * (*ThreadMustGoOn));
+				}
+				else {														//reset bomb to out of screen
+					baseGame->shot[shotNum].x = 0;
+					baseGame->shot[shotNum].y = 0;
+					baseGame->shot[shotNum].fired = 0;						//resets fired state
+				}
+			}
+		}
+	}
+	return 0;
+}
+
 
 
 

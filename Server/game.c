@@ -96,6 +96,8 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		Sleep(50);
 		_tprintf(TEXT("."));
 
+		FullCollision(sGTick->localGameData);
+
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 
 		SetEvent(sGTick->hTick);

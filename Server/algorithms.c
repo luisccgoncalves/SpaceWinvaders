@@ -68,7 +68,9 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 				if (baseGame->bomb[bombNum].y < baseGame->ysize-1) {		//if bomb has not reached the end of the play area
 					baseGame->bomb[bombNum].y++;							//update it's position, an wait for next tick 
 
-					BombCollision(baseGame, &baseGame->bomb[bombNum]);
+					//if (BombCollision(baseGame, &baseGame->bomb[bombNum])) {
+					//	ResetBomb(&baseGame->bomb[bombNum]);
+					//}
 
 					Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));
 				}
@@ -264,9 +266,9 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
-					if (ShotCollision(baseGame, &baseGame->shot[shotNum])) {
-						ResetShot(&baseGame->shot[shotNum]);
-					}
+					//if (ShotCollision(baseGame, &baseGame->shot[shotNum])) {
+					//	ResetShot(&baseGame->shot[shotNum]);
+					//}
 					Sleep(((baseGame->invaders_bombs_speed/3)) * (*ThreadMustGoOn));
 
 				}
@@ -290,18 +292,30 @@ int UpdateLocalShip(ClientMoves *move) {
 	case 0:
 		if (move->game->ship[move->localPacket.owner].x < (move->game->xsize - 1))
 			move->game->ship[move->localPacket.owner].x++;
+		//if (ShipCollision(move->game, &move->game->ship[move->localPacket.owner])) {
+		//	DamageShip(&move->game->ship[move->localPacket.owner]);
+		//}
 		break;
 	case 1:
 		if (move->game->ship[move->localPacket.owner].y<(move->game->ysize - 1))
 			move->game->ship[move->localPacket.owner].y++;
+		//if (ShipCollision(move->game, &move->game->ship[move->localPacket.owner])) {
+		//	DamageShip(&move->game->ship[move->localPacket.owner]);
+		//}
 		break;
 	case 2:
 		if (move->game->ship[move->localPacket.owner].x>0)
 			move->game->ship[move->localPacket.owner].x--;
+		//if (ShipCollision(move->game, &move->game->ship[move->localPacket.owner])) {
+		//	DamageShip(&move->game->ship[move->localPacket.owner]);
+		//}
 		break;
 	case 3:
 		if (move->game->ship[move->localPacket.owner].y>(move->game->ysize - (move->game->ysize*0.2)))
 			move->game->ship[move->localPacket.owner].y--;
+		//if (ShipCollision(move->game, &move->game->ship[move->localPacket.owner])) {
+		//	DamageShip(&move->game->ship[move->localPacket.owner]);
+		//}
 		break;
 	case 4:
 
@@ -383,6 +397,28 @@ int ShotCollision(GameData *game, ShipShot *shot) {
 	return 0;
 }
 
+int ShipCollision(GameData *game, Ship *ship) {
+	int i = 0;
+	for (i = 0; i < MAX_BOMBS; i++) {
+		if (game->bomb[i].x == ship->x && game->bomb[i].y == ship->y && game->bomb[i].fired == 1) {
+			ResetBomb(&game->bomb[i]);
+			return 1;
+		}
+	}
+	for (i = 0; i < MAX_INVADER; i++) {
+		if (game->invad[i].x == ship->x && game->invad[i].y == ship->y && game->invad[i].hp > 0) {
+			DamageInvader(&game->invad[i]);
+			return 1;
+		}
+	}
+
+	//if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
+	//	//Update game status? like lauch a thread reset after a sleep?
+	//	return 1;
+	//}
+	return 0;
+}
+
 int BombCollision(GameData *game, InvaderBomb *bomb) {
 	int i = 0;
 	for (i = 0; i < MAX_PLAYERS; i++) {
@@ -444,6 +480,24 @@ int ResetBomb(InvaderBomb *in) {
 	in->fired = 0;
 	in->x = -1;
 	in->y = -1;
+	return 0;
+}
+
+int FullCollision(GameData *game) {
+	int i = 0;
+	
+	for (i = 0; i < MAX_PLAYERS; i++) {
+		if (ShipCollision(game, &game->ship[i])) {
+			DamageShip(&game->ship[i]);
+		}
+	}
+
+	for (i = 0; i < MAX_SHOTS; i++) {
+		if (ShotCollision(game, &game->shot[i])) {
+			ResetShot(&game->shot[i]);
+		}
+	}
+
 	return 0;
 }
 

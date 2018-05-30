@@ -15,6 +15,7 @@ int UpdateLocalShip(ClientMoves *move);
 int InstantiateGame(GameData *game);
 int ShotCollision(GameData *game, ShipShot *shot);
 int BombCollision(GameData *game, InvaderBomb *bomb);
+int FullCollision(GameData *game);
 
 int DamageShip(Ship *in);
 int ResetShip(Ship *in);

@@ -187,7 +187,7 @@ typedef struct {							//Message to use in pipes
 	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);								//Read from Consumer-Productor style array
 	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);				//Write(copy) in to Consumer-Productor style array
 
-	DLL_IMP_API GameData consumeGameData(HANDLE *sharedMemory, HANDLE *mutex);					//Read from shared memory
-	DLL_IMP_API int writeGameData(HANDLE *sharedMemory, HANDLE *localGame, HANDLE *mutex);		//Write(copy) in to shared memory
+	DLL_IMP_API GameData consumeGameData(GameData *sharedMemory, HANDLE *mutex);					//Read from shared memory
+	DLL_IMP_API int writeGameData(GameData *sharedMemory, GameData *localGame, HANDLE *mutex);		//Write(copy) in to shared memory
 
 	DLL_IMP_API int RandomValue(int value);

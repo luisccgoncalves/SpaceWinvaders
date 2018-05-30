@@ -7,6 +7,7 @@
 #include <process.h>
 #include "../DLL/dll.h"
 #include "debug.h"
+#pragma comment(lib,"Winmm.lib")
 
 typedef struct {
 	HANDLE	hPipe;
@@ -129,32 +130,43 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 DWORD WINAPI GetKey(LPVOID tParam) {
 
 	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
-	char k_stroke, exk_stroke;
+	wint_t k_stroke, exk_stroke;
 
 	while (cThread->ThreadMustGoOn) {
 		k_stroke = _gettch();
-		_tprintf(TEXT("\7\n"));
+		
 		switch (k_stroke) {
 		case 'w':
+			//_tprintf(TEXT("\7\n"));
 			break;
 		case 's':
+			//_tprintf(TEXT("\7\n"));
 			break;
 		case 'a':
+			//_tprintf(TEXT("\7\n"));
 			break;
 		case 'd':
+			//_tprintf(TEXT("\7\n"));
 			break;
 		case 27:
 			cThread->ThreadMustGoOn = 0;
 			break;
+		case 32:
+			PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC|SND_FILENAME);
+			break;
 		case -32:				//is an extended keystroke
 			switch (exk_stroke = _gettch()) {
 			case 72:
+				//_tprintf(TEXT("\7\n"));
 				break;
 			case 80:
+				//_tprintf(TEXT("\7\n"));
 				break;
 			case 75:
+				//_tprintf(TEXT("\7\n"));
 				break;
 			case 77:
+				//_tprintf(TEXT("\7\n"));
 				break;
 			}
 			break;

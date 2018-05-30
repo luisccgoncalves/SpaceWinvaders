@@ -28,6 +28,7 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
 	}
 	WaitForMultipleObjects(MAX_BOMBS, htBombLauncher,TRUE, INFINITE);
+	return 0;
 }
 
 DWORD WINAPI BombMovement(LPVOID tParam) {
@@ -264,19 +265,13 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
 					if (ShotCollision(baseGame, &baseGame->shot[shotNum])) {
-						killShot(&baseGame->shot[shotNum]);
-/*						baseGame->shot[shotNum].x = -1;
-						baseGame->shot[shotNum].y = -1;
-						baseGame->shot[shotNum].fired = 0;	*/					//resets fired state
+						ResetShot(&baseGame->shot[shotNum]);
 					}
 					Sleep(((baseGame->invaders_bombs_speed/3)) * (*ThreadMustGoOn));
 
 				}
 				else {														//reset bomb to out of screen
-					killShot(&baseGame->shot[shotNum]);
-					//baseGame->shot[shotNum].x = -1;
-					//baseGame->shot[shotNum].y = -1;
-					//baseGame->shot[shotNum].fired = 0;						//resets fired state
+					ResetShot(&baseGame->shot[shotNum]);
 				}
 
 			}
@@ -285,21 +280,115 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 	return 0;
 }
 
-int killInvader(Invader *in) {
+int UpdateLocalShip(ClientMoves *move) {
 
-	in->hp = 0;
-	in->x = -1;
-	in->y = -1;
+	DWORD			tShotLauncherID;
+	HANDLE			htShotLauncher;  //### THIS NEEDS A CONSTANTE VALUE
+
+									 //validate action
+	switch (move->localPacket.instruction) {
+	case 0:
+		if (move->game->ship[move->localPacket.owner].x < (move->game->xsize - 1))
+			move->game->ship[move->localPacket.owner].x++;
+		break;
+	case 1:
+		if (move->game->ship[move->localPacket.owner].y<(move->game->ysize - 1))
+			move->game->ship[move->localPacket.owner].y++;
+		break;
+	case 2:
+		if (move->game->ship[move->localPacket.owner].x>0)
+			move->game->ship[move->localPacket.owner].x--;
+		break;
+	case 3:
+		if (move->game->ship[move->localPacket.owner].y>(move->game->ysize - (move->game->ysize*0.2)))
+			move->game->ship[move->localPacket.owner].y--;
+		break;
+	case 4:
+
+		htShotLauncher = CreateThread(
+			NULL,										//Thread security attributes
+			0,											//Stack size
+			ShotMovement,								//Thread function name
+			move,										//Thread parameter struct
+			0,											//Creation flags
+			&tShotLauncherID);							//gets thread ID to close it afterwards
+		if (htShotLauncher == NULL) {
+			_tprintf(TEXT("[Error] Creating thread htShotLauncher (%d) at server\n"), GetLastError());
+			return -1;
+		}
+
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+int InstantiateGame(GameData *game) {
+
+	/*
+	this is for filling the game,
+	that then will be altered later
+	...
+	another function?
+	*/
+
+	game->xsize = XSIZE;
+	game->ysize = YSIZE;
+
+	game->invaders_bombs_speed = INVADER_SPEED;		// not correct
+	game->invaders_speed = INVADER_SPEED;		// Base speed for invader
+	game->max_bombs = MAX_BOMBS;			// Base max num of bombs at same time
+	game->max_invaders = MAX_INVADER;		// Base num of invaders in the field
+	game->max_rand_invaders = RAND_INVADER;		// Base num of invaders in the field
+	game->num_players = MAX_PLAYERS;		// Base num of players
+	game->power_up_speed = INVADER_SPEED;		// Base speed for power up
+	game->ship_shot_speed = INVADER_SPEED;		// Base speed for defender ship
+
+	for (int i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status
+		ResetBomb(&game->bomb[i]);
+	}
+
+	for (int i = 0; i < MAX_SHOTS; i++) {				//Instantiates all shots outside of game and updates the status
+		ResetShot(&game->shot[i]);
+	}
 
 	return 0;
 }
 
-int killShot(ShipShot *in) {
+int ShotCollision(GameData *game, ShipShot *shot) {
+	int i = 0;
+	for (i = 0; i < MAX_INVADER; i++) {
+		if (game->invad[i].x == shot->x && game->invad[i].y == shot->y && game->invad[i].hp == 1) {
+			ResetInvader(&game->invad[i]);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int ResetInvader(Invader *in) {
+
+	in->hp = 0;
+	in->x = -1;
+	in->y = -1;
+	return 0;
+}
+
+int ResetShot(ShipShot *in) {
 
 	in->fired = 0;
 	in->x = -1;
 	in->y = -1;
+	return 0;
+}
 
+int ResetBomb(InvaderBomb *in) {
+
+	in->fired = 0;
+	in->x = -1;
+	in->y = -1;
 	return 0;
 }
 

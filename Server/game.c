@@ -3,16 +3,9 @@
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	//GameData *baseGame = ((SMCtrl *)tParam)->pSMemGameData;
-	
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+
 	InstantiateGame(baseGame);
-
-	//srand((unsigned)time(NULL));
-
-	/*
-	HERE we will need to CREATE a game and instantiate a lvl ands stuffs
-	*/
 
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
@@ -20,12 +13,8 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	HANDLE			htRandPathInvader;
 	DWORD			tInvadersBombID;
 	HANDLE			htInvadersBomb;
-	DWORD			tShipShotsID;
-	HANDLE			htShipShots;
 
 	int i;
-
-	
 
 	//Defines invader path
 	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
@@ -91,27 +80,16 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		0,											//Creation flags
 		&tInvadersBombID);							//gets thread ID to close it afterwards
 
-	//htShipShots = CreateThread(
-	//	NULL,										//Thread security attributes
-	//	0,											//Stack size
-	//	ShipShots,								//Thread function name
-	//	tParam,										//Thread parameter struct
-	//	0,											//Creation flags
-	//	&tShipShotsID);							//gets thread ID to close it afterwards
-
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
 	WaitForSingleObject(htInvadersBomb, INFINITE);
-	//WaitForSingleObject(htShipShots, INFINITE);
 
 	return 0;
-
 }
 
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;
-	//GameData *local = sGTick->localGameData;
 
 	while (sGTick->ThreadMustGoOn) {
 
@@ -121,105 +99,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 
 		SetEvent(sGTick->hTick);
-
-		//	WaitForSingleObject(sGTick->mhGameData, INFINITE);
-		//	CopyMemory(sGTick->smGameData, sGTick->localGameData, sizeof(GameData));
-		//	SetEvent(sGTick->hTick);
-		//	ReleaseMutex(sGTick->mhGameData);
 	}
 	return 0;
 }
 
-int UpdateLocalShip(ClientMoves *move) {
-
-	DWORD			tShotLauncherID;
-	HANDLE			htShotLauncher;  //### THIS NEEDS A CONSTANTE VALUE
-
-	//validate action
-	switch (move->localPacket.instruction) {
-	case 0:
-		if (move->game->ship[move->localPacket.owner].x < (move->game->xsize - 1))
-			move->game->ship[move->localPacket.owner].x++;
-		break;
-	case 1:
-		if (move->game->ship[move->localPacket.owner].y<(move->game->ysize - 1))
-			move->game->ship[move->localPacket.owner].y++;
-		break;
-	case 2:
-		if (move->game->ship[move->localPacket.owner].x>0)
-			move->game->ship[move->localPacket.owner].x--;
-		break;
-	case 3:
-		if (move->game->ship[move->localPacket.owner].y>(move->game->ysize - (move->game->ysize*0.2)))
-			move->game->ship[move->localPacket.owner].y--;
-		break;
-	case 4:
-
-		htShotLauncher = CreateThread(
-			NULL,										//Thread security attributes
-			0,											//Stack size
-			ShotMovement,								//Thread function name
-			move,										//Thread parameter struct
-			0,											//Creation flags
-			&tShotLauncherID);							//gets thread ID to close it afterwards
-		if (htShotLauncher == NULL) {
-			_tprintf(TEXT("[Error] Creating thread htBombLauncher (%d) at server\n"), GetLastError());
-			return -1;
-		}
-
-		break;
-	default:
-		break;
-	}
-	return 0;
-}
-
-int InstantiateGame(GameData *game) {
-
-	/*
-	this is for filling the game, 
-	that then will be altered later
-	...
-	another function?
-	*/
-
-	game->xsize = XSIZE;
-	game->ysize = YSIZE;
-
-	game->invaders_bombs_speed =	INVADER_SPEED;		// not correct
-	game->invaders_speed =			INVADER_SPEED;		// Base speed for invader
-	game->max_bombs =				MAX_BOMBS;			// Base max num of bombs at same time
-	game->max_invaders =			MAX_INVADER;		// Base num of invaders in the field
-	game->max_rand_invaders	=		RAND_INVADER;		// Base num of invaders in the field
-	game->num_players =				MAX_PLAYERS;		// Base num of players
-	game->power_up_speed =			INVADER_SPEED;		// Base speed for power up
-	game->ship_shot_speed =			INVADER_SPEED;		// Base speed for defender ship
-
-	for (int i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status
-		game->bomb[i].x = game->xsize + 1;
-		game->bomb[i].y = game->ysize + 1;
-		game->bomb[i].fired = 0;
-	}
-
-	for (int i = 0; i < MAX_SHOTS; i++) {			//Instantiates all bombs outside of game and updates the status
-		game->shot[i].x = -1;		//maybe -1
-		game->shot[i].y = -1;		//maybe -1
-		game->shot[i].fired = 0;
-	}
-
-	return 0;
-}
-
-int ShotCollision(GameData *game, ShipShot *shot) {
-	int i = 0;
-	for (i = 0; i < MAX_INVADER; i++) {
-		if (game->invad[i].x == shot->x && game->invad[i].y == shot->y && game->invad[i].hp==1) {
-			//game->invad[i].hp = 0;
-			//shot->fired = 0;
-			killInvader(&game->invad[i]);
-			return 1;
-		}
-	}
-
-	return 0;
-}

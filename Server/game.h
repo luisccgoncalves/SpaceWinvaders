@@ -6,6 +6,6 @@
 
 DWORD WINAPI StartGame(LPVOID tParam);
 DWORD WINAPI GameTick(LPVOID tParam);
-int UpdateLocalShip(ClientMoves *move);
+
 
 #endif // GAME_H

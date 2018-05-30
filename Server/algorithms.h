@@ -8,11 +8,15 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam);
 DWORD WINAPI RandPathInvaders(LPVOID tParam);
 DWORD WINAPI ShipInstruction(LPVOID tParam);
 DWORD WINAPI BombMovement(LPVOID tParam);
-int RandomValue(int value);
 //DWORD WINAPI ShipShots(LPVOID tParam);
 DWORD WINAPI ShotMovement(LPVOID tParam);
 
-int killInvader(Invader *in);
-int killShot(ShipShot *in);
+int UpdateLocalShip(ClientMoves *move);
+int InstantiateGame(GameData *game);
+int ShotCollision(GameData *game, ShipShot *shot);
+
+int ResetInvader(Invader *in);
+int ResetShot(ShipShot *in);
+int ResetBomb(InvaderBomb *in);
 
 #endif /* ALGORITHMS_H */

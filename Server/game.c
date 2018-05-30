@@ -54,6 +54,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 		baseGame->ship[i].x = 15;
 		baseGame->ship[i].y = 23;
+		baseGame->ship[i].lives = 0;
 	}
 
 	htRegPathInvader = CreateThread(

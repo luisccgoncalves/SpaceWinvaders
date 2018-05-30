@@ -263,7 +263,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
-					if (ShotCollision(baseGame, baseGame->shot[shotNum])) {
+					if (ShotCollision(baseGame, &baseGame->shot[shotNum])) {
 						killShot(&baseGame->shot[shotNum]);
 /*						baseGame->shot[shotNum].x = -1;
 						baseGame->shot[shotNum].y = -1;

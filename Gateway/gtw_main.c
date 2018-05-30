@@ -337,26 +337,26 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 		//
 		//ReleaseMutex(cThread->mhStructSync);
 
-		cls(hStdout);
-		for (i = 0; i < MAX_INVADER; i++) {
-			if (cThread->localGameData.invad[i].hp) {
-				gotoxy(cThread->localGameData.invad[i].x, cThread->localGameData.invad[i].y);
-				if (cThread->localGameData.invad[i].rand_path)
-					_tprintf(TEXT("X"));
-				else
-					_tprintf(TEXT("W"));
-			}
-		}
+		//cls(hStdout);
+		//for (i = 0; i < MAX_INVADER; i++) {
+		//	if (cThread->localGameData.invad[i].hp) {
+		//		gotoxy(cThread->localGameData.invad[i].x, cThread->localGameData.invad[i].y);
+		//		if (cThread->localGameData.invad[i].rand_path)
+		//			_tprintf(TEXT("X"));
+		//		else
+		//			_tprintf(TEXT("W"));
+		//	}
+		//}
 
-		if (cThread->pSMemGameData->bomb[0].y < 25) { //this needs another aproach (fired state?)
-			gotoxy(cThread->localGameData.bomb[0].x, cThread->localGameData.bomb[0].y);
-			_tprintf(TEXT("o"));
-		}
+		//if (cThread->pSMemGameData->bomb[0].y < 25) { //this needs another aproach (fired state?)
+		//	gotoxy(cThread->localGameData.bomb[0].x, cThread->localGameData.bomb[0].y);
+		//	_tprintf(TEXT("o"));
+		//}
 
-		for (i = 0; i < MAX_PLAYERS; i++) {
-			gotoxy(cThread->localGameData.ship[i].x, cThread->localGameData.ship[i].y);
-			_tprintf(TEXT("Â"));
-		}
+		//for (i = 0; i < MAX_PLAYERS; i++) {
+		//	gotoxy(cThread->localGameData.ship[i].x, cThread->localGameData.ship[i].y);
+		//	_tprintf(TEXT("Â"));
+		//}
 	}
 
 	return 0;

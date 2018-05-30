@@ -134,7 +134,7 @@ void printGame(GameData msg) {
 	for (i = 0; i < MAX_SHOTS; i++) {
 		if (msg.shot[i].fired) {
 			gotoxy(msg.shot[i].x, msg.shot[i].y);
-			_tprintf(TEXT("l"));
+			_tprintf(TEXT("|"));
 		}
 	}
 

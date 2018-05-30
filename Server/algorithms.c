@@ -65,15 +65,15 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 			baseGame->bomb[bombNum].fired = 1;								//update bomb status
 
 			while (*ThreadMustGoOn && baseGame->bomb[bombNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
-				if (baseGame->bomb[bombNum].y < baseGame->ysize-1) {			//if bomb has not reached the end of the play area
+				if (baseGame->bomb[bombNum].y < baseGame->ysize-1) {		//if bomb has not reached the end of the play area
 					baseGame->bomb[bombNum].y++;							//update it's position, an wait for next tick 
+
+					BombCollision(baseGame, &baseGame->bomb[bombNum]);
 
 					Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));
 				}
 				else {														//reset bomb to out of screen
-					baseGame->bomb[bombNum].x = baseGame->xsize + 1;
-					baseGame->bomb[bombNum].y = baseGame->ysize + 1;
-					baseGame->bomb[bombNum].fired = 0;						//resets fired state
+					ResetBomb(&baseGame->bomb[bombNum]);					
 				}
 			}
 		}
@@ -285,7 +285,7 @@ int UpdateLocalShip(ClientMoves *move) {
 	DWORD			tShotLauncherID;
 	HANDLE			htShotLauncher;  //### THIS NEEDS A CONSTANTE VALUE
 
-									 //validate action
+	//validate action
 	switch (move->localPacket.instruction) {
 	case 0:
 		if (move->game->ship[move->localPacket.owner].x < (move->game->xsize - 1))
@@ -325,7 +325,7 @@ int UpdateLocalShip(ClientMoves *move) {
 }
 
 int InstantiateGame(GameData *game) {
-
+	int i;
 	/*
 	this is for filling the game,
 	that then will be altered later
@@ -345,12 +345,21 @@ int InstantiateGame(GameData *game) {
 	game->power_up_speed = INVADER_SPEED;		// Base speed for power up
 	game->ship_shot_speed = INVADER_SPEED;		// Base speed for defender ship
 
-	for (int i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status
+	for (i = 0; i < MAX_BOMBS; i++) {			//Instantiates all bombs outside of game and updates the status
 		ResetBomb(&game->bomb[i]);
 	}
 
-	for (int i = 0; i < MAX_SHOTS; i++) {				//Instantiates all shots outside of game and updates the status
+	for (i = 0; i < MAX_SHOTS; i++) {				//Instantiates all shots outside of game and updates the status
 		ResetShot(&game->shot[i]);
+	}
+
+	for (i = 0; i < MAX_PLAYERS; i++) {
+		game->ship[i].drunk = 0;
+		game->ship[i].laser_shots = 0;
+		game->ship[i].lives = 1;
+		game->ship[i].x = 0;
+		game->ship[i].y = 0;
+		//...
 	}
 
 	return 0;
@@ -359,13 +368,59 @@ int InstantiateGame(GameData *game) {
 int ShotCollision(GameData *game, ShipShot *shot) {
 	int i = 0;
 	for (i = 0; i < MAX_INVADER; i++) {
-		if (game->invad[i].x == shot->x && game->invad[i].y == shot->y && game->invad[i].hp == 1) {
+		if (game->invad[i].x == shot->x && game->invad[i].y == shot->y && game->invad[i].hp > 0) {
 			ResetInvader(&game->invad[i]);
+			return 1;
+		}
+	}
+	for (i = 0; i < MAX_BOMBS; i++) {
+		if (game->bomb[i].x == shot->x && game->bomb[i].y == shot->y && game->bomb[i].fired > 0) {
+			ResetBomb(&game->bomb[i]);
 			return 1;
 		}
 	}
 
 	return 0;
+}
+
+int BombCollision(GameData *game, InvaderBomb *bomb) {
+	int i = 0;
+	for (i = 0; i < MAX_PLAYERS; i++) {
+		if (game->ship[i].x == bomb->x && game->ship[i].y == bomb->y) {
+			ResetShip(&game->ship[i]);
+			return 1;
+		}
+	}
+	//for (i = 0; i < MAX_SHOTS; i++) {
+	//	if (game->shot[i].x == bomb->x && game->shot[i].y == bomb->y && game->shot[i].fired > 0) {
+	//		ResetShot(&game->shot[i]);
+	//		return 1;
+	//	}
+	//}
+	return 0;
+}
+
+int DamageShip(Ship *in) {
+	in->lives--;
+	if (in->lives< 0) {
+		ResetShip(in);
+	}
+	return 1;
+}
+
+int ResetShip(Ship *in) {
+	in->lives = -1;
+	in->x = -1;
+	in->y = -1;
+	return 0;
+}
+
+int DamageInvader(Invader *in) {
+	in->hp--;
+	if (in->hp < 0) {
+		ResetInvader(in);
+	}
+	return 1;
 }
 
 int ResetInvader(Invader *in) {

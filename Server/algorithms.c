@@ -186,7 +186,7 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
-		UpdateLocalShip(move);
+		UpdateLocalShip(&move);
 
 		ReleaseMutex(cThread->mhStructSync);
 

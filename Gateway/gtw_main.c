@@ -116,7 +116,7 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 			&overlWrite);
 		if (!fSuccess) {
 			if (GetLastError() == ERROR_IO_INCOMPLETE)
-				return;
+				return -1;
 		}
 
 		WaitForSingleObject(writeReady, INFINITE);
@@ -147,7 +147,7 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 	PipeInst	pipeStruct = *(PipeInst*)tParam;
 	HANDLE		heWriteReady;
 	BOOL		fSuccess = FALSE;
-	GameData	clientMsg;
+	//GameData	clientMsg;
 
 	if (pipeStruct.hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
@@ -190,7 +190,7 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 	PipeInst	pipeStruct;
 
-	pipeStruct.ThreadMustGoOn = cThread->ThreadMustGoOn;
+	pipeStruct.ThreadMustGoOn = &cThread->ThreadMustGoOn;
 	pipeStruct.localGameData = &cThread->localGameData;
 	pipeStruct.hSMServerUpdate = cThread->hSMServerUpdate;
 

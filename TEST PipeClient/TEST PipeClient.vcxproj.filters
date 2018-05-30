@@ -18,7 +18,7 @@
     <ClCompile Include="pipeCLT.c">
       <Filter>Resource Files</Filter>
     </ClCompile>
-    <ClCompile Include="myPipeCLT.c">
+    <ClCompile Include="myPipeCLT.c.bak">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

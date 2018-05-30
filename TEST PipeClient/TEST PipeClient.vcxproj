@@ -143,7 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="myPipeCLT.c" />
+    <ClCompile Include="myPipeCLT.c.bak" />
     <ClCompile Include="pipeCLT.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

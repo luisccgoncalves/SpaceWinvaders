@@ -13,100 +13,6 @@ typedef struct {
 	int		ThreadMustGoOn;
 }ThreadCtrl;
 
-//void populate_structs(ship * d_ship) {
-//
-//	d_ship->owner.id = _getpid();
-//	_tprintf(TEXT("ID: %d\n"), d_ship->owner.id);
-//	_tprintf(TEXT("Username:"));
-//	//_tscanf_s(TEXT("%s"), d_ship->owner.username, (unsigned)_countof(d_ship->owner.username));
-//	_gettchar();
-//}
-//
-//int _tmain(int argc, LPTSTR argv[]) {
-//
-//	ship	d_ship;
-//	char	playing = 1, k_stroke, exk_stroke;
-//	HANDLE	hStdout=GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
-//
-//	d_ship.x = d_ship.y = 20;
-//
-//
-//	#ifdef UNICODE
-//		_setmode(_fileno(stdin), _O_WTEXT);
-//		_setmode(_fileno(stdout), _O_WTEXT);
-//	#endif
-//
-//	populate_structs(&d_ship);
-//
-//	cls(hStdout);
-//
-//	hidecursor();
-//
-//	gotoxy(d_ship.x, d_ship.y);
-//
-//	while (playing) {
-//
-//		if (d_ship.x >= XSIZE - 1) { d_ship.x--; gotoxy(d_ship.x, d_ship.y); }
-//		if (d_ship.y >= YSIZE-1){d_ship.y--; gotoxy(d_ship.x, d_ship.y); }
-//		if (d_ship.x <0){d_ship.x=0; gotoxy(d_ship.x, d_ship.y); }
-//		if (d_ship.y <0){d_ship.y=0; gotoxy(d_ship.x, d_ship.y); }
-//
-//		_tprintf(TEXT("Â"));
-//		gotoxy(d_ship.x, d_ship.y);
-//
-//		k_stroke = _gettch();
-//		_tprintf(TEXT(" "));
-//
-//		switch (k_stroke) {
-//		case 'w':
-//			d_ship.y--;
-//			gotoxy(d_ship.x, d_ship.y);
-//			break;
-//		case 's':
-//			d_ship.y++;
-//			gotoxy(d_ship.x, d_ship.y);
-//			break;
-//		case 'a':
-//			d_ship.x--;
-//			gotoxy(d_ship.x, d_ship.y);
-//			break;
-//		case 'd':
-//			d_ship.x++;
-//			gotoxy(d_ship.x, d_ship.y);
-//			break;
-//		case 27:
-//			playing = 0;
-//			break;
-//		case -32:				//is an extended keystroke
-//			switch (exk_stroke=_gettch()) {
-//			case 72:
-//				d_ship.y--;
-//				gotoxy(d_ship.x, d_ship.y);
-//				break;
-//			case 80:
-//				d_ship.y++;
-//				gotoxy(d_ship.x, d_ship.y);
-//				break;
-//			case 75:
-//				d_ship.x--;
-//				gotoxy(d_ship.x, d_ship.y);
-//				break;
-//			case 77:
-//				d_ship.x++;
-//				gotoxy(d_ship.x, d_ship.y);
-//				break;
-//			}
-//			break;
-//		default:
-//			break;
-//		}
-//
-//
-//	}
-//
-//	return 0;
-//}
-
 void printGame(GameData msg) {
 
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -220,13 +126,56 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	return 0;
 }
 
-int StartPipeListener(int * exitCondition, HANDLE *hPipe) {
+DWORD WINAPI GetKey(LPVOID tParam) {
+
+	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
+	char k_stroke, exk_stroke;
+
+	while (cThread->ThreadMustGoOn) {
+		k_stroke = _gettch();
+		_tprintf(TEXT("\7\n"));
+		switch (k_stroke) {
+		case 'w':
+			break;
+		case 's':
+			break;
+		case 'a':
+			break;
+		case 'd':
+			break;
+		case 27:
+			cThread->ThreadMustGoOn = 0;
+			break;
+		case -32:				//is an extended keystroke
+			switch (exk_stroke = _gettch()) {
+			case 72:
+				break;
+			case 80:
+				break;
+			case 75:
+				break;
+			case 77:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+
+	}
+
+	return 0;
+}
+int StartPipeListener(HANDLE *hPipe) {
 
 	HANDLE		h1stPipeInst;
 	DWORD		dwPipeMode;					//Stores pipe mode
 
 	BOOL		bSuccess;
+	BOOL		bRunning;
 
+
+	bRunning = TRUE;
 
 	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
 	if (!h1stPipeInst) {
@@ -267,9 +216,9 @@ int StartPipeListener(int * exitCondition, HANDLE *hPipe) {
 			return -1;
 		}
 		else
-			*exitCondition = 0;
+			bRunning=FALSE;
 
-	} while (*exitCondition);
+	} while (bRunning);
 
 	_tprintf(TEXT("Pipe connected.\nChanging pipe mode...\n"));
 
@@ -300,17 +249,18 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE		htReadGame;					//Game thread
 	DWORD		tReadGameID;				//Game thread ID
 
+	HANDLE		htGetKey;
+	DWORD		tGetKeyID;
+
 	ThreadCtrl	cThreadRdGame;
 	cThreadRdGame.ThreadMustGoOn = 1;
 
-	_tprintf(TEXT("Connecting to gateway...\n"));
-
-	StartPipeListener(&cThreadRdGame.ThreadMustGoOn, &hPipe);
-
-
+	if (!StartPipeListener(&hPipe)) {
+		_tprintf(TEXT("Error launching pipe listener...\n"));
+		return -1;
+	}
 
 	cThreadRdGame.hPipe = hPipe;
-	cThreadRdGame.ThreadMustGoOn = 1;
 
 	htReadGame = CreateThread(
 		NULL,										//Thread security attributes
@@ -325,8 +275,20 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	_gettch();
-	cThreadRdGame.ThreadMustGoOn = 0;
+	htGetKey = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size (0 for default)
+		GetKey,										//Thread function name
+		(LPVOID)&cThreadRdGame,						//Thread parameter struct
+		0,											//Creation flags
+		&tGetKeyID);								//gets thread ID to close it afterwards
+
+	if (htReadGame == NULL) {
+		_tprintf(TEXT("ERROR launching game thread. (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	WaitForSingleObject(htGetKey, INFINITE);
 	WaitForSingleObject(htReadGame, INFINITE);
 	CloseHandle(hPipe);
 

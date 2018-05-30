@@ -138,7 +138,7 @@ int UpdateLocalShip(ClientMoves *move) {
 	//validate action
 	switch (move->localPacket.instruction) {
 	case 0:
-		if (move->game->ship[move->localPacket.owner].x<(move->game->xsize - 1))
+		if (move->game->ship[move->localPacket.owner].x < (move->game->xsize - 1))
 			move->game->ship[move->localPacket.owner].x++;
 		break;
 	case 1:
@@ -205,6 +205,20 @@ int InstantiateGame(GameData *game) {
 		game->shot[i].x = -1;		//maybe -1
 		game->shot[i].y = -1;		//maybe -1
 		game->shot[i].fired = 0;
+	}
+
+	return 0;
+}
+
+int ShotCollision(GameData *game, ShipShot *shot) {
+	int i = 0;
+	for (i = 0; i < MAX_INVADER; i++) {
+		if (game->invad[i].x == shot->x && game->invad[i].y == shot->y && game->invad[i].hp==1) {
+			//game->invad[i].hp = 0;
+			//shot->fired = 0;
+			killInvader(&game->invad[i]);
+			return 1;
+		}
 	}
 
 	return 0;

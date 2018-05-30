@@ -12,4 +12,7 @@ int RandomValue(int value);
 //DWORD WINAPI ShipShots(LPVOID tParam);
 DWORD WINAPI ShotMovement(LPVOID tParam);
 
+int killInvader(Invader *in);
+int killShot(ShipShot *in);
+
 #endif /* ALGORITHMS_H */

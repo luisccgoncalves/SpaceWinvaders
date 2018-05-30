@@ -260,19 +260,46 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 			baseGame->shot[shotNum].fired = 1;								
 
 			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
+
 				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
+					if (ShotCollision(baseGame, baseGame->shot[shotNum])) {
+						killShot(&baseGame->shot[shotNum]);
+/*						baseGame->shot[shotNum].x = -1;
+						baseGame->shot[shotNum].y = -1;
+						baseGame->shot[shotNum].fired = 0;	*/					//resets fired state
+					}
+					Sleep(((baseGame->invaders_bombs_speed/3)) * (*ThreadMustGoOn));
 
-					Sleep(((baseGame->invaders_bombs_speed)) * (*ThreadMustGoOn));
 				}
 				else {														//reset bomb to out of screen
-					baseGame->shot[shotNum].x = -1;
-					baseGame->shot[shotNum].y = -1;
-					baseGame->shot[shotNum].fired = 0;						//resets fired state
+					killShot(&baseGame->shot[shotNum]);
+					//baseGame->shot[shotNum].x = -1;
+					//baseGame->shot[shotNum].y = -1;
+					//baseGame->shot[shotNum].fired = 0;						//resets fired state
 				}
+
 			}
 		}
 	}
+	return 0;
+}
+
+int killInvader(Invader *in) {
+
+	in->hp = 0;
+	in->x = -1;
+	in->y = -1;
+
+	return 0;
+}
+
+int killShot(ShipShot *in) {
+
+	in->fired = 0;
+	in->x = -1;
+	in->y = -1;
+
 	return 0;
 }
 

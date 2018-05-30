@@ -111,12 +111,9 @@ void printGame(GameData msg) {
 
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 	int i;
-	
+
 	cls(hStdout);
-	//for (i = 0; i < MAX_INVADER; i++) {
-	//	_tprintf(TEXT("(%d,%d) "), msg.invad[i].x, msg.invad[i].y);
-	//}
-	
+
 	for (i = 0; i < MAX_INVADER; i++) {
 		if (msg.invad[i].hp) {
 			gotoxy(msg.invad[i].x, msg.invad[i].y);
@@ -128,7 +125,7 @@ void printGame(GameData msg) {
 	}
 
 	for (i = 0; i < MAX_BOMBS; i++) {
-		if (msg.bomb[i].fired) { 
+		if (msg.bomb[i].fired) {
 			gotoxy(msg.bomb[i].x, msg.bomb[i].y);
 			_tprintf(TEXT("o"));
 		}
@@ -223,27 +220,13 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	return 0;
 }
 
-int _tmain(int argc, LPTSTR argv[]) {
-
-#ifdef UNICODE
-	_setmode(_fileno(stdin), _O_WTEXT);
-	_setmode(_fileno(stdout), _O_WTEXT);
-#endif
+int StartPipeListener(int * exitCondition, HANDLE *hPipe) {
 
 	HANDLE		h1stPipeInst;
-	HANDLE		hPipe;						//Pipe handle
-
-	HANDLE		htReadGame;					//Game thread
-	DWORD		tReadGameID;				//Game thread ID
-
 	DWORD		dwPipeMode;					//Stores pipe mode
 
-	BOOL		bSuccess;	
+	BOOL		bSuccess;
 
-	ThreadCtrl	cThreadRdGame;
-	cThreadRdGame.ThreadMustGoOn = 1;
-
-	_tprintf(TEXT("Connecting to gateway...\n"));
 
 	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
 	if (!h1stPipeInst) {
@@ -252,40 +235,41 @@ int _tmain(int argc, LPTSTR argv[]) {
 		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
-	do{
-		
-		hPipe = CreateFile(
+	do {
+
+		*hPipe = CreateFile(
 			PIPE_NAME,
-			GENERIC_READ | 
+			GENERIC_READ |
 			GENERIC_WRITE,
-			0|
-			FILE_SHARE_READ|
+			0 |
+			FILE_SHARE_READ |
 			FILE_SHARE_WRITE,
 			NULL,
 			OPEN_EXISTING,
-			0|
+			0 |
 			FILE_FLAG_OVERLAPPED,
 			NULL);
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {
-				_tprintf(TEXT("Server full. Waiting for 30 seconds\n"));
+			_tprintf(TEXT("Server full. Waiting for 30 seconds\n"));
 
-				bSuccess=WaitNamedPipe(PIPE_NAME, 30000);
+			bSuccess = WaitNamedPipe(PIPE_NAME, 30000);
 
-				if (bSuccess)
-					continue;
-				else
-					return -1;
+			if (bSuccess)
+				continue;
+			else
+				return -1;
 
-		}else if (hPipe == INVALID_HANDLE_VALUE) {
+		}
+		else if (*hPipe == INVALID_HANDLE_VALUE) {
 
 			_tprintf(TEXT("ERROR opening pipe. (%d)\n"), GetLastError());
 			return -1;
 		}
 		else
-			cThreadRdGame.ThreadMustGoOn = 0;
+			*exitCondition = 0;
 
-	} while (cThreadRdGame.ThreadMustGoOn);
+	} while (*exitCondition);
 
 	_tprintf(TEXT("Pipe connected.\nChanging pipe mode...\n"));
 
@@ -301,6 +285,30 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
+	return 0;
+}
+
+int _tmain(int argc, LPTSTR argv[]) {
+
+#ifdef UNICODE
+	_setmode(_fileno(stdin), _O_WTEXT);
+	_setmode(_fileno(stdout), _O_WTEXT);
+#endif
+
+	HANDLE		hPipe;						//Pipe handle
+
+	HANDLE		htReadGame;					//Game thread
+	DWORD		tReadGameID;				//Game thread ID
+
+	ThreadCtrl	cThreadRdGame;
+	cThreadRdGame.ThreadMustGoOn = 1;
+
+	_tprintf(TEXT("Connecting to gateway...\n"));
+
+	StartPipeListener(&cThreadRdGame.ThreadMustGoOn, &hPipe);
+
+
+
 	cThreadRdGame.hPipe = hPipe;
 	cThreadRdGame.ThreadMustGoOn = 1;
 
@@ -312,7 +320,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		0,											//Creation flags
 		&tReadGameID);								//gets thread ID to close it afterwards
 
-	if (htReadGame==NULL) {
+	if (htReadGame == NULL) {
 		_tprintf(TEXT("ERROR launching game thread. (%d)\n"), GetLastError());
 		return -1;
 	}

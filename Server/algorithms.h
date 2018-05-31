@@ -8,13 +8,11 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam);
 DWORD WINAPI RandPathInvaders(LPVOID tParam);
 DWORD WINAPI ShipInstruction(LPVOID tParam);
 DWORD WINAPI BombMovement(LPVOID tParam);
-//DWORD WINAPI ShipShots(LPVOID tParam);
 DWORD WINAPI ShotMovement(LPVOID tParam);
 
 int UpdateLocalShip(ClientMoves *move);
 int InstantiateGame(GameData *game);
 int ShotCollision(GameData *game, ShipShot *shot);
-int BombCollision(GameData *game, InvaderBomb *bomb);
 int FullCollision(GameData *game);
 
 int DamageShip(Ship *in);

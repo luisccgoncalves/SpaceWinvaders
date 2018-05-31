@@ -66,11 +66,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 			while (*ThreadMustGoOn && baseGame->bomb[bombNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
 				if (baseGame->bomb[bombNum].y < baseGame->ysize-1) {		//if bomb has not reached the end of the play area
 					baseGame->bomb[bombNum].y++;							//update it's position, an wait for next tick 
-
-					//if (BombCollision(baseGame, &baseGame->bomb[bombNum])) {
-					//	ResetBomb(&baseGame->bomb[bombNum]);
-					//}
-
+					
 					Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));
 				}
 				else {														//reset bomb to out of screen
@@ -197,43 +193,6 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	return 0;
 }
 
-/*
-ATENTION!
-
-FROM HERE DOWN:
-
-This is experimental code, the code must be adapted to identify and launch when the "space" key arrives!
-
-*/
-
-//DWORD WINAPI ShipShots(LPVOID tParam) {
-//
-//	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-//	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
-//
-//	DWORD			tShotLauncherID;
-//	HANDLE			htShotLauncher[MAX_SHOTS];  //### THIS NEEDS A CONSTANTE VALUE
-//
-//	for (int i = 0; i < MAX_SHOTS; i++) {
-//
-//
-//		htShotLauncher[i] = CreateThread(
-//			NULL,										//Thread security attributes
-//			0,											//Stack size
-//			ShotMovement,								//Thread function name
-//			tParam,										//Thread parameter struct
-//			0,											//Creation flags
-//			&tShotLauncherID);							//gets thread ID to close it afterwards
-//		if (htShotLauncher[i] == NULL) {
-//			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
-//			return -1;
-//		}
-//
-//
-//	}
-//	WaitForMultipleObjects(MAX_SHOTS, htShotLauncher, TRUE, INFINITE);
-//}
-
 DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 	int * ThreadMustGoOn = ((ClientMoves *)tParam)->TheadmustGoOn;
@@ -334,6 +293,9 @@ int UpdateLocalShip(ClientMoves *move) {
 	default:
 		break;
 	}
+	/* is it logic?*/
+	//FullCollision(move->game);
+
 	return 0;
 }
 
@@ -418,44 +380,33 @@ int ShipCollision(GameData *game, Ship *ship) {
 	return 0;
 }
 
-int BombCollision(GameData *game, InvaderBomb *bomb) {
-	int i = 0;
-	for (i = 0; i < MAX_PLAYERS; i++) {
-		if (game->ship[i].x == bomb->x && game->ship[i].y == bomb->y) {
-			ResetShip(&game->ship[i]);
-			return 1;
-		}
-	}
-	//for (i = 0; i < MAX_SHOTS; i++) {
-	//	if (game->shot[i].x == bomb->x && game->shot[i].y == bomb->y && game->shot[i].fired > 0) {
-	//		ResetShot(&game->shot[i]);
-	//		return 1;
-	//	}
-	//}
-	return 0;
-}
-
 int DamageShip(Ship *in) {
 	in->lives--;
 	if (in->lives< 0) {
 		ResetShip(in);
+		return 1;
 	}
-	return 1;
+	else {
+		return 0;
+	}
 }
 
 int ResetShip(Ship *in) {
 	in->lives = -1;
 	in->x = -1;
 	in->y = -1;
-	return 0;
+	return 1;
 }
 
 int DamageInvader(Invader *in) {
 	in->hp--;
 	if (in->hp < 0) {
 		ResetInvader(in);
+		return 1;
 	}
-	return 1;
+	else {
+		return 0;
+	}
 }
 
 int ResetInvader(Invader *in) {
@@ -463,7 +414,7 @@ int ResetInvader(Invader *in) {
 	in->hp = 0;
 	in->x = -1;
 	in->y = -1;
-	return 0;
+	return 1;
 }
 
 int ResetShot(ShipShot *in) {
@@ -471,7 +422,7 @@ int ResetShot(ShipShot *in) {
 	in->fired = 0;
 	in->x = -1;
 	in->y = -1;
-	return 0;
+	return 1;
 }
 
 int ResetBomb(InvaderBomb *in) {

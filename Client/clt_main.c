@@ -93,6 +93,30 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 	return 0;
 }
 
+int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg) {
+	
+	OVERLAPPED	OvrWr = { 0 };
+	DWORD		dwBytesWritten = 0;
+	BOOL		bSuccess = FALSE;
+
+	ResetEvent(writeReady);
+	OvrWr.hEvent = writeReady;
+
+	bSuccess = WriteFile(
+		hPipe,
+		&msg,
+		sizeof(Packet),
+		&dwBytesWritten,
+		&OvrWr);
+
+	WaitForSingleObject(writeReady, INFINITE);
+	GetOverlappedResult(hPipe, &OvrWr, &dwBytesWritten, FALSE);
+	if (dwBytesWritten < sizeof(Packet))
+		_tprintf(TEXT("\nWriteFile failed. Error = %d\7"), GetLastError());
+
+	return 0;
+}
+
 DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
@@ -116,12 +140,6 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	while (cThreadRdGame->ThreadMustGoOn) {
 
 		readPipeMsg(cThreadRdGame->hPipe, heReadReady);
-
-		/*
-		Here we should present to screen
-		later...
-		*/
-
 	}
 
 	return 0;
@@ -130,54 +148,55 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 DWORD WINAPI GetKey(LPVOID tParam) {
 
 	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
-	wint_t k_stroke, exk_stroke;
+	wint_t k_stroke;
+
+	Packet	localpacket;
+
+	HANDLE	heWriteReady;
+
+	localpacket.owner = GetCurrentProcessId();
+
+	heWriteReady = CreateEvent(
+		NULL,										//Event attributes
+		TRUE,										//Manual reset (TRUE for auto-reset)
+		FALSE,										//Initial state
+		NULL);										//Event name
+	if (heWriteReady == NULL) {
+		_tprintf(TEXT("[Error] Event ReadReady(%d)\n"), GetLastError());
+		return -1;
+	}
 
 	while (cThread->ThreadMustGoOn) {
 		k_stroke = _gettch();
-		
+
 		switch (k_stroke) {
 		case 'w':
-			//_tprintf(TEXT("\7\n"));
+			localpacket.instruction = 3;
 			break;
 		case 's':
-			//_tprintf(TEXT("\7\n"));
+			localpacket.instruction = 1;
 			break;
 		case 'a':
-			//_tprintf(TEXT("\7\n"));
+			localpacket.instruction = 2;
 			break;
 		case 'd':
-			//_tprintf(TEXT("\7\n"));
+			localpacket.instruction = 0;
 			break;
-		case 27:
+		case 27://esc
 			cThread->ThreadMustGoOn = 0;
 			break;
-		case 32:
-			PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC|SND_FILENAME);
-			break;
-		case -32:				//is an extended keystroke
-			switch (exk_stroke = _gettch()) {
-			case 72:
-				//_tprintf(TEXT("\7\n"));
-				break;
-			case 80:
-				//_tprintf(TEXT("\7\n"));
-				break;
-			case 75:
-				//_tprintf(TEXT("\7\n"));
-				break;
-			case 77:
-				//_tprintf(TEXT("\7\n"));
-				break;
-			}
+		case 32://space
+			PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC | SND_FILENAME);
 			break;
 		default:
 			break;
 		}
 
+		writePipeMsg(cThread->hPipe, heWriteReady, localpacket);
 	}
-
 	return 0;
 }
+
 int StartPipeListener(HANDLE *hPipe) {
 
 	HANDLE		h1stPipeInst;

@@ -264,6 +264,8 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 	}
 
 	WaitForMultipleObjects(threadn, htPipeConnect, TRUE, INFINITE);
+
+	return 0;
 }
 
 
@@ -316,8 +318,6 @@ DWORD WINAPI ReadServerMsg(LPVOID tParam) {
 	
 	//GameData	*gameMsg;
 	//gameMsg = malloc(sizeof(GameData));
-
-	int i;
 
 	cls(hStdout);
 	hidecursor();

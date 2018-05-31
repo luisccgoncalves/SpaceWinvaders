@@ -318,7 +318,7 @@ int UpdateLocalShip(ClientMoves *move) {
 		//}
 		break;
 	case 4:
-
+		
 		htShotLauncher = CreateThread(
 			NULL,										//Thread security attributes
 			0,											//Stack size

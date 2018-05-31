@@ -273,11 +273,9 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 void simulClient(Packet * localpacket) {
 
-	srand((unsigned)time(NULL));
-
 	localpacket->owner = 0;
 
-	localpacket->instruction = rand() % 5;
+	localpacket->instruction = RandomValue(5);
 
 	Sleep(500);
 	return;

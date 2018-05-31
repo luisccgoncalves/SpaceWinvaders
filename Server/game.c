@@ -37,8 +37,8 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 			baseGame->invad[i].y = baseGame->invad[i].y_init = i / INVADER_BY_ROW;
 		}
 		else {
-			baseGame->invad[i].x = baseGame->invad[i].x_init = rand() % baseGame->xsize;
-			baseGame->invad[i].y = baseGame->invad[i].y_init = rand() % baseGame->ysize;
+			baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue(baseGame->xsize);
+			baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
 		}
 	}
 
@@ -48,7 +48,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	}
 
 	//Kills a random invader ##### For testing purposes #####
-	baseGame->invad[rand() % 55].hp = 0;
+	baseGame->invad[RandomValue(55)].hp = 0;
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < baseGame->num_players; i++) {

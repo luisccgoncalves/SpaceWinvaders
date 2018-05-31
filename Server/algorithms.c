@@ -54,7 +54,6 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 		}
 
 		do {																//find a random invader to send the bomb from
-			//invPosition = rand() % baseGame->max_invaders + 1;
 			invPosition = RandomValue(baseGame->max_invaders);
 		} while (baseGame->invad[invPosition].hp == 0);
 
@@ -138,7 +137,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 		for (i = startIndex; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
 
-			switch (rand() % 4) {
+			switch (RandomValue(4)) {
 			case 0:
 				if (baseGame->invad[i].x > 0)
 					baseGame->invad[i].x--;

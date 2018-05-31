@@ -7,10 +7,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_setmode(_fileno(stdout), _O_WTEXT);
 #endif
 
-	//#####
-	/*srand((unsigned)time(NULL));*/					//Seeds the RNG
-	//#####
-
 	//StartGame thread STRUCT/HANDLE/ID
 	SMCtrl			cThread;						//Thread parameter structure
 	HANDLE			htGame;							//Handle to the game thread

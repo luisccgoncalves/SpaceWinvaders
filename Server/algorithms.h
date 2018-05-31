@@ -12,14 +12,20 @@ DWORD WINAPI ShotMovement(LPVOID tParam);
 
 int UpdateLocalShip(ClientMoves *move);
 int InstantiateGame(GameData *game);
-int ShotCollision(GameData *game, ShipShot *shot);
+
 int FullCollision(GameData *game);
 
+int ShipCollision(GameData *game, Ship *ship);
+int ShotCollision(GameData *game, ShipShot *shot);
+int InvaderCollision(GameData *game, Invader *invader);
+int BombCollision(GameData *game, InvaderBomb *bomb);;
+
 int DamageShip(Ship *in);
-int ResetShip(Ship *in);
 int DamageInvader(Invader *in);
-int ResetInvader(Invader *in);
+
+int ResetShip(Ship *in);
 int ResetShot(ShipShot *in);
+int ResetInvader(Invader *in);
 int ResetBomb(InvaderBomb *in);
 
 

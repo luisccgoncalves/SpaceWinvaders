@@ -3,8 +3,8 @@
 
 DWORD WINAPI StartGame(LPVOID tParam) {
 
-	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
 
 	InstantiateGame(baseGame);
 
@@ -46,9 +46,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 		baseGame->invad[i].hp = 1;
 	}
-
-	//Kills a random invader ##### For testing purposes #####
-	baseGame->invad[RandomValue(55)].hp = 0;
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < baseGame->num_players; i++) {
@@ -109,7 +106,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 		Sleep(50);
 		spinnerSlash();
-		FullCollision(sGTick->localGameData);
+		//FullCollision(sGTick->localGameData);
 
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 

@@ -15,7 +15,7 @@ typedef struct {
 	HANDLE		*hSMServerUpdate;
 	GameData	*localGameData;
 
-}PipeInst;
+}PipeInstWrt;
 
 //#########################################################################################
 //############################   TEMP TEST   ##############################################
@@ -134,20 +134,79 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 		return 0;
 }
 
-//int broadcastGame(HANDLE *clients, HANDLE *writeReady, PipeGameData *game) { //This needs to receive nr of connected players
-//	int numWrites = 0;
-//	for (int i = 0; i < MAX_PLAYERS; i++) {
-//		numWrites += writeGameData(clients[i], writeReady, game);
-//	}
-//	return numWrites;
-//}
+int readPipePacket(HANDLE hPipe, HANDLE readReady) { //probably the event needs to be a pointer
 
-DWORD WINAPI instanceThread(LPVOID tParam) {
+	OVERLAPPED	OvrRd = { 0 };
+	DWORD		dwBytesRead = 0;
+	BOOL		bSuccess = FALSE;
+
+	Packet		pipePacket;
+
+	OvrRd.hEvent = readReady;
+	ResetEvent(readReady);
+
+	bSuccess = ReadFile(
+		hPipe,
+		&pipePacket,
+		sizeof(pipePacket),
+		&dwBytesRead,
+		&OvrRd);
+
+	WaitForSingleObject(readReady, INFINITE);
+
+	GetOverlappedResult(
+		hPipe,
+		&OvrRd,
+		&dwBytesRead,
+		FALSE);
+
+	if (dwBytesRead < sizeof(pipePacket)) {
+		if (GetLastError() == ERROR_BROKEN_PIPE) {
+			_tprintf(TEXT("Connection lost.\n"));
+			return -1;
+		}
+		else
+			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
+	}
+
+	_tprintf(TEXT("GOT KEY\n"));
+
+	return 0;
+}
+
+DWORD WINAPI instanceThreadRead(LPVOID tParam) {
+	PipeInstWrt	pipeStruct = *(PipeInstWrt*)tParam;
+	HANDLE		heReadReady;
+	BOOL		fSuccess = FALSE;
+
+	if (pipeStruct.hPipe == NULL) {
+		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	heReadReady = CreateEvent(			//Creates the event to signal access to write action
+		NULL, 										//Event attributes
+		TRUE, 										//Manual reset (TRUE for auto-reset)
+		FALSE, 										//Initial state
+		NULL);										//Event name
+	if (heReadReady == NULL) {
+		_tprintf(TEXT("[Error] Event writeReady (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	while (pipeStruct.ThreadMustGoOn) {
 	
-	PipeInst	pipeStruct = *(PipeInst*)tParam;
+		readPipePacket(pipeStruct.hPipe, heReadReady);
+		//SetEvent(GotPacket);
+	}
+	return 0;
+}
+
+DWORD WINAPI instanceThreadWrite(LPVOID tParam) {
+	
+	PipeInstWrt	pipeStruct = *(PipeInstWrt*)tParam;
 	HANDLE		heWriteReady;
 	BOOL		fSuccess = FALSE;
-	//GameData	clientMsg;
 
 	if (pipeStruct.hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
@@ -170,7 +229,6 @@ DWORD WINAPI instanceThread(LPVOID tParam) {
 
 	}
 	
-	_tprintf(TEXT("Sent...\n"));
 	return 0;
 }
 
@@ -178,23 +236,23 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 	SMCtrl		*cThread= (SMCtrl*)tParam;
 	LPTSTR		lpsPipeName = PIPE_NAME;
-	HANDLE		clients[MAX_PLAYERS] = {0};
+
 	HANDLE		h1stPipeInst;
-	HANDLE		htPipeConnect[40] = { NULL }; //Update this
+	HANDLE		htPipeConnectW[40] = { NULL }; //Update this
+	HANDLE		htPipeConnectR[40] = { NULL }; //Update this
+	int			threadn = 0;
 
 	HANDLE		hPipe = INVALID_HANDLE_VALUE;
 
 	BOOL		fConnected = FALSE;
-	DWORD		dwPipeThreadId;
-	int			threadn = 0;
 
-	PipeInst	pipeStruct;
+	PipeInstWrt	pipeStructWrite;
 
-	pipeStruct.ThreadMustGoOn = &cThread->ThreadMustGoOn;
-	pipeStruct.localGameData = &cThread->localGameData;
-	pipeStruct.hSMServerUpdate = cThread->hSMServerUpdate;
+	pipeStructWrite.ThreadMustGoOn = &cThread->ThreadMustGoOn;
+	pipeStructWrite.localGameData = &cThread->localGameData;
+	pipeStructWrite.hSMServerUpdate = cThread->hSMServerUpdate;
 
-	h1stPipeInst = CreateEvent(				//Creates the event to warn gateway that the shared memoy is mapped
+	h1stPipeInst = CreateEvent(				//Creates the event to warn clients that the 1st pipe instance was created
 		NULL,										//Event attributes
 		TRUE,										//Manual reset (TRUE for auto-reset)
 		FALSE,										//Initial state
@@ -240,21 +298,35 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 			_tprintf(TEXT("Someone connected!\n"));
 
-			pipeStruct.hPipe = hPipe;
+			pipeStructWrite.hPipe = hPipe;
 
-			htPipeConnect[threadn] = CreateThread(
+			htPipeConnectR[threadn] = CreateThread(
 				NULL,									//Thread security attributes
 				0,										//Stack size
-				instanceThread,							//Thread function name
-				(LPVOID)&pipeStruct,						//Thread parameter struct
+				instanceThreadRead,						//Thread function name
+				(LPVOID)&pipeStructWrite/*UPDATE*/,				//Thread parameter struct
 				0,										//Creation flags
-				&dwPipeThreadId);						//gets thread ID to close it afterwards
-			if (htPipeConnect[threadn] == NULL) {
-				_tprintf(TEXT("[Error] Creating thread ConnectPipesThread (%d) at Gateway\n"), GetLastError());
+				NULL);									//gets thread ID to close it afterwards
+			if (htPipeConnectR[threadn] == NULL) {
+				_tprintf(TEXT("[Error] Creating thread ConnectPipesThreadRead (%d) at Gateway\n"), GetLastError());
 				return -1;
 			}
 			else {
-				threadn++;
+
+				htPipeConnectW[threadn] = CreateThread(
+					NULL,								//Thread security attributes
+					0,									//Stack size
+					instanceThreadWrite,				//Thread function name
+					(LPVOID)&pipeStructWrite,			//Thread parameter struct
+					0,									//Creation flags
+					NULL);								//gets thread ID to close it afterwards
+				if (htPipeConnectW[threadn] == NULL) {
+					_tprintf(TEXT("[Error] Creating thread ConnectPipesThreadWrite (%d) at Gateway\n"), GetLastError());
+					return -1;
+				}
+				else {
+					threadn++;
+				}
 			}
 		}
 		else {
@@ -263,7 +335,8 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 	}
 
-	WaitForMultipleObjects(threadn, htPipeConnect, TRUE, INFINITE);
+	WaitForMultipleObjects(threadn, htPipeConnectW, TRUE, INFINITE);
+	WaitForMultipleObjects(threadn, htPipeConnectR, TRUE, INFINITE);
 
 	return 0;
 }
@@ -293,6 +366,7 @@ DWORD WINAPI sendMessage(LPVOID tParam) {
 
 		//Produces item
 		simulClient(&localpacket);
+		WaitForSingleObject(cThread->GotPacket, INFINITE);
 
 		writePacket(cThread, &nextIn, localpacket);
 

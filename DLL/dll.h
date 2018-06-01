@@ -160,8 +160,11 @@ typedef struct {
 
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 
-	GameData		localGameData;				//structure that holds the local game
-	//maybe a local Packet?
+	GameData		localGameData;			//structure that holds the local game
+
+	HANDLE			GotPacket;
+	Packet			localPacket;
+
 } SMCtrl;
 
 typedef struct {							//Message to use in pipes

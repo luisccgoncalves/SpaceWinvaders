@@ -213,12 +213,6 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 	int owner = ((ClientMoves*)tParam)->localPacket.owner;
 
 	int shotNum = -1;
-	int num = -1;
-
-	while (*ThreadMustGoOn) {
-
-		num = RandomValue(10);
-		Sleep(1000 * (num+1));
 		
 		for (int i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a shot
 			if (!baseGame->shot[i].fired) {
@@ -229,16 +223,16 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 		if (shotNum > -1) {
 
-			baseGame->shot[shotNum].x = baseGame->ship[owner].x;		
+			baseGame->shot[shotNum].x = baseGame->ship[owner].x;
 			baseGame->shot[shotNum].y = baseGame->ship[owner].y;
-			baseGame->shot[shotNum].fired = 1;								
+			baseGame->shot[shotNum].fired = 1;
 
 			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
 
 				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
 					ShotCollision(baseGame, &baseGame->shot[shotNum]);
-					Sleep(((baseGame->invaders_bombs_speed/3)) * (*ThreadMustGoOn));
+					Sleep(((baseGame->invaders_bombs_speed / 4)) * (*ThreadMustGoOn));
 
 				}
 				else {														//reset bomb to out of screen
@@ -247,7 +241,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 			}
 		}
-	}
+
 	return 0;
 }
 

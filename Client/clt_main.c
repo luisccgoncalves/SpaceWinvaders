@@ -152,11 +152,12 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
 	wint_t k_stroke;
 
-	Packet	localpacket;
+	Packet	localpacket = { 0 };
 
 	HANDLE	heWriteReady;
 
-	localpacket.owner = GetCurrentProcessId();
+	int		packetUpd = 0;
+	//localpacket.owner = GetCurrentProcessId();
 
 	heWriteReady = CreateEvent(
 		NULL,										//Event attributes
@@ -174,27 +175,41 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 		switch (k_stroke) {
 		case 'w':
 			localpacket.instruction = 3;
+			packetUpd = 1;
 			break;
 		case 's':
 			localpacket.instruction = 1;
+			packetUpd = 1;
 			break;
 		case 'a':
 			localpacket.instruction = 2;
+			packetUpd = 1;
 			break;
 		case 'd':
 			localpacket.instruction = 0;
+			packetUpd = 1;
 			break;
 		case 27://esc
+			//deauth packet?
 			cThread->ThreadMustGoOn = 0;
+			packetUpd = 1;
 			break;
 		case 32://space
-			PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC | SND_FILENAME);
+			//PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC | SND_FILENAME);		//needs better aproach
+			localpacket.instruction = 0;
+			packetUpd = 1;
+			break;
+		case 224://extended
+			_gettch();//ignore extended
 			break;
 		default:
 			break;
 		}
 
-		writePipeMsg(cThread->hPipe, heWriteReady, localpacket);
+		if (packetUpd) {
+			writePipeMsg(cThread->hPipe, heWriteReady, localpacket);
+			packetUpd = 0;
+		}
 	}
 	return 0;
 }

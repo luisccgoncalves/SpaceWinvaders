@@ -169,7 +169,7 @@ int readPipePacket(HANDLE hPipe, HANDLE readReady) { //probably the event needs 
 			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
 	}
 
-	_tprintf(TEXT("GOT KEY\n"));
+	_tprintf(TEXT("GOT KEY %d\n"),pipePacket.instruction);
 
 	return 0;
 }

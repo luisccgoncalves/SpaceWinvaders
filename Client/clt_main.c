@@ -196,7 +196,7 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 			break;
 		case 32://space
 			//PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC | SND_FILENAME);		//needs better aproach
-			localpacket.instruction = 0;
+			localpacket.instruction = 4;
 			packetUpd = 1;
 			break;
 		case 224://extended

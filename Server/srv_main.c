@@ -82,7 +82,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 
-	cThread.hSMServerUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
+	cThread.hSMServerUpdate = CreateEvent(	
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
 		FALSE, 										//Initial state

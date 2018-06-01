@@ -17,6 +17,16 @@ typedef struct {
 
 }PipeInstWrt;
 
+typedef struct {
+
+	HANDLE		hPipe;
+	int			*ThreadMustGoOn;
+
+	HANDLE		*heGotPacket;
+	Packet		*localPacket;
+
+}PipeInstRd;
+
 //#########################################################################################
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
@@ -134,21 +144,21 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
 		return 0;
 }
 
-int readPipePacket(HANDLE hPipe, HANDLE readReady) { //probably the event needs to be a pointer
+int readPipePacket(HANDLE hPipe, HANDLE readReady, Packet * pipePacket) { //probably the event needs to be a pointer
 
 	OVERLAPPED	OvrRd = { 0 };
 	DWORD		dwBytesRead = 0;
 	BOOL		bSuccess = FALSE;
 
-	Packet		pipePacket;
+	//Packet		pipePacket;
 
 	OvrRd.hEvent = readReady;
 	ResetEvent(readReady);
 
 	bSuccess = ReadFile(
 		hPipe,
-		&pipePacket,
-		sizeof(pipePacket),
+		pipePacket,
+		sizeof(Packet),
 		&dwBytesRead,
 		&OvrRd);
 
@@ -160,7 +170,7 @@ int readPipePacket(HANDLE hPipe, HANDLE readReady) { //probably the event needs 
 		&dwBytesRead,
 		FALSE);
 
-	if (dwBytesRead < sizeof(pipePacket)) {
+	if (dwBytesRead < sizeof(Packet)) {
 		if (GetLastError() == ERROR_BROKEN_PIPE) {
 			_tprintf(TEXT("Connection lost.\n"));
 			return -1;
@@ -169,15 +179,15 @@ int readPipePacket(HANDLE hPipe, HANDLE readReady) { //probably the event needs 
 			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
 	}
 
-	_tprintf(TEXT("GOT KEY %d\n"),pipePacket.instruction);
-
 	return 0;
 }
 
 DWORD WINAPI instanceThreadRead(LPVOID tParam) {
-	PipeInstWrt	pipeStruct = *(PipeInstWrt*)tParam;
+	PipeInstRd	pipeStruct = *(PipeInstRd*)tParam;
 	HANDLE		heReadReady;
 	BOOL		fSuccess = FALSE;
+
+	Packet		instancePacket;
 
 	if (pipeStruct.hPipe == NULL) {
 		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
@@ -196,8 +206,14 @@ DWORD WINAPI instanceThreadRead(LPVOID tParam) {
 
 	while (pipeStruct.ThreadMustGoOn) {
 	
-		readPipePacket(pipeStruct.hPipe, heReadReady);
-		//SetEvent(GotPacket);
+		readPipePacket(pipeStruct.hPipe, heReadReady, &instancePacket);
+		_tprintf(TEXT("GOT KEY %d "), instancePacket.instruction);
+
+		//I should protect this with a mutex
+		*pipeStruct.localPacket = instancePacket;
+
+		SetEvent(*pipeStruct.heGotPacket);
+
 	}
 	return 0;
 }
@@ -247,10 +263,15 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 	BOOL		fConnected = FALSE;
 
 	PipeInstWrt	pipeStructWrite;
+	PipeInstRd	pipeStructRead;
 
 	pipeStructWrite.ThreadMustGoOn = &cThread->ThreadMustGoOn;
 	pipeStructWrite.localGameData = &cThread->localGameData;
 	pipeStructWrite.hSMServerUpdate = cThread->hSMServerUpdate;
+
+	pipeStructRead.ThreadMustGoOn = &cThread->ThreadMustGoOn;
+	pipeStructRead.localPacket = &cThread->localPacket;
+	pipeStructRead.heGotPacket = &cThread->heGotPacket;
 
 	h1stPipeInst = CreateEvent(				//Creates the event to warn clients that the 1st pipe instance was created
 		NULL,										//Event attributes
@@ -299,12 +320,13 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 			_tprintf(TEXT("Someone connected!\n"));
 
 			pipeStructWrite.hPipe = hPipe;
+			pipeStructRead.hPipe = hPipe;
 
 			htPipeConnectR[threadn] = CreateThread(
 				NULL,									//Thread security attributes
 				0,										//Stack size
 				instanceThreadRead,						//Thread function name
-				(LPVOID)&pipeStructWrite/*UPDATE*/,				//Thread parameter struct
+				(LPVOID)&pipeStructRead,				//Thread parameter struct
 				0,										//Creation flags
 				NULL);									//gets thread ID to close it afterwards
 			if (htPipeConnectR[threadn] == NULL) {
@@ -365,10 +387,11 @@ DWORD WINAPI sendMessage(LPVOID tParam) {
 	while (cThread->ThreadMustGoOn) {
 
 		//Produces item
-		simulClient(&localpacket);
-		WaitForSingleObject(cThread->GotPacket, INFINITE);
+		//simulClient(&localpacket);
+		WaitForSingleObject(cThread->heGotPacket, INFINITE);
 
-		writePacket(cThread, &nextIn, localpacket);
+		_tprintf(TEXT("GOT KEY %d \n"), cThread->localPacket.instruction);
+		writePacket(cThread, &nextIn, cThread->localPacket);
 
 		//Puts it in buffer
 		//WaitForSingleObject(cThread->shVacant,INFINITE);
@@ -523,6 +546,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 	if (cThread.hSMGatewayUpdate == NULL) {
 		_tprintf(TEXT("[Error] Event gateway update (%d)\n"), GetLastError());
 		return ;
+	}
+
+	cThread.heGotPacket = CreateEvent(
+		NULL, 										//Event attributes
+		FALSE, 										//Manual reset (TRUE for auto-reset)
+		FALSE, 										//Initial state
+		NULL);										//Event name
+	if (cThread.heGotPacket == NULL) {
+		_tprintf(TEXT("[Error] Event server update (%d)\n"), GetLastError());
+		return -1;
 	}
 
 	//Opens a mapped file by the server

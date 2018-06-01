@@ -26,7 +26,7 @@
 #define YSIZE			25							//Terminal max row number
 
 #define MAX_PLAYERS		2							//Maximum number of concurrent players
-#define MAX_INVADER		57							//Maximum invaders by level
+#define MAX_INVADER		100							//Maximum invaders by level
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define MAX_BOMBS		10							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 #define MAX_SHOTS		5//25							//Maximum shots a defender can have on the screen at same time

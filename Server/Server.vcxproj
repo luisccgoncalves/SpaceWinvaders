@@ -147,6 +147,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="algorithms.c" />
+    <ClCompile Include="game.c" />
     <ClCompile Include="srv_main.c" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +157,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="algorithms.h" />
+    <ClInclude Include="game.h" />
     <ClInclude Include="localStructs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

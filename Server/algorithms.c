@@ -513,6 +513,44 @@ int ValidateInvaderPosition(GameData * game, int x, int y)
 	return 0;
 }
 
+int writeToReg(TCHAR *username, int score) {
+
+	HKEY	key;
+	DWORD	dwDisposition;
+	LONG	lResult;
+
+	lResult=RegCreateKeyEx(
+		HKEY_CURRENT_USER,
+		TEXT("Software\\SpaceWinvaders\\HighScores"),
+		0,
+		NULL,
+		REG_OPTION_NON_VOLATILE, 
+		KEY_ALL_ACCESS, 
+		NULL, 
+		&key, 
+		&dwDisposition);
+	if (lResult!=ERROR_SUCCESS) {
+		_tprintf(TEXT("[Error] Creating registry key (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	if (dwDisposition == REG_CREATED_NEW_KEY) {
+		_tprintf(TEXT("Created a new key\n"));
+	}
+
+	RegSetValueEx(
+		key,
+		username,
+		0,
+		REG_DWORD,
+		(LPBYTE)&score,
+		sizeof(DWORD)
+		);
+
+	RegCloseKey(key);
+
+	return 0;
+}
 
 
 

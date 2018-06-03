@@ -174,6 +174,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
 	}
 
+	writeToReg(TEXT("Armando"), 1234);
+
 	//Enter to end thread and exit
 	_gettchar();
 

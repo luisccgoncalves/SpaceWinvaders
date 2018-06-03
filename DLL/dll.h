@@ -95,11 +95,12 @@ typedef struct {							//Game data to use in pipes
 
 	talk / discuss this
 	*/
+	//int			gameRunning;			
 
 	Invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
 	Ship			ship[MAX_PLAYERS];		//number of ships/players in game
-	ShipShot		shot[MAX_SHOTS];				//temporary number of shots
+	ShipShot		shot[MAX_SHOTS];		//temporary number of shots
 	PowerUp			pUp;					//One powerUp only at any given time
 
 	int xsize;								//max y size of play area
@@ -125,12 +126,12 @@ typedef struct {							//Game data to use in pipes
 } GameData;
 
 typedef struct {
-	//int		msgID;						//probably unnecessary - event driven approach	
 	int		owner;							//player1, player2, server, gateway, etc..
 	int		instruction;					//up, down, right, left, fire, shutdown,etc...	
 
-	//maybe a string?
-	//if this aproach is to follow we may need to consider constants
+	//debatable
+	TCHAR	text; 
+	int		auth;  //starts at 0, server changes it to 1 if auth=ok
 }Packet;
 
 typedef struct {							//Message to use in the message view

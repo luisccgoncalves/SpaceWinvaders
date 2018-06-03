@@ -125,7 +125,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
-	int i, xTemp, yTemp, valid;
+	int i, xTemp, yTemp, invalid, count;
 	//int startIndex = baseGame->max_invaders - baseGame->max_rand_invaders;
 	//int maxXpos = baseGame->xsize - 1;
 	//int maxYpos = (int)((baseGame->ysize - 1)*0.8);
@@ -139,6 +139,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				do {
 					xTemp = baseGame->invad[i].x;
 					yTemp = baseGame->invad[i].y;
+					count = 0;
 
 					switch (baseGame->invad[i].direction) {
 					case 0:
@@ -158,14 +159,19 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 						yTemp++;
 						break;
 					}
-					valid = ValidateInvaderPosition(baseGame, xTemp, yTemp);
-					if (valid) {
-						baseGame->invad[i].direction = RandomValue(3);
-					}
-				} while (valid);
 
-				baseGame->invad[i].x = xTemp;
-				baseGame->invad[i].y = yTemp;
+					UpdateCoords(baseGame, &xTemp, &yTemp);
+					
+					invalid = ValidateInvaderPosition(baseGame, xTemp, yTemp, i);
+					if (invalid) {
+						baseGame->invad[i].direction = RandomValue(3);
+						count++;
+					}
+				} while (invalid && count < 15);
+				if (count < 15) {
+					baseGame->invad[i].x = xTemp;
+					baseGame->invad[i].y = yTemp;
+				}
 
 				InvaderCollision(baseGame, &baseGame->invad[i]);
 			}
@@ -401,7 +407,7 @@ int InstantiateGame(GameData *game) {
 int ShipCollision(GameData *game, Ship *ship) {
 	int i = 0;
 	for (i = 0; i < game->max_bombs; i++) {
-		if (game->bomb[i].x == ship->x && game->bomb[i].y == ship->y && game->bomb[i].fired) {
+		if (game->bomb[i].x == ship->x && game->bomb[i].y == ship->y && game->bomb[i].fired) { //ERROR?
 			ResetBomb(&game->bomb[i]);
 			DamageShip(ship);
 			return 1;
@@ -533,16 +539,47 @@ int ResetBomb(InvaderBomb *in) {
 	return 1;
 }
 
-int ValidateInvaderPosition(GameData * game, int x, int y)
+int ValidateInvaderPosition(GameData * game, int x, int y, int index)
 {
 	int i;
+	//for (i = 0; i < game->max_invaders; i++) {
+	//	if (game->invad[i].x == x && game->invad[i].y == y && game->invad[i].hp > 0) {
+	//		return 1;
+	//	}
+	//}
 	for (i = 0; i < game->max_invaders; i++) {
-		if (game->invad[i].x == x && game->invad[i].y == y && game->invad[i].hp > 0) {
-			return 1;
+		if(i!=index){
+			if (!game->invad[i].rand_path) {
+				if (abs(game->invad[i].x - x) < 2 && abs(game->invad[i].y - y) < 2 && game->invad[i].hp > 0) {
+					return 1;
+				}
+			}
+			else {
+					if (game->invad[i].x == x && game->invad[i].y == y && game->invad[i].hp > 0) {
+						return 1;
+					}
+			}
 		}
 	}
-	if (x < 0 || y < 0|| x > game->xsize || y > game->ysize) {
-		return 1;
+
+	//if (x < 0 || y < 0|| x > game->xsize || y > game->ysize) {
+	//	return 1;
+	//}
+	return 0;
+}
+
+int UpdateCoords(GameData * game, int *x, int *y) {
+	if (*x < 0) {
+		*x = game->xsize;
+	}
+	if (*y < 0) {
+		*y = game->ysize;
+	}
+	if (*x > game->xsize) {
+		*x = 0;
+	}
+	if (*y > game->ysize ) {
+		*y = 0;
 	}
 	return 0;
 }

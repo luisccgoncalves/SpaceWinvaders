@@ -32,7 +32,7 @@
 #define MAX_SHOTS		5//25							//Maximum shots a defender can have on the screen at same time
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
-#define RAND_INVADER	20							//Number of random path invaders
+#define RAND_INVADER	50							//Number of random path invaders
 
 typedef struct {
 

@@ -538,11 +538,19 @@ int UpdateCoords(GameData * game, int *y) {
 	return 0;
 }
 
-int writeToReg(TCHAR *timestamp, int score) {
+int writeToReg(HighScore top10[], HighScore curScore) {
 
 	HKEY	key;
 	DWORD	dwDisposition;
 	LONG	lResult;
+
+	if (top10->score!=0) {
+		RegDeleteKeyEx(
+			HKEY_CURRENT_USER,
+			TEXT("Software\\SpaceWinvaders\\HighScores"),
+			KEY_WOW64_64KEY,
+			0);
+	}
 
 	lResult=RegCreateKeyEx(
 		HKEY_CURRENT_USER,									//A handle to an open registry key.
@@ -559,56 +567,91 @@ int writeToReg(TCHAR *timestamp, int score) {
 		return -1;
 	}
 
-	RegSetValueEx(											//Stores Username:score in the previously opended/created key.
-		key,												//A handle to an open registry key.
-		timestamp,											//The name of the value to be set.
-		0,													//This parameter is reserved and must be zero.
-		REG_DWORD,											//The type of data pointed to by the lpData parameter
-		(LPBYTE)&score,										//The data to be stored.
-		sizeof(DWORD)										//The size of the information pointed to by the lpData parameter, in bytes.
-	);													
+	for (int i = 0; i < 10; i++) {
+		RegSetValueEx(											//Stores Username:score in the previously opended/created key.
+			key,												//A handle to an open registry key.
+			top10[i].timestamp,											//The name of the value to be set.
+			0,													//This parameter is reserved and must be zero.
+			REG_DWORD,											//The type of data pointed to by the lpData parameter
+			(LPBYTE)top10[i].score,										//The data to be stored.
+			sizeof(DWORD)										//The size of the information pointed to by the lpData parameter, in bytes.
+		);
+	}
+												
 														
 	RegCloseKey(key);										//Closes the key
 
 	return 0;
 }
 
-int readFromReg() {
+int readFromReg(HighScore * top10) {
 
-	HKEY key;
-	TCHAR lpValueName[16383];
-	DWORD lpcchValueName = 16383;
-	DWORD lpData[30];
+	HKEY	key;
+	TCHAR	lpValueName[SMALL_BUFF];
+	DWORD	lpData;
+	DWORD	szValueName, szData, nRegValues;
 	LONG	lResult;
+	DWORD	dwDisposition;
 
-	lResult=RegOpenKeyEx(
+
+	for (int i = 0; i < 10; i++) {
+		_tcscpy_s(top10[i].timestamp, sizeof(TCHAR), L"\0");
+		top10[i].score = 0;
+	}
+
+	lResult = RegCreateKeyEx(
 		HKEY_CURRENT_USER,									//A handle to an open registry key.
 		TEXT("Software\\SpaceWinvaders\\HighScores"),		//The name of a subkey that this function opens or creates.
-		0,													//Specifies the option to apply when opening the key. Set this parameter to zero or REG_OPTION_OPEN_LINK
-		KEY_ALL_ACCESS,										//A mask that specifies the desired access rights to the key to be opened.
-		&key);												//A pointer to a variable that receives a handle to the opened key.
-	if(lResult!=ERROR_SUCCESS) {
-		_tprintf(TEXT("[Error] Opening registry key (%d)\n"), GetLastError());
+		0,													//This parameter is reserved and must be zero.
+		NULL,												//The user-defined class type of this key.
+		REG_OPTION_NON_VOLATILE,							//Options: This key is not volatile, information is preserved after restart.
+		KEY_ALL_ACCESS,										//A mask that specifies the access rights for the key to be created.
+		NULL,												//Inheritance: NULL= Not inherited
+		&key,												//A pointer to a variable that receives a handle to the opened or created key.
+		&dwDisposition);									//A pointer to a variable that receives REG_CREATED_NEW_KEY or REG_OPENED_EXISTING_KEY
+	if (lResult != ERROR_SUCCESS) {
+		_tprintf(TEXT("[Error] Creating registry key (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	for (int i = 0 ; lResult == ERROR_SUCCESS; i++) {
-		lpcchValueName = SMALL_BUFF*sizeof(TCHAR);
+	if (dwDisposition == REG_CREATED_NEW_KEY)
+		return 0;											//Registry was empty, nothing to copy
+
+	RegQueryInfoKey(
+		key,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		&nRegValues,
+		NULL,
+		NULL,
+		NULL,
+		NULL
+		);
+
+	_tprintf(TEXT("%d \n"), nRegValues);
+
+	for (int i = 0; lResult == ERROR_SUCCESS && i<nRegValues; i++) {
+		szValueName = SMALL_BUFF * sizeof(TCHAR);
+		szData = sizeof(DWORD);
 		lResult = RegEnumValue(
-			key,												//A handle to an open registry key.
-			i,													//The index of the value to be retrieved.
-			lpValueName, 										//A pointer to a buffer that receives the name of the value as a null-terminated string. 
-			&lpcchValueName, 									//
-			NULL, 												//
-			NULL, 												//
-			(LPBYTE)lpData,
-			&lpcchValueName);
-		//if (lResult != ERROR_SUCCESS) {
-		//	_tprintf(TEXT("[Error] Opening registry key (%d)\n"), lResult);
-		//	return -1;
-		//}
-		_tprintf(TEXT("%s\n"), lpValueName);
+			key,										//A handle to an open registry key.
+			i,											//The index of the value to be retrieved.
+			lpValueName, 								//A pointer to a buffer that receives the name of the value as a null-terminated string. 
+			&szValueName, 								//
+			NULL, 										//
+			NULL, 										//
+			&lpData,
+			&szData);
+		if (lResult == ERROR_SUCCESS) {
+			_tcscpy_s(top10[i].timestamp, SMALL_BUFF * sizeof(TCHAR), lpValueName);
+			top10[i].score = lpData;
+		}
 	}
+
 	return 0;
 }
 
@@ -616,8 +659,8 @@ int SystemTimeString(TCHAR * timeString) {
 
 	SYSTEMTIME time;
 
-	GetSystemTime(&time);
-	_stprintf_s(timeString,20,TEXT("%02d:%02d %02d/%02d/%d"),time.wHour, time.wMinute, time.wDay, time.wMonth, time.wYear);
+	GetLocalTime(&time);
+	_stprintf_s(timeString,SMALL_BUFF,TEXT("(%02d:%02d %02d/%02d/%d)"),time.wHour, time.wMinute, time.wDay, time.wMonth, time.wYear);
 
 	return 0;
 }

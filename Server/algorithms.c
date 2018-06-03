@@ -547,7 +547,7 @@ int ValidateInvaderPosition(GameData * game, int x, int y)
 	return 0;
 }
 
-int writeToReg(TCHAR *username, int score) {
+int writeToReg(TCHAR *timestamp, int score) {
 
 	HKEY	key;
 	DWORD	dwDisposition;
@@ -570,7 +570,7 @@ int writeToReg(TCHAR *username, int score) {
 
 	RegSetValueEx(											//Stores Username:score in the previously opended/created key.
 		key,												//A handle to an open registry key.
-		username,											//The name of the value to be set.
+		timestamp,											//The name of the value to be set.
 		0,													//This parameter is reserved and must be zero.
 		REG_DWORD,											//The type of data pointed to by the lpData parameter
 		(LPBYTE)&score,										//The data to be stored.
@@ -620,6 +620,17 @@ int readFromReg() {
 	}
 	return 0;
 }
+
+int SystemTimeString(TCHAR * timeString) {
+
+	SYSTEMTIME time;
+
+	GetSystemTime(&time);
+	_stprintf_s(timeString,20,TEXT("%02d:%02d %02d/%02d/%d"),time.wHour, time.wMinute, time.wDay, time.wMonth, time.wYear);
+
+	return 0;
+}
+
 
 
 

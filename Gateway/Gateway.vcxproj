@@ -147,12 +147,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="comm.c" />
     <ClCompile Include="gtw_main.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DLL\DLL.vcxproj">
       <Project>{9e21106a-e867-4267-aaf7-2f91606b957c}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="comm.h" />
+    <ClInclude Include="localStructs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,53 +1,8 @@
-#include <windows.h>
-#include <tchar.h>
-#include <stdio.h>
-#include <io.h>
-#include <fcntl.h>
-#include "../DLL/dll.h"
-#include "../Client/debug.h"
-
-
-typedef struct {
-	
-	HANDLE		hPipe;
-	int			*ThreadMustGoOn;
-
-	HANDLE		*hSMServerUpdate;
-	GameData	*localGameData;
-
-}PipeInstWrt;
-
-typedef struct {
-
-	HANDLE		hPipe;
-	int			*ThreadMustGoOn;
-
-	HANDLE		*heGotPacket;
-	Packet		*localPacket;
-
-}PipeInstRd;
+#include "comm.h"
 
 //#########################################################################################
 //############################   TEMP TEST   ##############################################
 //#########################################################################################
-
-/* 
-ToDo List - Please clean after every point.
-
-
--Implement the structure again, *not shore if done or not 
--remove the global writeReady, 
--Redo the writeGameData
--Remove the DEBUG prints
-*/
-
-//typedef struct {				//Don't think this is needed (right now at least)
-//	HANDLE heWriteReady;
-//	HANDLE heReadReady;
-//	HANDLE hPipe;
-//
-//} PipeComm;
-
 
 #define BUFSIZE 2048
 
@@ -377,86 +332,8 @@ void simulClient(Packet * localpacket) {
 	return;
 }
 
-DWORD WINAPI sendMessage(LPVOID tParam) {
-
-	SMCtrl		*cThread = (SMCtrl*)tParam;
-
-	Packet		localpacket;
-
-	int nextIn = 0;
-
-	while (cThread->ThreadMustGoOn) {
-
-		//Produces item
-		//simulClient(&localpacket);
-		WaitForSingleObject(cThread->heGotPacket, INFINITE);
-
-		_tprintf(TEXT("GOT KEY %d \n"), cThread->localPacket.instruction);
-		writePacket(cThread, &nextIn, cThread->localPacket);
-
-		//Puts it in buffer
-		//WaitForSingleObject(cThread->shVacant,INFINITE);
-		//WaitForSingleObject(cThread->mhProdConsMut, INFINITE);
-		//cThread->pSMemMessage->buffer[nextIn] = localpacket;
-		//nextIn = (nextIn + 1) % SMEM_BUFF;
-		//ReleaseMutex(cThread->mhProdConsMut);
-		//ReleaseSemaphore(cThread->shOccupied, 1, NULL);
-
-	}
-
-	return 0;
-}
-
-DWORD WINAPI ReadServerMsg(LPVOID tParam) {	
-
-	SMCtrl		*cThread = (SMCtrl*)tParam;
-	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
-	
-	//GameData	*gameMsg;
-	//gameMsg = malloc(sizeof(GameData));
-
-	cls(hStdout);
-	hidecursor();
-
-	while (cThread->ThreadMustGoOn) {
-
-		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
 
 
-		cThread->localGameData = consumeGameData(cThread->pSMemGameData, cThread->mhGameData);
-
-		//WaitForSingleObject(cThread->mhStructSync, INFINITE);
-
-		////gameMsg = cThread->pSMemGameData;
-		////Copies shared memory to a local data structure
-		//cThread->localGameData = *cThread->pSMemGameData;
-		//
-		//ReleaseMutex(cThread->mhStructSync);
-
-		//cls(hStdout);
-		//for (i = 0; i < MAX_INVADER; i++) {
-		//	if (cThread->localGameData.invad[i].hp) {
-		//		gotoxy(cThread->localGameData.invad[i].x, cThread->localGameData.invad[i].y);
-		//		if (cThread->localGameData.invad[i].rand_path)
-		//			_tprintf(TEXT("X"));
-		//		else
-		//			_tprintf(TEXT("W"));
-		//	}
-		//}
-
-		//if (cThread->pSMemGameData->bomb[0].y < 25) { //this needs another aproach (fired state?)
-		//	gotoxy(cThread->localGameData.bomb[0].x, cThread->localGameData.bomb[0].y);
-		//	_tprintf(TEXT("o"));
-		//}
-
-		//for (i = 0; i < MAX_PLAYERS; i++) {
-		//	gotoxy(cThread->localGameData.ship[i].x, cThread->localGameData.ship[i].y);
-		//	_tprintf(TEXT("Â"));
-		//}
-	}
-
-	return 0;
-}
 
 int _tmain(int argc, LPTSTR argv[]) {
 
@@ -600,12 +477,12 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	hSSendMessage = CreateThread(
-		NULL,					//Thread security attributes
-		0,						//Stack size
-		sendMessage,			//Thread function name
-		(LPVOID)&cThread,		//Thread parameter struct
-		0,						//Creation flags
-		&tSendMessageID);		//gets thread ID to close it afterwards
+		NULL,								//Thread security attributes
+		0,									//Stack size
+		sendPacketServer,					//Thread function name
+		(LPVOID)&cThread,					//Thread parameter struct
+		0,									//Creation flags
+		&tSendMessageID);					//gets thread ID to close it afterwards
 	if (hSSendMessage == NULL) {
 		_tprintf(TEXT("[Error] Creating thread SendMessage (%d) at Gateway\n"), GetLastError());
 	}

@@ -39,6 +39,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		else {
 			baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue((baseGame->xsize/2))+ (baseGame->xsize / 3);
 			baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
+			baseGame->invad[i].direction = 2;
 		}
 	}
 

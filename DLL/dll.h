@@ -31,6 +31,9 @@
 #define MAX_BOMBS		1//0							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 #define MAX_SHOTS		5//25							//Maximum shots a defender can have on the screen at same time
 
+#define INVADER_BY_ROW	11							//Number of maximum invaders by row
+#define RAND_INVADER	20							//Number of random path invaders
+
 typedef struct {
 
 	int		id;							//populated with pid of each client
@@ -56,6 +59,8 @@ typedef struct {
 	int		y;
 	int		x_init;			//ship x,y initial position
 	int		y_init;			//needed for relative coordinates
+
+	int		direction;		//ship movement
 
 	int		hp;				//ship hit points
 	int		rand_path;		//true for random trajectory, false for zig-zag

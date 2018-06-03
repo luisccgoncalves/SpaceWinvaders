@@ -26,8 +26,8 @@ int ResetShot(ShipShot *in);
 int ResetInvader(Invader *in);
 int ResetBomb(InvaderBomb *in);
 
-int ValidateInvaderPosition(GameData *game, int x, int y);
-
+int ValidateInvaderPosition(GameData *game, int x, int y, int index);
+int UpdateCoords(GameData * game, int *y);
 
 
 #endif /* ALGORITHMS_H */

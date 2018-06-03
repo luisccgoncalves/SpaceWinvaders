@@ -176,7 +176,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					if (invalid && count < 50) {
 						baseGame->invad[i].direction = RandomValue(3);
 						count++;
-					}if (count >= 50) {
+					}if (count >= 50) {  //if there is no option find another path
 						baseGame->invad[i].direction = RandomValue(3)+4;
 						count++;
 					}
@@ -185,6 +185,8 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					baseGame->invad[i].x = xTemp;
 					baseGame->invad[i].y = yTemp;
 				}
+				//if the game got here, then it does not move
+				//if we want we could kill the ship... last resort
 				//else {
 				//	baseGame->invad[i].hp = 0;
 				//}
@@ -247,7 +249,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 			baseGame->shot[shotNum].y = baseGame->ship[owner].y;
 			baseGame->shot[shotNum].fired = 1;
 
-			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired/*&&bombColDetect(&bomb,tParam)*/) {
+			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired) {
 
 				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
@@ -268,7 +270,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 int UpdateLocalShip(ClientMoves *move) {
 
 	DWORD			tShotLauncherID;
-	HANDLE			htShotLauncher;  //### THIS NEEDS A CONSTANTE VALUE
+	HANDLE			htShotLauncher;  
 
 	//validate action
 	switch (move->localPacket.instruction) {
@@ -446,8 +448,6 @@ int DamageShip(Ship *in) {
 		return 0;
 }
 
-
-
 int DamageInvader(Invader *in) {
 	in->hp--;
 	if (in->hp < 0) {
@@ -490,6 +490,7 @@ int ResetBomb(InvaderBomb *in) {
 int ValidateInvaderPosition(GameData * game, int x, int y, int index)
 {
 	int i;
+	int largerCoord = GetRegularLargerXPosition(game);
 
 	for (i = 0; i < game->max_invaders; i++) {
 		if(i!=index){
@@ -505,13 +506,26 @@ int ValidateInvaderPosition(GameData * game, int x, int y, int index)
 				if (x >= game->xsize) {
 					return 1;
 				}
-				if (x <= 0) {
+				if (x <= largerCoord+1) {
 					return 1;
 				}
 			}
 		}
 	}
 	return 0;
+}
+
+int GetRegularLargerXPosition(GameData *game) {
+	int x = 0;
+	int i = 0;
+
+	for (i = 0; i < game->max_invaders; i++) {
+		if (!game->invad[i].rand_path) {
+			if (x < game->invad[i].x)
+				x = game->invad[i].x;
+		}
+	}
+	return x;
 }
 
 int UpdateCoords(GameData * game, int *y) {

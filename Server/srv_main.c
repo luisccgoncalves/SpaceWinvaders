@@ -26,6 +26,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	SYSTEM_INFO		SysInfo;						//System info structure; Needed to extract dwAllocationGranularity
 	DWORD			dwSysGran;						//Stores system granularity (usually arround 65KB)
 
+	HighScore		curScore;
+
 	GetSystemInfo(&SysInfo);						//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
@@ -34,6 +36,16 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThread.SMemViewGateway.QuadPart = ((sizeof(SMMessage) / dwSysGran)*dwSysGran) + dwSysGran;
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
+
+	readFromReg(&cThread.localGameData.top10);
+
+	for (int i = 0; cThread.localGameData.top10[i].score!=0 && i<10; i++) {
+		_tprintf(TEXT("%s - %d\n"), cThread.localGameData.top10[i].timestamp, cThread.localGameData.top10[i].score);
+	}
+
+	SystemTimeString(curScore.timestamp);
+	curScore.score = 12345;
+	writeToReg(&cThread.localGameData.top10,curScore);
 
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
@@ -174,11 +186,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
 	}
 
-	TCHAR timeString[20];
-	SystemTimeString(&timeString);
-	_tprintf(TEXT("%s\n"), timeString);
-	writeToReg(TEXT("Armando"), 1235);
-	readFromReg();
 	//Enter to end thread and exit
 	_gettchar();
 

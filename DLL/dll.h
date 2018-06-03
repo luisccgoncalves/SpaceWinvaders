@@ -93,6 +93,11 @@ typedef struct {
 	int		speed;
 } ShipShot;
 
+typedef struct {
+	TCHAR	timestamp[SMALL_BUFF];
+	DWORD	score;
+}HighScore;
+
 typedef struct {							//Game data to use in pipes
 
 	/*
@@ -128,6 +133,7 @@ typedef struct {							//Game data to use in pipes
 	int max_rand_invaders;					//number of rand invaders
 	int max_bombs;							//max boms on game (%invaders?)
 
+	HighScore	top10[10];					//Top 10 highest scores
 } GameData;
 
 typedef struct {

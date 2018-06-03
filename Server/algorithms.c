@@ -520,35 +520,70 @@ int writeToReg(TCHAR *username, int score) {
 	LONG	lResult;
 
 	lResult=RegCreateKeyEx(
-		HKEY_CURRENT_USER,
-		TEXT("Software\\SpaceWinvaders\\HighScores"),
-		0,
-		NULL,
-		REG_OPTION_NON_VOLATILE, 
-		KEY_ALL_ACCESS, 
-		NULL, 
-		&key, 
-		&dwDisposition);
+		HKEY_CURRENT_USER,									//A handle to an open registry key.
+		TEXT("Software\\SpaceWinvaders\\HighScores"),		//The name of a subkey that this function opens or creates.
+		0,													//This parameter is reserved and must be zero.
+		NULL,												//The user-defined class type of this key.
+		REG_OPTION_NON_VOLATILE,							//Options: This key is not volatile, information is preserved after restart.
+		KEY_ALL_ACCESS,										//A mask that specifies the access rights for the key to be created.
+		NULL,												//Inheritance: NULL= Not inherited
+		&key,												//A pointer to a variable that receives a handle to the opened or created key.
+		&dwDisposition);									//A pointer to a variable that receives REG_CREATED_NEW_KEY or REG_OPENED_EXISTING_KEY
 	if (lResult!=ERROR_SUCCESS) {
 		_tprintf(TEXT("[Error] Creating registry key (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	if (dwDisposition == REG_CREATED_NEW_KEY) {
-		_tprintf(TEXT("Created a new key\n"));
+	RegSetValueEx(											//Stores Username:score in the previously opended/created key.
+		key,												//A handle to an open registry key.
+		username,											//The name of the value to be set.
+		0,													//This parameter is reserved and must be zero.
+		REG_DWORD,											//The type of data pointed to by the lpData parameter
+		(LPBYTE)&score,										//The data to be stored.
+		sizeof(DWORD)										//The size of the information pointed to by the lpData parameter, in bytes.
+	);													
+														
+	RegCloseKey(key);										//Closes the key
+
+	return 0;
+}
+
+int readFromReg() {
+
+	HKEY key;
+	TCHAR lpValueName[16383];
+	DWORD lpcchValueName = 16383;
+	DWORD lpData[30];
+	LONG	lResult;
+
+	lResult=RegOpenKeyEx(
+		HKEY_CURRENT_USER,									//A handle to an open registry key.
+		TEXT("Software\\SpaceWinvaders\\HighScores"),		//The name of a subkey that this function opens or creates.
+		0,													//Specifies the option to apply when opening the key. Set this parameter to zero or REG_OPTION_OPEN_LINK
+		KEY_ALL_ACCESS,										//A mask that specifies the desired access rights to the key to be opened.
+		&key);												//A pointer to a variable that receives a handle to the opened key.
+	if(lResult!=ERROR_SUCCESS) {
+		_tprintf(TEXT("[Error] Opening registry key (%d)\n"), GetLastError());
+		return -1;
 	}
 
-	RegSetValueEx(
-		key,
-		username,
-		0,
-		REG_DWORD,
-		(LPBYTE)&score,
-		sizeof(DWORD)
-		);
-
-	RegCloseKey(key);
-
+	for (int i = 0 ; lResult == ERROR_SUCCESS; i++) {
+		lpcchValueName = SMALL_BUFF*sizeof(TCHAR);
+		lResult = RegEnumValue(
+			key,												//A handle to an open registry key.
+			i,													//The index of the value to be retrieved.
+			lpValueName, 										//A pointer to a buffer that receives the name of the value as a null-terminated string. 
+			&lpcchValueName, 									//
+			NULL, 												//
+			NULL, 												//
+			(LPBYTE)lpData,
+			&lpcchValueName);
+		//if (lResult != ERROR_SUCCESS) {
+		//	_tprintf(TEXT("[Error] Opening registry key (%d)\n"), lResult);
+		//	return -1;
+		//}
+		_tprintf(TEXT("%s\n"), lpValueName);
+	}
 	return 0;
 }
 

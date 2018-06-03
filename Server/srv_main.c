@@ -175,7 +175,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	writeToReg(TEXT("Armando"), 1234);
-
+	readFromReg();
 	//Enter to end thread and exit
 	_gettchar();
 

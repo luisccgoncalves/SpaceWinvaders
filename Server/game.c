@@ -105,7 +105,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	while (sGTick->ThreadMustGoOn) {
 
 		Sleep(50);
-		spinnerSlash();
+		//spinnerSlash();
 		//FullCollision(sGTick->localGameData);
 
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);

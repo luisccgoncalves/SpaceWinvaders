@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <tchar.h>
+#include <time.h>
 
 
 #ifdef DLL_EXPORTS

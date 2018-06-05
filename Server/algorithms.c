@@ -195,7 +195,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 			}
 		}
 		ReleaseMutex(mhStructSync);
-		Sleep((baseGame->invaders_speed *0.9)*(*ThreadMustGoOn));
+		Sleep((DWORD)(baseGame->invaders_speed *0.9)*(*ThreadMustGoOn));
 	}
 
 	return 0;
@@ -538,7 +538,7 @@ int UpdateCoords(GameData * game, int *y) {
 	return 0;
 }
 
-int writeToReg(HighScore top10[], HighScore curScore) {
+int writeTop10ToReg(HighScore *top10) {
 
 	HKEY	key;
 	DWORD	dwDisposition;
@@ -626,7 +626,7 @@ int readTop10FromReg(HighScore * top10) {
 		&nRegValues, NULL, NULL, NULL, NULL);				//Pointer to be filled with the number of values stored
 
 	//Reads nRegvalues from registry to Top10 
-	for (int i = 0; lResult == ERROR_SUCCESS && i<nRegValues; i++) {
+	for (int i = 0; lResult == ERROR_SUCCESS && i<(int)nRegValues; i++) {
 		szValueNameRead = szValueName;
 		szDataRead = szData;
 		lResult = RegEnumValue(
@@ -636,10 +636,10 @@ int readTop10FromReg(HighScore * top10) {
 			&szValueNameRead, 							//Specifies the size of the buffer pointed to by the lpValueName parameter, in characters.
 			NULL, 										//Reserved
 			NULL, 										//A pointer to a variable that receives a code indicating the type of data
-			&lpData,									//A pointer to a buffer that receives the data for the value entry.
+			(LPBYTE)&lpData,							//A pointer to a buffer that receives the data for the value entry.
 			&szDataRead);								//A pointer to a variable that specifies the size of the buffer pointed to by the lpData parameter, in bytes.
 		if (lResult == ERROR_SUCCESS) {					//Copy the value to Top10
-			_tcscpy_s(top10[i].timestamp, szValueNameRead, /*lpValueName*/TEXT("abc"));
+			_tcscpy_s(top10[i].timestamp, szValueNameRead+1, lpValueName);
 			top10[i].score = lpData;
 			top10[i + 1].timestamp;
 			//_tprintf(TEXT("\7"));

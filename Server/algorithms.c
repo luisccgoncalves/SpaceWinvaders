@@ -639,9 +639,10 @@ int readTop10FromReg(HighScore * top10) {
 			&lpData,									//A pointer to a buffer that receives the data for the value entry.
 			&szDataRead);								//A pointer to a variable that specifies the size of the buffer pointed to by the lpData parameter, in bytes.
 		if (lResult == ERROR_SUCCESS) {					//Copy the value to Top10
-			_tcscpy_s(top10[i].timestamp, SMALL_BUFF * sizeof(TCHAR), lpValueName);
+			_tcscpy_s(top10[i].timestamp, szValueNameRead, /*lpValueName*/TEXT("abc"));
 			top10[i].score = lpData;
-			_tprintf(TEXT("\7"));
+			top10[i + 1].timestamp;
+			//_tprintf(TEXT("\7"));
 		}
 	}
 

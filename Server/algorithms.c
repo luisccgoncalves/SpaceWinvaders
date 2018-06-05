@@ -584,21 +584,24 @@ int writeToReg(HighScore top10[], HighScore curScore) {
 	return 0;
 }
 
-int readFromReg(HighScore * top10) {
+int readTop10FromReg(HighScore * top10) {
 
 	HKEY	key;
 	TCHAR	lpValueName[SMALL_BUFF];
 	DWORD	lpData;
-	DWORD	szValueName, szData, nRegValues;
+	DWORD	szValueNameRead, szValueName= SMALL_BUFF * sizeof(TCHAR);
+	DWORD	szDataRead, szData=sizeof(DWORD);
+	DWORD	nRegValues;
 	LONG	lResult;
 	DWORD	dwDisposition;
 
-
+	//Populates top 10 with no scores
 	for (int i = 0; i < 10; i++) {
-		_tcscpy_s(top10[i].timestamp, sizeof(TCHAR), L"\0");
+		_tcscpy_s(top10[i].timestamp, szValueName, TEXT("NO RECORD"));
 		top10[i].score = 0;
 	}
 
+	//Opens a key for writing, if non existant, creates a new one
 	lResult = RegCreateKeyEx(
 		HKEY_CURRENT_USER,									//A handle to an open registry key.
 		TEXT("Software\\SpaceWinvaders\\HighScores"),		//The name of a subkey that this function opens or creates.
@@ -614,41 +617,31 @@ int readFromReg(HighScore * top10) {
 		return -1;
 	}
 
-	if (dwDisposition == REG_CREATED_NEW_KEY)
-		return 0;											//Registry was empty, nothing to copy
+	if (dwDisposition == REG_CREATED_NEW_KEY)				//Registry was empty, nothing to copy
+		return 0;											//Returns an empty top 10
 
+	//Query how many values the subkey has, sprinkle it with a few NULLs for good measure
 	RegQueryInfoKey(
-		key,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		&nRegValues,
-		NULL,
-		NULL,
-		NULL,
-		NULL
-		);
+		key, NULL, NULL, NULL, NULL, NULL, NULL,			//Key to check
+		&nRegValues, NULL, NULL, NULL, NULL);				//Pointer to be filled with the number of values stored
 
-	_tprintf(TEXT("%d \n"), nRegValues);
-
+	//Reads nRegvalues from registry to Top10 
 	for (int i = 0; lResult == ERROR_SUCCESS && i<nRegValues; i++) {
-		szValueName = SMALL_BUFF * sizeof(TCHAR);
-		szData = sizeof(DWORD);
+		szValueNameRead = szValueName;
+		szDataRead = szData;
 		lResult = RegEnumValue(
 			key,										//A handle to an open registry key.
 			i,											//The index of the value to be retrieved.
 			lpValueName, 								//A pointer to a buffer that receives the name of the value as a null-terminated string. 
-			&szValueName, 								//
-			NULL, 										//
-			NULL, 										//
-			&lpData,
-			&szData);
-		if (lResult == ERROR_SUCCESS) {
+			&szValueNameRead, 							//Specifies the size of the buffer pointed to by the lpValueName parameter, in characters.
+			NULL, 										//Reserved
+			NULL, 										//A pointer to a variable that receives a code indicating the type of data
+			&lpData,									//A pointer to a buffer that receives the data for the value entry.
+			&szDataRead);								//A pointer to a variable that specifies the size of the buffer pointed to by the lpData parameter, in bytes.
+		if (lResult == ERROR_SUCCESS) {					//Copy the value to Top10
 			_tcscpy_s(top10[i].timestamp, SMALL_BUFF * sizeof(TCHAR), lpValueName);
 			top10[i].score = lpData;
+			_tprintf(TEXT("\7"));
 		}
 	}
 

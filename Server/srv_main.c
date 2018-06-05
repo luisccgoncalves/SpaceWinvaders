@@ -37,15 +37,15 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
-	readFromReg(&cThread.localGameData.top10);
+	readTop10FromReg(&cThread.localGameData.top10);
 
-	for (int i = 0; cThread.localGameData.top10[i].score!=0 && i<10; i++) {
+	for (int i = 0; /*cThread.localGameData.top10[i].score!=0 &&*/ i<10; i++) {
 		_tprintf(TEXT("%s - %d\n"), cThread.localGameData.top10[i].timestamp, cThread.localGameData.top10[i].score);
 	}
 
 	SystemTimeString(curScore.timestamp);
 	curScore.score = 12345;
-	writeToReg(&cThread.localGameData.top10,curScore);
+	//writeToReg(&cThread.localGameData.top10,curScore);
 
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position

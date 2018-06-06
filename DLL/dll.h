@@ -17,7 +17,6 @@
 #define	EVE_BOOT		TEXT("LetsBoot")
 #define EVE_1ST_PIPE	TEXT("1stPipeInstance")
 #define	EVE_SERV_UP		TEXT("SMServerUpdate")
-#define	EVE_GATE_UP		TEXT("SMGatewayUpdate")
 
 #define PIPE_NAME		TEXT("\\\\.\\pipe\\SpaceWPipe")
 #define REG_SUBKEY		TEXT("Software\\SpaceWinvaders\\HighScores")
@@ -159,9 +158,8 @@ typedef struct {
 	LARGE_INTEGER	SMemSize;				//Stores the size of the mapped file
 
 	HANDLE			hSMServerUpdate;		//Handle to event. Warns gateway about updates in shared memory
-	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
 
-	HANDLE			hSMGatewayUpdate;		//Handle to event. Warns server about updates in shared memory
+	LARGE_INTEGER	SMemViewServer;			//Stores the size of the view
 	LARGE_INTEGER	SMemViewGateway;		//Stores the size of the view
 	
 	GameData		*pSMemGameData;			//Pointer to shared memory's structure server>gateway
@@ -183,6 +181,7 @@ typedef struct {
 } SMCtrl;
 
 typedef struct {							//Message to use in pipes
+
 	TCHAR		username[SMALL_BUFF];		//string		
 	TCHAR		password[SMALL_BUFF];		//string
 	int			logged;						//BOOL

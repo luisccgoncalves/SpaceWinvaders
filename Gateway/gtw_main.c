@@ -417,15 +417,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cThread.hSMGatewayUpdate = OpenEvent(	//Opens the event to warn server that the shared memoy is mapped
-		EVENT_ALL_ACCESS, 							//Desired access
-		FALSE, 										//Inherit handle by child processes
-		EVE_GATE_UP);								//Event name
-	if (cThread.hSMGatewayUpdate == NULL) {
-		_tprintf(TEXT("[Error] Event gateway update (%d)\n"), GetLastError());
-		return ;
-	}
-
 	cThread.heGotPacket = CreateEvent(
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)

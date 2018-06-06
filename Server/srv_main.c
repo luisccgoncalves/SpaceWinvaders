@@ -94,16 +94,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
-		NULL, 										//Event attributes
-		FALSE, 										//Manual reset (TRUE for auto-reset)
-		FALSE, 										//Initial state
-		EVE_GATE_UP);								//Event name
-	if (cThread.hSMGatewayUpdate == NULL) {
-		_tprintf(TEXT("[Error] Event gateway update (%d)\n"), GetLastError());
-		return -1;
-	}
-
 	//Populate sGTick's pointers
 	//InstantiateGame(&cThread.game);
 
@@ -183,10 +173,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	WaitForSingleObject(htGame, INFINITE);			//Waits for thread to exit
 	WaitForSingleObject(htGTick, INFINITE);			//Waits for thread to exit
 
-	SetEvent(cThread.hSMGatewayUpdate);				//This isn't used anymore ##############################
 	//needs to interrupt prodcons algorithm
 	WaitForSingleObject(htGReadMsg, INFINITE);		//Waits for thread to exit
-
 
 	UnmapViewOfFile(cThread.pSMemGameData);			//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.pSMemMessage);			//Unmaps view of shared memory

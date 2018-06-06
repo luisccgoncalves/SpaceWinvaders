@@ -324,13 +324,13 @@ int InstantiateGame(GameData *game) {
 	game->ysize = YSIZE;
 
 	game->invaders_bombs_speed = INVADER_SPEED;		// not correct
-	game->invaders_speed = INVADER_SPEED;		// Base speed for invader
-	game->max_bombs = MAX_BOMBS;			// Base max num of bombs at same time
-	game->max_invaders = MAX_INVADER;		// Base num of invaders in the field
-	game->max_rand_invaders = RAND_INVADER;		// Base num of invaders in the field
-	game->num_players = MAX_PLAYERS;		// Base num of players
-	game->power_up_speed = INVADER_SPEED;		// Base speed for power up
-	game->ship_shot_speed = INVADER_SPEED;		// Base speed for defender ship
+	game->invaders_speed = INVADER_SPEED;			// Base speed for invader
+	game->max_bombs = MAX_BOMBS;					// Base max num of bombs at same time
+	game->max_invaders = MAX_INVADER;				// Base num of invaders in the field
+	game->max_rand_invaders = RAND_INVADER;			// Base num of invaders in the field
+	game->num_players = MAX_PLAYERS;				// Base num of players
+	game->power_up_speed = INVADER_SPEED;			// Base speed for power up
+	game->ship_shot_speed = INVADER_SPEED;			// Base speed for defender ship
 
 	for (i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status
 		ResetBomb(&game->bomb[i]);

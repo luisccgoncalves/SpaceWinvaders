@@ -207,19 +207,21 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	ClientMoves move;
 	move.game = &cThread->localGameData;
 	move.TheadmustGoOn = &cThread->ThreadMustGoOn;
+	move.mhStructSync = &cThread->mhStructSync;
 
 	int	nextOut = 0;
 
 
 	while (cThread->ThreadMustGoOn) {
 
-		//Consume item from buffer
-		move.localPacket = consumePacket(cThread, &nextOut);  //Problem here: No exit condition
+		//Consume item from buffer (gets a packet with a client instruction)
+		move.localPacket = consumePacket(cThread, &nextOut);	//Problem here: No exit condition
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
-		UpdateLocalShip(&move);
-		ShipCollision(move.game, &move.game->ship[move.localPacket.owner]);
+		UpdateLocalShip(&move);									//Translates instructions into actions (movement, shots...)
+		ShipCollision(move.game,								//Tests if those actions are valid
+			&move.game->ship[move.localPacket.owner]);
 
 		ReleaseMutex(cThread->mhStructSync);
 
@@ -230,11 +232,11 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 
 DWORD WINAPI ShotMovement(LPVOID tParam) {
 
-	int * ThreadMustGoOn = ((ClientMoves *)tParam)->TheadmustGoOn;
-	GameData *baseGame = ((ClientMoves *)tParam)->game;
-	int owner = ((ClientMoves*)tParam)->localPacket.owner;
-
-	int shotNum = -1;
+	int			*ThreadMustGoOn = ((ClientMoves *)tParam)->TheadmustGoOn;
+	GameData	*baseGame = ((ClientMoves *)tParam)->game;
+	int			owner = ((ClientMoves*)tParam)->localPacket.owner;
+	HANDLE		*mhStructSync = ((ClientMoves*)tParam)->mhStructSync;
+	int			shotNum = -1;
 		
 		for (int i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a shot
 			if (!baseGame->shot[i].fired) {
@@ -252,8 +254,11 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired) {
 
 				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
+
+					WaitForSingleObject(mhStructSync, INFINITE);
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
 					ShotCollision(baseGame, &baseGame->shot[shotNum]);
+					ReleaseMutex(mhStructSync);
 					Sleep(((baseGame->invaders_bombs_speed / 4)) * (*ThreadMustGoOn));
 
 				}
@@ -271,7 +276,7 @@ int UpdateLocalShip(ClientMoves *move) {
 
 	DWORD			tShotLauncherID;
 	HANDLE			htShotLauncher;  
-
+	
 	//validate action
 	switch (move->localPacket.instruction) {
 	case 0:

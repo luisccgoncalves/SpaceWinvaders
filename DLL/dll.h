@@ -177,7 +177,7 @@ typedef struct {
 
 	GameData		localGameData;			//structure that holds the local game
 
-	HANDLE			heGotPacket;
+	HANDLE			heGotPacket;			
 	Packet			localPacket;
 
 } SMCtrl;

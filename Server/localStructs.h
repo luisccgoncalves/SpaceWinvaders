@@ -20,9 +20,10 @@ typedef struct {
 }GTickStruct;
 
 typedef struct {
-	GameData	*game;
-	Packet		localPacket;
-	int			*TheadmustGoOn;
+	GameData	*game;								//Pointer to localGamedata
+	Packet		localPacket;						//stores a client packet to be translated into a game action
+	int			*TheadmustGoOn;						//Pointer to cThread's exit condition
+	HANDLE		*mhStructSync;						//Pointer to cThread's structSync mutex
 } ClientMoves;
 
 #endif /* LOCALSTRUCTS_H */

@@ -20,10 +20,6 @@ DWORD WINAPI sendPacketServer(LPVOID tParam) {
 }
 
 DWORD WINAPI ReadServerMsg(LPVOID tParam) {
-	/*
-	This message calls the DLL function asdfasdas
-	and sends a packet to the server trhough the Shared Memmory
-	*/
 
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 

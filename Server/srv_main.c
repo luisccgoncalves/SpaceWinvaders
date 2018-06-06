@@ -26,8 +26,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	SYSTEM_INFO		SysInfo;						//System info structure; Needed to extract dwAllocationGranularity
 	DWORD			dwSysGran;						//Stores system granularity (usually arround 65KB)
 
-	HighScore		curScore;
-
 	GetSystemInfo(&SysInfo);						//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;	//Used to get system granularity
 
@@ -37,16 +35,9 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
-	readTop10FromReg(cThread.localGameData.top10);
+	readTop10FromReg(cThread.localGameData.top10); //Loads highscores from windows registry
 
-	for (int i = 0; /*cThread.localGameData.top10[i].score!=0 &&*/ i<10; i++) {
-		_tprintf(TEXT("%s - %d\n"), cThread.localGameData.top10[i].timestamp, cThread.localGameData.top10[i].score);
-	}
-
-	SystemTimeString(curScore.timestamp);
-	curScore.score = 12345;
-	_tprintf(TEXT("%s - %d\n"), curScore.timestamp, curScore.score);
-	//writeToReg(&cThread.localGameData.top10,curScore);
+	cThread.localGameData.score = 321;
 
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position

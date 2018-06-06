@@ -20,6 +20,7 @@
 #define	EVE_GATE_UP		TEXT("SMGatewayUpdate")
 
 #define PIPE_NAME		TEXT("\\\\.\\pipe\\SpaceWPipe")
+#define REG_SUBKEY		TEXT("Software\\SpaceWinvaders\\HighScores")
 
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define	SMEM_BUFF		10
@@ -42,7 +43,7 @@ typedef struct {
 	TCHAR	password[SMALL_BUFF];		//unhashed password
 	int		high_score;
 
-	int		score;
+	//int		score;		//Moving this to GameData
 	int		lives;			//ship is a one shot kill, but has several lives
 	int		x;				//ship x,y position
 	int		y;
@@ -134,6 +135,7 @@ typedef struct {							//Game data to use in pipes
 	int max_rand_invaders;					//number of rand invaders
 	int max_bombs;							//max boms on game (%invaders?)
 
+	int	score;
 	HighScore	top10[10];					//Top 10 highest scores
 } GameData;
 

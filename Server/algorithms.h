@@ -13,8 +13,6 @@ DWORD WINAPI ShotMovement(LPVOID tParam);
 int UpdateLocalShip(ClientMoves *move);
 int InstantiateGame(GameData *game);
 
-int FullCollision(GameData *game);
-
 int ShipCollision(GameData *game, Ship *ship);
 int ShotCollision(GameData *game, ShipShot *shot);
 int InvaderCollision(GameData *game, Invader *invader);
@@ -28,8 +26,14 @@ int ResetShot(ShipShot *in);
 int ResetInvader(Invader *in);
 int ResetBomb(InvaderBomb *in);
 
-int ValidateInvaderPosition(GameData *game, int x, int y);
+int ValidateInvaderPosition(GameData *game, int x, int y, int index);
+int GetRegularLargerXPosition(GameData *game);
+int UpdateCoords(GameData * game, int *y);
 
-
+int writeTop10ToReg(HighScore *top10);
+int readTop10FromReg(HighScore * top10);
+int SystemTimeString(TCHAR * timeString);
+int addScoretoTop10(int score, HighScore * top10);
+int sortTop10(HighScore *top10);
 
 #endif /* ALGORITHMS_H */

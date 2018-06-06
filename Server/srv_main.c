@@ -35,6 +35,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	//No rounding needed,  parts are already multiples
 	cThread.SMemSize.QuadPart = cThread.SMemViewServer.QuadPart + cThread.SMemViewGateway.QuadPart;
 
+	readTop10FromReg(cThread.localGameData.top10); //Loads highscores from windows registry
+
 	cThread.ThreadMustGoOn = 1;						//Preps thread to run position
 	sGTick.ThreadMustGoOn = 1;						//Preps thread to run position
 
@@ -92,9 +94,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-
-	//##############################################################################################################
-	//This does not make sense, only gametick and gateway will use this, no need to be on cThread anymore... I think
 	cThread.hSMGatewayUpdate = CreateEvent(	//Creates the event to warn gateway that the shared memoy is mapped
 		NULL, 										//Event attributes
 		FALSE, 										//Manual reset (TRUE for auto-reset)
@@ -115,7 +114,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Creates a view of the desired part <GameDataView>
-
 	if (mapGameDataView(&cThread, FILE_MAP_WRITE) == -1) {				//Checks for errors
 		_tprintf(TEXT("[Error] Mapping GameData view (%d) at Server\n"), GetLastError());
 		return -1;
@@ -129,7 +127,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	sGTick.mhGameData = cThread.mhStructSync;			//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread.hSMServerUpdate;				//Copies Event to warn gateway of memory updates  
-	sGTick.localGameData = &cThread.localGameData;			//Copies gameData address to GTick
+	sGTick.localGameData = &cThread.localGameData;		//Copies gameData address to GTick
 	sGTick.smGameData = cThread.pSMemGameData;			//Copies the sharedmemory pointer to GTick
 
 	SetEvent(hCanBootNow);								//Warns gateway that Shared memory is mapped

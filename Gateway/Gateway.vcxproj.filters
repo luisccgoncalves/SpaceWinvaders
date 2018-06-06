@@ -18,5 +18,16 @@
     <ClCompile Include="gtw_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="comm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="comm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="localStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

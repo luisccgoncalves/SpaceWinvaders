@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <tchar.h>
+#include <time.h>
 
 
 #ifdef DLL_EXPORTS
@@ -19,6 +20,7 @@
 #define	EVE_GATE_UP		TEXT("SMGatewayUpdate")
 
 #define PIPE_NAME		TEXT("\\\\.\\pipe\\SpaceWPipe")
+#define REG_SUBKEY		TEXT("Software\\SpaceWinvaders\\HighScores")
 
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define	SMEM_BUFF		10
@@ -28,8 +30,11 @@
 #define MAX_PLAYERS		2							//Maximum number of concurrent players
 #define MAX_INVADER		100							//Maximum invaders by level
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
-#define MAX_BOMBS		1//0							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
+#define MAX_BOMBS		10//0							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 #define MAX_SHOTS		5//25							//Maximum shots a defender can have on the screen at same time
+
+#define INVADER_BY_ROW	11							//Number of maximum invaders by row
+#define RAND_INVADER	50							//Number of random path invaders
 
 typedef struct {
 
@@ -38,7 +43,7 @@ typedef struct {
 	TCHAR	password[SMALL_BUFF];		//unhashed password
 	int		high_score;
 
-	int		score;
+	//int		score;		//Moving this to GameData
 	int		lives;			//ship is a one shot kill, but has several lives
 	int		x;				//ship x,y position
 	int		y;
@@ -56,6 +61,8 @@ typedef struct {
 	int		y;
 	int		x_init;			//ship x,y initial position
 	int		y_init;			//needed for relative coordinates
+
+	int		direction;		//ship movement
 
 	int		hp;				//ship hit points
 	int		rand_path;		//true for random trajectory, false for zig-zag
@@ -88,6 +95,11 @@ typedef struct {
 	int		speed;
 } ShipShot;
 
+typedef struct {
+	TCHAR	timestamp[SMALL_BUFF];
+	DWORD	score;
+}HighScore;
+
 typedef struct {							//Game data to use in pipes
 
 	/*
@@ -95,11 +107,12 @@ typedef struct {							//Game data to use in pipes
 
 	talk / discuss this
 	*/
+	//int			gameRunning;			
 
 	Invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
 	Ship			ship[MAX_PLAYERS];		//number of ships/players in game
-	ShipShot		shot[MAX_SHOTS];				//temporary number of shots
+	ShipShot		shot[MAX_SHOTS];		//temporary number of shots
 	PowerUp			pUp;					//One powerUp only at any given time
 
 	int xsize;								//max y size of play area
@@ -122,15 +135,17 @@ typedef struct {							//Game data to use in pipes
 	int max_rand_invaders;					//number of rand invaders
 	int max_bombs;							//max boms on game (%invaders?)
 
+	int	score;
+	HighScore	top10[10];					//Top 10 highest scores
 } GameData;
 
 typedef struct {
-	//int		msgID;						//probably unnecessary - event driven approach	
 	int		owner;							//player1, player2, server, gateway, etc..
 	int		instruction;					//up, down, right, left, fire, shutdown,etc...	
 
-	//maybe a string?
-	//if this aproach is to follow we may need to consider constants
+	//debatable
+	TCHAR	text; 
+	int		auth;  //starts at 0, server changes it to 1 if auth=ok
 }Packet;
 
 typedef struct {							//Message to use in the message view
@@ -162,7 +177,7 @@ typedef struct {
 
 	GameData		localGameData;			//structure that holds the local game
 
-	HANDLE			heGotPacket;
+	HANDLE			heGotPacket;			
 	Packet			localPacket;
 
 } SMCtrl;

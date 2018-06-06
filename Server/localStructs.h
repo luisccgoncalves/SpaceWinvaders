@@ -10,9 +10,6 @@
 
 #include "../DLL/dll.h"
 
-#define INVADER_BY_ROW	11							//Number of maximum invaders by row
-#define RAND_INVADER	20							//Number of random path invaders
-
 typedef struct {
 	HANDLE			*hTick;							//Handle to event. Warns gateway about updates in shared memory
 	int				ThreadMustGoOn;
@@ -23,9 +20,10 @@ typedef struct {
 }GTickStruct;
 
 typedef struct {
-	GameData	*game;
-	Packet		localPacket;
-	int			*TheadmustGoOn;
+	GameData	*game;								//Pointer to localGamedata
+	Packet		localPacket;						//stores a client packet to be translated into a game action
+	int			*TheadmustGoOn;						//Pointer to cThread's exit condition
+	HANDLE		*mhStructSync;						//Pointer to cThread's structSync mutex
 } ClientMoves;
 
 #endif /* LOCALSTRUCTS_H */

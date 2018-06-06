@@ -37,8 +37,12 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 			baseGame->invad[i].y = baseGame->invad[i].y_init = i / INVADER_BY_ROW;
 		}
 		else {
-			baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue((baseGame->xsize/2))+ (baseGame->xsize / 3);
-			baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
+			do {
+				baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue((baseGame->xsize / 2)) + (baseGame->xsize / 3);
+				baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
+				baseGame->invad[i].direction = RandomValue(3);
+
+			} while (ValidateInvaderPosition(baseGame, baseGame->invad[i].x, baseGame->invad[i].y, i));
 		}
 	}
 
@@ -50,7 +54,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < baseGame->num_players; i++) {
 
-		baseGame->ship[i].x = 15;
+		baseGame->ship[i].x = i+RandomValue(baseGame->xsize/4);
 		baseGame->ship[i].y = 23;
 		baseGame->ship[i].lives = 0;
 	}
@@ -106,7 +110,6 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 		Sleep(50);
 		spinnerSlash();
-		//FullCollision(sGTick->localGameData);
 
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 

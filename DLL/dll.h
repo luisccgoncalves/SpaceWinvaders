@@ -29,7 +29,8 @@
 #define MAX_PLAYERS		2							//Maximum number of concurrent players
 #define MAX_INVADER		100							//Maximum invaders by level
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
-#define MAX_BOMBS		10//0							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
+#define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
+#define MAX_BOMBS		10							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 #define MAX_SHOTS		25							//Maximum shots a defender can have on the screen at same time
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
@@ -111,7 +112,7 @@ typedef struct {							//Game data to use in pipes
 	Invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
 	Ship			ship[MAX_PLAYERS];		//number of ships/players in game
-	ShipShot		shot[MAX_SHOTS];		//temporary number of shots
+	ShipShot		shot[MAX_SHOTS];		//temporary number of  
 	PowerUp			pUp;					//One powerUp only at any given time
 
 	int xsize;								//max y size of play area
@@ -124,9 +125,7 @@ typedef struct {							//Game data to use in pipes
 	int projectiles_speed;					//bombs, shots and powerUps base speed
 
 	/*Eventualy find a way to use them from projectiles speed*/
-	int invaders_bombs_speed;
 	int ship_shot_speed;					//defenders shot speed
-	int power_up_speed;
 	/**/
 
 	int num_players;						//number of players per game

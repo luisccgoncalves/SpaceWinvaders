@@ -26,6 +26,18 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 
 			WaitForSingleObject(cThread->mhStructSync,INFINITE);
 			cThread->localGameData.pUp.y = i;
+
+			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
+				//for loop
+				if (cThread->localGameData.pUp.x == cThread->localGameData.ship[0].x &&
+					cThread->localGameData.pUp.y == cThread->localGameData.ship[0].y) {
+					//PowerupShip(cThread->localGameData.ship[0]);
+					_tprintf(TEXT("\7"));
+					//exit condition
+				}
+
+			}
+
 			ReleaseMutex(cThread->mhStructSync);
 			Sleep(cThread->localGameData.projectiles_speed*(*ThreadMustGoOn));		//Pratical assignment pdf, page 3, 4th rule
 		}
@@ -403,8 +415,9 @@ int ShipCollision(GameData *game, Ship *ship) {
 		}
 
 		//if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
-		//	//Update game status? like lauch a thread reset after a sleep?
-		//DamageShip(ship);
+		////	//Update game status? like lauch a thread reset after a sleep?
+		////DamageShip(ship);
+		//	_tprintf(TEXT("\7"));
 		//	return 1;
 		//}
 	}

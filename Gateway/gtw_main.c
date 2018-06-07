@@ -135,118 +135,7 @@ int readPipePacket(HANDLE hPipe, HANDLE readReady, Packet * pipePacket) { //prob
 	return 0;
 }
 
-DWORD WINAPI CreatePipes(LPVOID tParam) {
 
-	SMCtrl		*cThread= (SMCtrl*)tParam;
-	LPTSTR		lpsPipeName = PIPE_NAME;
-
-	HANDLE		h1stPipeInst;
-	HANDLE		htPipeConnectW[40] = { NULL }; //Update this
-	HANDLE		htPipeConnectR[40] = { NULL }; //Update this
-	int			threadn = 0;
-
-	HANDLE		hPipe = INVALID_HANDLE_VALUE;
-
-	BOOL		fConnected = FALSE;
-
-	PipeInstWrt	pipeStructWrite;
-	PipeInstRd	pipeStructRead;
-
-	pipeStructWrite.ThreadMustGoOn = &cThread->ThreadMustGoOn;
-	pipeStructWrite.hSMServerUpdate = cThread->hSMServerUpdate;
-	pipeStructWrite.mhGameData = cThread->mhGameData;
-	pipeStructWrite.pSMemGameData = cThread->pSMemGameData;
-
-	pipeStructRead.ThreadMustGoOn = &cThread->ThreadMustGoOn;
-	pipeStructRead.localPacket = &cThread->localPacket;
-	pipeStructRead.heGotPacket = &cThread->heGotPacket;
-
-	h1stPipeInst = CreateEvent(				//Creates the event to warn clients that the 1st pipe instance was created
-		NULL,										//Event attributes
-		TRUE,										//Manual reset (TRUE for auto-reset)
-		FALSE,										//Initial state
-		EVE_1ST_PIPE);								//Event name
-	if (h1stPipeInst  == NULL) {
-		_tprintf(TEXT("[Error] Event 1st pipe instance (%d)\n"), GetLastError());
-		return -1;
-	}
-
-	while (cThread->ThreadMustGoOn) {
-	
-		hPipe = CreateNamedPipe(
-			lpsPipeName,
-			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT|	PIPE_ACCEPT_REMOTE_CLIENTS,
-			MAX_PLAYERS,
-			BUFSIZE,
-			BUFSIZE,
-			5000,														//5 secs timeout
-			NULL);
-
-		if (GetLastError() == ERROR_PIPE_BUSY) {
-			_tprintf(TEXT("[Error] Max players Reached\n"));
-			//WaitForSingleObject until threadn<MAX_PLAYERS
-			return -1;
-		}
-		if (hPipe == INVALID_HANDLE_VALUE) {
-			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
-			return -1;
-		}
-
-		if(!threadn)
-			SetEvent(h1stPipeInst);
-
-		fConnected = ConnectNamedPipe(hPipe, NULL) ? 
-						TRUE : 
-						(GetLastError() == ERROR_PIPE_CONNECTED);
-		
-		if (fConnected) {
-
-			_tprintf(TEXT("[DEBUG] Someone connected!\n"));
-
-			pipeStructWrite.hPipe = hPipe;
-			pipeStructRead.hPipe = hPipe;
-
-			htPipeConnectR[threadn] = CreateThread(
-				NULL,									//Thread security attributes
-				0,										//Stack size
-				instanceThreadRead,						//Thread function name
-				(LPVOID)&pipeStructRead,				//Thread parameter struct
-				0,										//Creation flags
-				NULL);									//gets thread ID to close it afterwards
-			if (htPipeConnectR[threadn] == NULL) {
-				_tprintf(TEXT("[Error] Creating thread ConnectPipesThreadRead (%d) at Gateway\n"), GetLastError());
-				return -1;
-			}
-			else {
-
-				htPipeConnectW[threadn] = CreateThread(
-					NULL,								//Thread security attributes
-					0,									//Stack size
-					instanceThreadWrite,				//Thread function name
-					(LPVOID)&pipeStructWrite,			//Thread parameter struct
-					0,									//Creation flags
-					NULL);								//gets thread ID to close it afterwards
-				if (htPipeConnectW[threadn] == NULL) {
-					_tprintf(TEXT("[Error] Creating thread ConnectPipesThreadWrite (%d) at Gateway\n"), GetLastError());
-					return -1;
-				}
-				else {
-					threadn++;
-				}
-			}
-		}
-		else {
-			CloseHandle(hPipe);							//Frees this pipe instance
-		}
-
-	}
-
-	WaitForMultipleObjects(threadn, htPipeConnectW, TRUE, INFINITE);
-	WaitForMultipleObjects(threadn, htPipeConnectR, TRUE, INFINITE);
-
-	return 0;
-}
 
 
 //#########################################################################################
@@ -278,8 +167,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	SMCtrl		cThread;
 	HANDLE		hCanBootNow;
 
-	HANDLE		hSSendMessage;
-	DWORD		tSendMessageID;
+	//HANDLE		hSSendMessage;
+	//DWORD		tSendMessageID;
 
 	HANDLE		htCreatePipes;
 	DWORD		tCreatePipesID;
@@ -386,20 +275,20 @@ int _tmain(int argc, LPTSTR argv[]) {
 		_tprintf(TEXT("[Error] Creating thread CreatePipes (%d) at Gateway\n"), GetLastError());
 	}
 
-	hSSendMessage = CreateThread(
-		NULL,								//Thread security attributes
-		0,									//Stack size
-		sendPacketServer,					//Thread function name
-		(LPVOID)&cThread,					//Thread parameter struct
-		0,									//Creation flags
-		&tSendMessageID);					//gets thread ID to close it afterwards
-	if (hSSendMessage == NULL) {
-		_tprintf(TEXT("[Error] Creating thread SendMessage (%d) at Gateway\n"), GetLastError());
-	}
+	//hSSendMessage = CreateThread(
+	//	NULL,								//Thread security attributes
+	//	0,									//Stack size
+	//	sendPacketServer,					//Thread function name
+	//	(LPVOID)&cThread,					//Thread parameter struct
+	//	0,									//Creation flags
+	//	&tSendMessageID);					//gets thread ID to close it afterwards
+	//if (hSSendMessage == NULL) {
+	//	_tprintf(TEXT("[Error] Creating thread SendMessage (%d) at Gateway\n"), GetLastError());
+	//}
 
 	//cThread.ThreadMustGoOn = 0;
 
-	WaitForSingleObject(hSSendMessage, INFINITE);
+	//WaitForSingleObject(hSSendMessage, INFINITE);
 	WaitForSingleObject(htCreatePipes, INFINITE);
 
 	UnmapViewOfFile(cThread.pSMemGameData);		//Unmaps view of shared memory

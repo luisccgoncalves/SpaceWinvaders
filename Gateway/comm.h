@@ -3,7 +3,7 @@
 
 #include "localStructs.h"
 
-DWORD WINAPI sendPacketServer(LPVOID tParam);
+//DWORD WINAPI sendPacketServer(LPVOID tParam);
 //DWORD WINAPI ReadServerMsg(LPVOID tParam);
 
 DWORD WINAPI instanceThreadRead(LPVOID tParam);

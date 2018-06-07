@@ -171,7 +171,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 			WaitForSingleObject(mhStructSync, INFINITE);
 
 			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn; j++) {
-				if (!baseGame->invad[j].rand_path && baseGame->invad[i].hp > 0) {
+				if (!baseGame->invad[j].rand_path && baseGame->invad[j].hp > 0) {
 
 					baseGame->invad[j].y = (i / sidestep) + baseGame->invad[j].y_init;				//Invader goes down after n sidesteps
 

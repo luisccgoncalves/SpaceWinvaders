@@ -9,21 +9,29 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 
 	while (*ThreadMustGoOn) {
 
-		Sleep(1000 + RandomValue(1000));
+		Sleep((10000 + RandomValue(10000))*(*ThreadMustGoOn));
+		cThread->localGameData.pUp.x = RandomValue(cThread->localGameData.xsize);
+		cThread->localGameData.pUp.y = 0;
 
-		while (cThread->localGameData.pUp.fired==0) {
-			cThread->localGameData.pUp.fired = 1;
-			cThread->localGameData.pUp.x = RandomValue(cThread->localGameData.xsize);
-			cThread->localGameData.pUp.y = 0;
-
-			for (int i = 0; i < cThread->localGameData.ysize; i++) {
-				cThread->localGameData.pUp.y = i;
-				Sleep(200);
-			}
-
-			cThread->localGameData.pUp.fired = 0;
-
+		//Flash the powerUp 5x before dropping it
+		for (int i = 0; i < 5 && *ThreadMustGoOn; i++) {
+			Sleep(500 * (*ThreadMustGoOn));
+			cThread->localGameData.pUp.fired ^= 1;
 		}
+
+		Sleep(1000 * (*ThreadMustGoOn)); //Waits 1 sec
+
+		//Drops the powerUp
+		for (int i = 0; i < cThread->localGameData.ysize && *ThreadMustGoOn; i++) {
+
+			WaitForSingleObject(cThread->mhStructSync,INFINITE);
+			cThread->localGameData.pUp.y = i;
+			ReleaseMutex(cThread->mhStructSync);
+			Sleep(cThread->localGameData.projectiles_speed*(*ThreadMustGoOn));		//Pratical assignment pdf, page 3, 4th rule
+		}
+
+		cThread->localGameData.pUp.fired = 0;
+
 	}
 
 	return 0;
@@ -31,14 +39,13 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 
 DWORD WINAPI InvadersBomb(LPVOID tParam) {
 
-	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+	int			* ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
 
-	DWORD			tBombLauncherID;
-	HANDLE			htBombLauncher[MAX_BOMBS];  //### THIS NEEDS A CONSTANTE VALUE
+	DWORD		tBombLauncherID;
+	HANDLE		htBombLauncher[MAX_BOMBS];  //### THIS NEEDS A CONSTANT VALUE
 
 	for (int i = 0; i < baseGame->max_bombs; i++) {
-
 
 		htBombLauncher[i] = CreateThread(
 			NULL,										//Thread security attributes
@@ -51,7 +58,6 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"),i, GetLastError());
 			return -1;
 		}
-
 
 	}
 	WaitForMultipleObjects(MAX_BOMBS, htBombLauncher,TRUE, INFINITE);
@@ -96,7 +102,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 
 					BombCollision(baseGame, &baseGame->bomb[bombNum]);
 					
-					Sleep(((baseGame->invaders_bombs_speed) / 5) * (*ThreadMustGoOn));
+					Sleep(baseGame->projectiles_speed * (*ThreadMustGoOn));	//Pratical assignment pdf, page 3, 4th rule
 				}
 				else {														//reset bomb to out of screen
 					ResetBomb(&baseGame->bomb[bombNum]);					
@@ -109,8 +115,8 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 
 DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
-	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
 	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
@@ -286,7 +292,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
 					ShotCollision(baseGame, &baseGame->shot[shotNum]);
 					ReleaseMutex(mhStructSync);
-					Sleep(((baseGame->invaders_bombs_speed / 4)) * (*ThreadMustGoOn));		//##HARDCODED - Change
+					Sleep(baseGame->projectiles_speed * (*ThreadMustGoOn));
 
 				}
 				else {														//reset bomb to out of screen
@@ -350,14 +356,13 @@ int InstantiateGame(GameData *game) {
 	game->xsize = XSIZE;
 	game->ysize = YSIZE;
 
-	game->invaders_bombs_speed = INVADER_SPEED;		// not correct
 	game->invaders_speed = INVADER_SPEED;			// Base speed for invader
 	game->max_bombs = MAX_BOMBS;					// Base max num of bombs at same time
 	game->max_invaders = MAX_INVADER;				// Base num of invaders in the field
 	game->max_rand_invaders = RAND_INVADER;			// Base num of invaders in the field
 	game->num_players = MAX_PLAYERS;				// Base num of players
-	game->power_up_speed = INVADER_SPEED;			// Base speed for power up
 	game->ship_shot_speed = INVADER_SPEED;			// Base speed for defender ship
+	game->projectiles_speed = PROJECTL_SPEED;		// Base speed for Powerups and invader bombs
 
 	for (i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status
 		ResetBomb(&game->bomb[i]);

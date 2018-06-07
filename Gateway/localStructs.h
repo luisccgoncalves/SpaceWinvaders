@@ -9,14 +9,18 @@
 #include "../DLL/dll.h"
 //#include "../Client/debug.h"
 
+#define BUFSIZE 2048
 
 typedef struct {
 
 	HANDLE		hPipe;
-	int			*ThreadMustGoOn;
 
+	int			*ThreadMustGoOn;
 	HANDLE		*hSMServerUpdate;
-	GameData	*localGameData;
+	HANDLE		*pSMemGameData;
+	HANDLE		*mhGameData;
+	//GameData	*localGameData;
+
 
 }PipeInstWrt;
 

@@ -100,7 +100,7 @@ typedef struct {
 	DWORD	score;
 }HighScore;
 
-typedef struct {							//Game data to use in pipes
+typedef struct {							//Game data to use in communication
 
 	/*
 	problem here, structures are created with diferent values from possible...
@@ -173,20 +173,10 @@ typedef struct {
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 
 	GameData		localGameData;			//structure that holds the local game
-
+	Packet			localPacket;			//local packet
 	HANDLE			heGotPacket;			
-	Packet			localPacket;
 
 } SMCtrl;
-
-typedef struct {							//Message to use in pipes
-
-	TCHAR		username[SMALL_BUFF];		//string		
-	TCHAR		password[SMALL_BUFF];		//string
-	int			logged;						//BOOL
-	int			SGMsg;
-
-}PipeMsgs;
 
 	DLL_IMP_API int sharedMemory(HANDLE * hSMem, LARGE_INTEGER * SMemSize);
 

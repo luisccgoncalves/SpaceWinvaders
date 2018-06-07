@@ -19,7 +19,6 @@ typedef struct {
 	HANDLE		*hSMServerUpdate;
 	HANDLE		*pSMemGameData;
 	HANDLE		*mhGameData;
-	//GameData	*localGameData;
 
 
 }PipeInstWrt;
@@ -27,10 +26,7 @@ typedef struct {
 typedef struct {
 
 	HANDLE		hPipe;
-	int			*ThreadMustGoOn;
-
-	HANDLE		*heGotPacket;
-	Packet		*localPacket;
+	SMCtrl		*cThread;
 
 }PipeInstRd;
 

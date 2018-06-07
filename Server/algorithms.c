@@ -286,7 +286,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
 					ShotCollision(baseGame, &baseGame->shot[shotNum]);
 					ReleaseMutex(mhStructSync);
-					Sleep(((baseGame->invaders_bombs_speed / 4)) * (*ThreadMustGoOn));
+					Sleep(((baseGame->invaders_bombs_speed / 4)) * (*ThreadMustGoOn));		//##HARDCODED - Change
 
 				}
 				else {														//reset bomb to out of screen

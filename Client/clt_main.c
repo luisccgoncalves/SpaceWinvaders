@@ -48,7 +48,10 @@ void printGame(GameData msg) {
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		if (msg.ship[i].lives >= 0) {
 			gotoxy(msg.ship[i].x, msg.ship[i].y);
-			_tprintf(TEXT("Â"));
+			if(msg.ship[i].shield)
+				_tprintf(TEXT("Â"));
+			else
+				_tprintf(TEXT("A"));
 		}
 	}
 

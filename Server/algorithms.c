@@ -1,41 +1,68 @@
 #include "algorithms.h"
 
+void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE *mutex) {
+
+	//This needs to randomize powerups instead of giving a shield
+	ship->shield = 1;
+
+	//Launch a thread with a timeout, dont forget to carry the structsync mutex along
+}
+
+PowerUp GeneratePowerUp(int x_max) {
+	
+	PowerUp pUp;
+
+	pUp.x = RandomValue(x_max);
+	pUp.y = 0;
+
+	pUp.fired = 0;
+
+	return pUp;
+}
+
 DWORD WINAPI PowerUps(LPVOID tParam) {
 
 	SMCtrl	*cThread = (SMCtrl*)tParam;
 	int		*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 
-	cThread->localGameData.pUp.fired = 0;
-
 	while (*ThreadMustGoOn) {
 
-		Sleep((10000 + RandomValue(10000))*(*ThreadMustGoOn));
-		cThread->localGameData.pUp.x = RandomValue(cThread->localGameData.xsize);
-		cThread->localGameData.pUp.y = 0;
+		Sleep((1000 + RandomValue(1000))*(*ThreadMustGoOn));
+
+		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+		cThread->localGameData.pUp = GeneratePowerUp(cThread->localGameData.xsize);
+		ReleaseMutex(cThread->mhStructSync);
 
 		//Flash the powerUp 5x before dropping it
 		for (int i = 0; i < 5 && *ThreadMustGoOn; i++) {
+
 			Sleep(500 * (*ThreadMustGoOn));
+
+			WaitForSingleObject(cThread->mhStructSync, INFINITE);
 			cThread->localGameData.pUp.fired ^= 1;
+			ReleaseMutex(cThread->mhStructSync);
 		}
 
 		Sleep(1000 * (*ThreadMustGoOn)); //Waits 1 sec
 
 		//Drops the powerUp
-		for (int i = 0; i < cThread->localGameData.ysize && *ThreadMustGoOn; i++) {
+		for (int i = 0; i < cThread->localGameData.ysize && cThread->localGameData.pUp.fired && *ThreadMustGoOn; i++) {
 
 			WaitForSingleObject(cThread->mhStructSync,INFINITE);
 			cThread->localGameData.pUp.y = i;
 
 			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
-				//for loop
-				if (cThread->localGameData.pUp.x == cThread->localGameData.ship[0].x &&
-					cThread->localGameData.pUp.y == cThread->localGameData.ship[0].y) {
-					//PowerupShip(cThread->localGameData.ship[0]);
-					_tprintf(TEXT("\7"));
-					//exit condition
-				}
+				for (int j = 0; j < cThread->localGameData.num_players && cThread->localGameData.pUp.fired; j++) {
+					if (cThread->localGameData.pUp.x == cThread->localGameData.ship[j].x &&
+						cThread->localGameData.pUp.y == cThread->localGameData.ship[j].y) {
 
+						PowerUpShip(&cThread->localGameData.ship[j], 
+							&cThread->localGameData.pUp, 
+							cThread->mhStructSync);
+
+						cThread->localGameData.pUp.fired = 0;
+					}
+				}
 			}
 
 			ReleaseMutex(cThread->mhStructSync);
@@ -390,6 +417,7 @@ int InstantiateGame(GameData *game) {
 		game->ship[i].lives = 1;
 		game->ship[i].x = 0;
 		game->ship[i].y = 0;
+		game->ship[i].shield = 0;
 		//...
 	}
 

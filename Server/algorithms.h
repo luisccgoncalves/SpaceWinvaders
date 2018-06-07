@@ -31,10 +31,4 @@ int ValidateInvaderPosition(GameData *game, int x, int y, int index);
 int GetRegularLargerXPosition(GameData *game);
 int UpdateCoords(GameData * game, int *y);
 
-int writeTop10ToReg(HighScore *top10);
-int readTop10FromReg(HighScore * top10);
-int SystemTimeString(TCHAR * timeString);
-int addScoretoTop10(int score, HighScore * top10);
-int sortTop10(HighScore *top10);
-
 #endif /* ALGORITHMS_H */

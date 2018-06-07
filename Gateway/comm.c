@@ -71,7 +71,7 @@ DWORD WINAPI instanceThreadRead(LPVOID tParam) {
 	while (pipeStruct.cThread->ThreadMustGoOn) {
 
 		readPipePacket(pipeStruct.hPipe, heReadReady, &instancePacket);
-		_tprintf(TEXT("[DEBUG] GOT KEY %d \n"), instancePacket.instruction);
+		_tprintf(TEXT("[DEBUG] GOT KEY (%d) \n"), instancePacket.instruction);
 
 		WaitForSingleObject(mhReadPipe, INFINITE);
 
@@ -91,7 +91,7 @@ DWORD WINAPI instanceThreadWrite(LPVOID tParam) {
 	GameData	localGameData;
 
 	if (pipeStruct.hPipe == NULL) {
-		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
 
@@ -162,8 +162,17 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {
 			_tprintf(TEXT("[Error] Max players Reached\n"));
-			//WaitForSingleObject until threadn<MAX_PLAYERS
+
+			/* 
+			WaitForSingleObject while threadn<MAX_PLAYERS
+			right now it breaks the gateway
+			needs thought.
+
+
+			*/
+
 			return -1;
+			//continue;?
 		}
 		if (hPipe == INVALID_HANDLE_VALUE) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
@@ -221,6 +230,78 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 	WaitForMultipleObjects(threadn, htPipeConnectW, TRUE, INFINITE);
 	WaitForMultipleObjects(threadn, htPipeConnectR, TRUE, INFINITE);
+
+	return 0;
+}
+
+int readPipePacket(HANDLE hPipe, HANDLE readReady, Packet * pipePacket) { 
+
+	OVERLAPPED	OvrRd = { 0 };
+	DWORD		dwBytesRead = 0;
+	BOOL		bSuccess = FALSE;
+
+	OvrRd.hEvent = readReady;
+	ResetEvent(readReady);
+
+	bSuccess = ReadFile(
+		hPipe,
+		pipePacket,
+		sizeof(Packet),
+		&dwBytesRead,
+		&OvrRd);
+
+	WaitForSingleObject(readReady, INFINITE);
+
+	GetOverlappedResult(
+		hPipe,
+		&OvrRd,
+		&dwBytesRead,
+		FALSE);
+
+	if (dwBytesRead < sizeof(Packet)) {
+		if (GetLastError() == ERROR_BROKEN_PIPE) {
+			_tprintf(TEXT("[Error] Connection lost.\n"));
+			return -1;
+		}
+		else
+			_tprintf(TEXT("[Error] ReadFile failed. Error = %d \n"), GetLastError());
+	}
+
+	return 0;
+}
+
+int writePipeMsg(HANDLE hPipe, HANDLE writeReady, GameData msg) {
+
+	BOOL fSuccess = FALSE;
+	DWORD cbWriten = 0;
+
+	OVERLAPPED overlWrite = { 0 };
+
+	ResetEvent(writeReady);
+	overlWrite.hEvent = writeReady;
+
+	fSuccess = WriteFile(
+		hPipe,
+		&msg,
+		sizeof(msg),
+		&cbWriten,
+		&overlWrite);
+	if (!fSuccess) {
+		if (GetLastError() == ERROR_IO_INCOMPLETE)
+			return -1;
+	}
+
+	WaitForSingleObject(writeReady, INFINITE);
+
+	GetOverlappedResult(
+		hPipe,
+		&overlWrite,
+		&cbWriten,
+		FALSE);
+	if (cbWriten < sizeof(msg)) {
+		_tprintf(TEXT("[Error] OVERLAPPED writePipeMsgs (%d)\n"), GetLastError());
+		return 1;
+	}
 
 	return 0;
 }

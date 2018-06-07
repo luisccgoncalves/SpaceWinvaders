@@ -1,4 +1,5 @@
 #include "game.h"
+#include "score.h"
 
 int _tmain(int argc, LPTSTR argv[]) {
 

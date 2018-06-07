@@ -173,6 +173,7 @@ typedef struct {
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 
 	GameData		localGameData;			//structure that holds the local game
+
 	Packet			localPacket;			//local packet
 	HANDLE			heGotPacket;			
 

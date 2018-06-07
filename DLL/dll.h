@@ -30,10 +30,10 @@
 #define MAX_INVADER		100							//Maximum invaders by level
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define MAX_BOMBS		10//0							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
-#define MAX_SHOTS		5//25							//Maximum shots a defender can have on the screen at same time
+#define MAX_SHOTS		25							//Maximum shots a defender can have on the screen at same time
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
-#define RAND_INVADER	50							//Number of random path invaders
+#define RAND_INVADER	10							//Number of random path invaders
 
 typedef struct {
 

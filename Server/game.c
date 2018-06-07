@@ -10,10 +10,15 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
+
 	DWORD			tRandPathInvaderID;
 	HANDLE			htRandPathInvader;
+
 	DWORD			tInvadersBombID;
 	HANDLE			htInvadersBomb;
+
+	DWORD			tPowerUpsID;
+	HANDLE			htPowerUps;
 
 	int i;
 
@@ -82,6 +87,14 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
 		&tInvadersBombID);							//gets thread ID to close it afterwards
+
+	htPowerUps = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		PowerUps,									//Thread function name
+		tParam,										//Thread parameter struct
+		0,											//Creation flags
+		&tPowerUpsID);							//gets thread ID to close it afterwards
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);

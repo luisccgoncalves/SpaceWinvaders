@@ -3,6 +3,7 @@
 
 #include "localStructs.h"
 
+DWORD WINAPI PowerUps(LPVOID tParam);
 DWORD WINAPI InvadersBomb(LPVOID tParam);
 DWORD WINAPI RegPathInvaders(LPVOID tParam);
 DWORD WINAPI RandPathInvaders(LPVOID tParam);

@@ -52,6 +52,10 @@ void printGame(GameData msg) {
 		}
 	}
 
+	if (msg.pUp.fired==1) {
+		gotoxy(msg.pUp.x, msg.pUp.y);
+		_tprintf(TEXT("*"));
+	}
 
 }
 

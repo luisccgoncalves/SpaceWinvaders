@@ -1,6 +1,33 @@
 #include "algorithms.h"
 
+DWORD WINAPI PowerUps(LPVOID tParam) {
 
+	SMCtrl	*cThread = (SMCtrl*)tParam;
+	int		*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+
+	cThread->localGameData.pUp.fired = 0;
+
+	while (*ThreadMustGoOn) {
+
+		Sleep(1000 + RandomValue(1000));
+
+		while (cThread->localGameData.pUp.fired==0) {
+			cThread->localGameData.pUp.fired = 1;
+			cThread->localGameData.pUp.x = RandomValue(cThread->localGameData.xsize);
+			cThread->localGameData.pUp.y = 0;
+
+			for (int i = 0; i < cThread->localGameData.ysize; i++) {
+				cThread->localGameData.pUp.y = i;
+				Sleep(200);
+			}
+
+			cThread->localGameData.pUp.fired = 0;
+
+		}
+	}
+
+	return 0;
+}
 
 DWORD WINAPI InvadersBomb(LPVOID tParam) {
 

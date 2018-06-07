@@ -17,10 +17,9 @@ typedef struct {
 
 	int			*ThreadMustGoOn;
 	HANDLE		*hSMServerUpdate;
-	HANDLE		*pSMemGameData;
+	GameData	*pSMemGameData;
 	HANDLE		*mhGameData;
 	//GameData	*localGameData;
-
 
 }PipeInstWrt;
 

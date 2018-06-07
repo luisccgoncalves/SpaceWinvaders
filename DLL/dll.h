@@ -143,7 +143,7 @@ typedef struct {
 
 	//debatable
 	TCHAR	text; 
-	int		auth;  //starts at 0, server changes it to 1 if auth=ok
+	int		auth;							//starts at 0, server changes it to 1 if auth=ok
 }Packet;
 
 typedef struct {							//Message to use in the message view
@@ -181,8 +181,8 @@ typedef struct {
 
 	DLL_IMP_API int sharedMemory(HANDLE * hSMem, LARGE_INTEGER * SMemSize);
 
-	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl);													//Maps Msg area - ALL ACCESS
-	DLL_IMP_API int mapGameDataView(SMCtrl *smCtrl, DWORD permission);							//Maps GameData area - READ/WRITE
+	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl);														//Maps Msg area - ALL ACCESS
+	DLL_IMP_API int mapGameDataView(SMCtrl *smCtrl, DWORD permission);								//Maps GameData area - READ/WRITE
 
 	/* This section creates the mutexes and semaphores needed to */
 	/* Semi-abstract the send and read funcions below */
@@ -191,8 +191,8 @@ typedef struct {
 	DLL_IMP_API HANDLE createOccupiedSemaphore();
 	DLL_IMP_API HANDLE createVacantSemaphore();
 
-	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);								//Read from Consumer-Productor style array
-	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);				//Write(copy) in to Consumer-Productor style array
+	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);									//Read from Consumer-Productor style array
+	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);					//Write(copy) in to Consumer-Productor style array
 
 	DLL_IMP_API GameData consumeGameData(GameData *sharedMemory, HANDLE *mutex);					//Read from shared memory
 	DLL_IMP_API int writeGameData(GameData *sharedMemory, GameData *localGame, HANDLE *mutex);		//Write(copy) in to shared memory

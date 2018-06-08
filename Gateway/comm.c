@@ -33,6 +33,30 @@
 //	return 0;
 //}
 
+void populateSecurityAtributes(SECURITY_ATTRIBUTES *pSA) {
+
+	BOOL bResult;
+
+	TCHAR *SAString = TEXT("D:")
+		TEXT("(A;OICI;GA;;;BG)")
+		TEXT("(A;OICI;GA;;;AN)")
+		TEXT("(A;OICI;GA;;;AU)")
+		TEXT("(A;OICI;GA;;;BA)");
+
+	pSA->nLength = sizeof(SECURITY_ATTRIBUTES);
+	pSA->bInheritHandle = FALSE;
+
+	bResult = ConvertStringSecurityDescriptorToSecurityDescriptor(
+		SAString,
+		SDDL_REVISION_1,
+		&(pSA->lpSecurityDescriptor),
+		NULL);
+	if (bResult == FALSE) {
+		_tprintf(TEXT("[Error] Converting security descriptor string (%d)\n"), GetLastError());
+		return;
+	}
+}
+
 DWORD WINAPI instanceThreadRead(LPVOID tParam) {
 	PipeInstRd	pipeStruct = *(PipeInstRd*)tParam;
 	HANDLE		heReadReady;
@@ -125,11 +149,14 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 	int			threadn = 0;
 
 	HANDLE		hPipe = INVALID_HANDLE_VALUE;
+	SECURITY_ATTRIBUTES	secAtributes;
 
 	BOOL		fConnected = FALSE;
 
 	PipeInstWrt	pipeStructWrite;
 	PipeInstRd	pipeStructRead;
+
+	populateSecurityAtributes(&secAtributes);
 
 	pipeStructWrite.ThreadMustGoOn = &cThread->ThreadMustGoOn;
 	pipeStructWrite.hSMServerUpdate = cThread->hSMServerUpdate;
@@ -152,13 +179,17 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 		hPipe = CreateNamedPipe(
 			lpsPipeName,
-			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT | PIPE_ACCEPT_REMOTE_CLIENTS,
+			PIPE_ACCESS_DUPLEX | 
+			FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_MESSAGE | 
+			PIPE_READMODE_MESSAGE | 
+			PIPE_WAIT | 
+			PIPE_ACCEPT_REMOTE_CLIENTS,
 			MAX_PLAYERS,
 			BUFSIZE,
 			BUFSIZE,
 			5000,														//5 secs timeout
-			NULL);
+			&secAtributes);
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {
 			_tprintf(TEXT("[Error] Max players Reached\n"));

@@ -32,7 +32,7 @@
 #define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
 #define MAX_BOMBS		10							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 #define MAX_SHOTS		99							//Maximum shots a defender can have on the screen at same time
-#define POWERUP_DUR		5000						//Duration of a powerup buff
+#define POWERUP_DUR		10000						//Duration of a powerup buff
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
 #define RAND_INVADER	5							//Number of random path invaders
@@ -49,8 +49,6 @@ typedef struct {
 	int			id;							//populated with pid of each client
 	TCHAR		username[SMALL_BUFF];		//probably needed for remote pipe usage
 	//TCHAR		password[SMALL_BUFF];		//unhashed password
-	//int			high_score;
-	//int			score;		//Moving this to GameData
 
 	int			lives;			//ship is a one shot kill, but has several lives
 	int			x;				//ship x,y position
@@ -105,17 +103,11 @@ typedef struct {
 
 typedef struct {			//Game data to use in communication
 
-	/*
-	problem here, structures are created with diferent values from possible...
-
-	talk / discuss this
-	*/
 	//int			gameRunning;			
 
 	Invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
 	InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
 	Ship			ship[MAX_PLAYERS];		//number of ships/players in game
-	//ShipShot		shot[MAX_SHOTS];		//temporary number of  
 	PowerUp			pUp;					//One powerUp only at any given time
 
 	int xsize;								//max y size of play area
@@ -177,9 +169,6 @@ typedef struct {
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 
 	GameData		localGameData;			//structure that holds the local game
-
-	Packet			localPacket;			//local packet
-	HANDLE			heGotPacket;			
 
 } SMCtrl;
 

@@ -85,7 +85,6 @@ typedef struct {
 	int		x;				//ship x,y position
 	int		y;
 	int		fired;			//dead or alive
-	//int		speed;		//May not be sensible to have it here - RECONSIDER
 } InvaderBomb;
 
 typedef struct {

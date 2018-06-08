@@ -57,7 +57,23 @@ void printGame(GameData msg) {
 
 	if (msg.pUp.fired==1) {
 		gotoxy(msg.pUp.x, msg.pUp.y);
-		_tprintf(TEXT("*"));
+		switch (msg.pUp.type) {
+		case 0:
+			_tprintf(TEXT("*"));
+			break;
+		case 1:
+			_tprintf(TEXT("x"));
+			break;
+		case 2:
+			_tprintf(TEXT("@"));
+			break;
+		case 3:
+			_tprintf(TEXT("+"));
+			break;
+		default:
+			break;
+		}
+		
 	}
 
 }

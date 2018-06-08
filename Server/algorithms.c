@@ -2,9 +2,23 @@
 
 void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE *mutex) {
 
-	//This needs to randomize powerups instead of giving a shield
-	ship->shield = 1;
-
+	switch (pUp->type) {
+	case 0:
+		ship->shield = 1;
+		break;
+	case 1:
+		ship->drunk = 1;
+		break;
+	case 2:
+		ship->turbo = 1;
+		break;
+	case 3:
+		ship->laser_shots = 1;
+		break;
+	default:
+		break;
+	}
+	
 	//Launch a thread with a timeout, dont forget to carry the structsync mutex along
 }
 
@@ -12,10 +26,11 @@ PowerUp GeneratePowerUp(int x_max) {
 	
 	PowerUp pUp;
 
-	pUp.x = RandomValue(x_max);
+	pUp.x = RandomValue(x_max);		//Choose a random x position to drop
 	pUp.y = 0;
 
 	pUp.fired = 0;
+	pUp.type = RandomValue(3);		//Random type between 0 and 3
 
 	return pUp;
 }
@@ -39,7 +54,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 			Sleep(500 * (*ThreadMustGoOn));
 
 			WaitForSingleObject(cThread->mhStructSync, INFINITE);
-			cThread->localGameData.pUp.fired ^= 1;
+			cThread->localGameData.pUp.fired ^= 1;		//Bit shift blinker
 			ReleaseMutex(cThread->mhStructSync);
 		}
 
@@ -49,8 +64,10 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 		for (int i = 0; i < cThread->localGameData.ysize && cThread->localGameData.pUp.fired && *ThreadMustGoOn; i++) {
 
 			WaitForSingleObject(cThread->mhStructSync,INFINITE);
-			cThread->localGameData.pUp.y = i;
+			cThread->localGameData.pUp.y = i;			//Drops powerUP one place
 
+
+			//
 			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
 				for (int j = 0; j < cThread->localGameData.num_players && cThread->localGameData.pUp.fired; j++) {
 					if (cThread->localGameData.pUp.x == cThread->localGameData.ship[j].x &&
@@ -331,7 +348,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
 					ShotCollision(baseGame, &baseGame->shot[shotNum]);
 					ReleaseMutex(mhStructSync);
-					Sleep(baseGame->projectiles_speed * (*ThreadMustGoOn));
+					Sleep(baseGame->ship_shot_speed * (*ThreadMustGoOn));
 
 				}
 				else {														//reset bomb to out of screen
@@ -400,7 +417,7 @@ int InstantiateGame(GameData *game) {
 	game->max_invaders = MAX_INVADER;				// Base num of invaders in the field
 	game->max_rand_invaders = RAND_INVADER;			// Base num of invaders in the field
 	game->num_players = MAX_PLAYERS;				// Base num of players
-	game->ship_shot_speed = INVADER_SPEED;			// Base speed for defender ship
+	game->ship_shot_speed = PROJECTL_SPEED;			// Base speed for defender ship
 	game->projectiles_speed = PROJECTL_SPEED;		// Base speed for Powerups and invader bombs
 
 	for (i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status

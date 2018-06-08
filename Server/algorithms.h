@@ -3,6 +3,7 @@
 
 #include "localStructs.h"
 
+DWORD WINAPI PowerUpTimer(LPVOID tParam);
 DWORD WINAPI PowerUps(LPVOID tParam);
 DWORD WINAPI InvadersBomb(LPVOID tParam);
 DWORD WINAPI RegPathInvaders(LPVOID tParam);
@@ -11,6 +12,8 @@ DWORD WINAPI ShipInstruction(LPVOID tParam);
 DWORD WINAPI BombMovement(LPVOID tParam);
 DWORD WINAPI ShotMovement(LPVOID tParam);
 
+void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE mutex);
+PowerUp GeneratePowerUp(int x_max, int duration);
 int UpdateLocalShip(ClientMoves *move);
 int InstantiateGame(GameData *game);
 

@@ -78,7 +78,7 @@ typedef struct {
 	int		x;				//ship x,y position
 	int		y;
 	int		fired;			//dead or alive
-	//int		speed;		//May not be sensible to have it here - RECONSIDER
+	int		type;			//0-shield 1-drunk 2-turbo 3-laser_shot
 } PowerUp;
 
 typedef struct {
@@ -92,7 +92,7 @@ typedef struct {
 	int		x;				//ship x,y position
 	int		y;
 	int		fired;			//dead or alive
-	int		speed;
+	int		speed;			//Not being used right now
 } ShipShot;
 
 typedef struct {
@@ -100,7 +100,7 @@ typedef struct {
 	DWORD	score;
 }HighScore;
 
-typedef struct {							//Game data to use in communication
+typedef struct {			//Game data to use in communication
 
 	/*
 	problem here, structures are created with diferent values from possible...

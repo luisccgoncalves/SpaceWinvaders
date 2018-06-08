@@ -1,24 +1,5 @@
 #include "comm.h"
 
-//#########################################################################################
-/*
-To test move this to client
-*/
-
-/*
-void simulClient(Packet * localpacket) {
-
-	localpacket->owner = 0;
-
-	localpacket->instruction = RandomValue(5);
-
-	Sleep(500);
-	return;
-}
-*/
-//#########################################################################################
-
-
 int _tmain(int argc, LPTSTR argv[]) {
 
 #ifdef UNICODE
@@ -31,8 +12,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	HANDLE		htCreatePipes;
 	DWORD		tCreatePipesID;
-
-	//HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE); //Handle to stdout to clear screen ##DELETE-ME after May 12th##
 
 	SYSTEM_INFO	SysInfo;
 	DWORD		dwSysGran;

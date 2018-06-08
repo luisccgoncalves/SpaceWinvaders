@@ -129,7 +129,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		CreatePipes,					//Thread function name
 		(LPVOID)&cThread,				//Thread parameter struct
 		0,								//Creation flags
-		&tCreatePipesID);				//gets thread ID to close it afterwards
+		&tCreatePipesID);				//gets thread ID 
 	if (htCreatePipes == NULL) {
 		_tprintf(TEXT("[Error] Creating thread CreatePipes (%d) at Gateway\n"), GetLastError());
 	}

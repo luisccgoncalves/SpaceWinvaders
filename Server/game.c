@@ -61,7 +61,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 		baseGame->ship[i].x = i+RandomValue(baseGame->xsize/4);
 		baseGame->ship[i].y = 23;
-		baseGame->ship[i].lives = 0;
 	}
 
 	htRegPathInvader = CreateThread(
@@ -70,7 +69,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		RegPathInvaders,							//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tRegPathInvaderID);						//gets thread ID to close it afterwards
+		&tRegPathInvaderID);						//gets thread ID 
 
 	htRandPathInvader = CreateThread(
 		NULL,										//Thread security attributes
@@ -78,7 +77,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		RandPathInvaders,							//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tRandPathInvaderID);						//gets thread ID to close it afterwards
+		&tRandPathInvaderID);						//gets thread ID 
 
 	htInvadersBomb = CreateThread(
 		NULL,										//Thread security attributes
@@ -86,7 +85,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		InvadersBomb,								//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tInvadersBombID);							//gets thread ID to close it afterwards
+		&tInvadersBombID);							//gets thread ID 
 
 	htPowerUps = CreateThread(
 		NULL,										//Thread security attributes
@@ -94,7 +93,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		PowerUps,									//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tPowerUpsID);							//gets thread ID to close it afterwards
+		&tPowerUpsID);							//gets thread ID 
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);

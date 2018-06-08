@@ -199,7 +199,7 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 				instanceThreadRead,						//Thread function name
 				(LPVOID)&pipeStructRead,				//Thread parameter struct
 				0,										//Creation flags
-				NULL);									//gets thread ID to close it afterwards
+				NULL);									//gets thread ID 
 			if (htPipeConnectR[threadn] == NULL) {
 				_tprintf(TEXT("[Error] Creating thread ConnectPipesThreadRead (%d) at Gateway\n"), GetLastError());
 				return -1;
@@ -212,7 +212,7 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 					instanceThreadWrite,				//Thread function name
 					(LPVOID)&pipeStructWrite,			//Thread parameter struct
 					0,									//Creation flags
-					NULL);								//gets thread ID to close it afterwards
+					NULL);								//gets thread ID 
 				if (htPipeConnectW[threadn] == NULL) {
 					_tprintf(TEXT("[Error] Creating thread ConnectPipesThreadWrite (%d) at Gateway\n"), GetLastError());
 					return -1;

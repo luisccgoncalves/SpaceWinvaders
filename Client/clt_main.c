@@ -339,7 +339,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		ReadGame,									//Thread function name
 		(LPVOID)&cThreadRdGame,						//Thread parameter struct
 		0,											//Creation flags
-		&tReadGameID);								//gets thread ID to close it afterwards
+		&tReadGameID);								//gets thread ID 
 
 	if (htReadGame == NULL) {
 		_tprintf(TEXT("ERROR launching game thread. (%d)\n"), GetLastError());
@@ -352,7 +352,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		GetKey,										//Thread function name
 		(LPVOID)&cThreadRdGame,						//Thread parameter struct
 		0,											//Creation flags
-		&tGetKeyID);								//gets thread ID to close it afterwards
+		&tGetKeyID);								//gets thread ID 
 
 	if (htReadGame == NULL) {
 		_tprintf(TEXT("ERROR launching game thread. (%d)\n"), GetLastError());

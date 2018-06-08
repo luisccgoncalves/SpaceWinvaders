@@ -14,7 +14,7 @@
 void printGame(GameData msg) {
 
 	HANDLE		hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	int i;
+	int i, j;
 
 	cls(hStdout);
 
@@ -35,10 +35,12 @@ void printGame(GameData msg) {
 		}
 	}
 
-	for (i = 0; i < MAX_SHOTS; i++) {
-		if (msg.shot[i].fired) {
-			gotoxy(msg.shot[i].x, msg.shot[i].y);
-			_tprintf(TEXT("|"));
+	for (i = 0; i < msg.num_players; i++) {
+		for (j = 0; j < MAX_SHOTS; j++) {
+			if (msg.ship[i].shots[j].fired) {
+				gotoxy(msg.ship[i].shots[j].x, msg.ship[i].shots[j].y);
+				_tprintf(TEXT("|"));
+			}
 		}
 	}
 

@@ -376,14 +376,15 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 
 DWORD WINAPI ShotMovement(LPVOID tParam) {
 
-	int			*ThreadMustGoOn = ((ClientMoves *)tParam)->TheadmustGoOn;
 	GameData	*baseGame = ((ClientMoves *)tParam)->game;
-	int			owner = ((ClientMoves*)tParam)->localPacket.owner;
 	HANDLE		*mhStructSync = ((ClientMoves*)tParam)->mhStructSync;
-	int			shotNum = -1;
+	
+	int			*ThreadMustGoOn = ((ClientMoves *)tParam)->TheadmustGoOn;
+	int			owner = ((ClientMoves*)tParam)->localPacket.owner;
+	int			i, shotNum = -1;
 		
-		for (int i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a shot
-			if (!baseGame->shot[i].fired) {
+		for (i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a shot
+			if (!baseGame->ship[owner].shots[i].fired) {
 				shotNum = i;
 				break;
 			}
@@ -391,23 +392,23 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 		if (shotNum > -1) {
 
-			baseGame->shot[shotNum].x = baseGame->ship[owner].x;
-			baseGame->shot[shotNum].y = baseGame->ship[owner].y;
-			baseGame->shot[shotNum].fired = 1;
+			baseGame->ship[owner].shots[shotNum].x = baseGame->ship[owner].x;
+			baseGame->ship[owner].shots[shotNum].y = baseGame->ship[owner].y;
+			baseGame->ship[owner].shots[shotNum].fired = 1;
 
-			while (*ThreadMustGoOn && baseGame->shot[shotNum].fired) {
+			while (*ThreadMustGoOn && baseGame->ship[owner].shots[shotNum].fired) {
 
-				if (baseGame->shot[shotNum].y > 0) {						//if bomb has not reached the end of the play area
+				if (baseGame->ship[owner].shots[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 
 					WaitForSingleObject(mhStructSync, INFINITE);
-					baseGame->shot[shotNum].y--;							//update it's position, an wait for next tick 
-					ShotCollision(baseGame, &baseGame->shot[shotNum]);
+					baseGame->ship[owner].shots[shotNum].y--;							//update it's position, an wait for next tick 
+					ShotCollision(baseGame, &baseGame->ship[owner].shots[shotNum]);
 					ReleaseMutex(mhStructSync);
 					Sleep(baseGame->ship_shot_speed * (*ThreadMustGoOn));
 
 				}
 				else {														//reset bomb to out of screen
-					ResetShot(&baseGame->shot[shotNum]);
+					ResetShot(&baseGame->ship[owner].shots[shotNum]);
 				}
 
 			}
@@ -462,7 +463,7 @@ int UpdateLocalShip(ClientMoves *move) {
 }
 
 int InstantiateGame(GameData *game) {
-	int i;
+	int i, j;
 
 	game->xsize = XSIZE;
 	game->ysize = YSIZE;
@@ -480,9 +481,7 @@ int InstantiateGame(GameData *game) {
 		ResetBomb(&game->bomb[i]);
 	}
 
-	for (i = 0; i < MAX_SHOTS; i++) {				//Instantiates all shots outside of game and updates the status
-		ResetShot(&game->shot[i]);
-	}
+
 
 	for (i = 0; i < game->num_players; i++) {
 		game->ship[i].drunk = 0;
@@ -491,6 +490,9 @@ int InstantiateGame(GameData *game) {
 		game->ship[i].x = 0;
 		game->ship[i].y = 0;
 		game->ship[i].shield = 0;
+		for (j = 0; j < MAX_SHOTS; j++) {				//Instantiates all shots outside of game and updates the status
+			ResetShot(&game->ship[i].shots[j]);
+		}
 		//...
 	}
 
@@ -549,7 +551,7 @@ int ShotCollision(GameData *game, ShipShot *shot) {
 
 int InvaderCollision(GameData * game, Invader * invader)
 {
-	int i = 0;
+	int i, j;
 	if (invader->hp > 0) {
 		for (i = 0; i < game->num_players; i++) {
 			if (game->ship[i].x == invader->x && game->ship[i].y == invader->y && game->ship[i].lives >= 0) {
@@ -558,11 +560,13 @@ int InvaderCollision(GameData * game, Invader * invader)
 				return 1;
 			}
 		}
-		for (i = 0; i < MAX_SHOTS; i++) {
-			if (game->shot[i].x == invader->x && game->shot[i].y == invader->y && game->shot[i].fired) {
-				ResetShot(&game->shot[i]);
-				DamageInvader(invader);
-				return 1;
+		for (i = 0; i < game->num_players; i++) {
+			for (j = 0; j < MAX_SHOTS; j++) {
+				if (game->ship[i].shots[j].x == invader->x && game->ship[i].shots[j].y == invader->y && game->ship[i].shots[j].fired) {
+					ResetShot(&game->ship[i].shots[j]);
+					DamageInvader(invader);
+					return 1;
+				}
 			}
 		}
 	}
@@ -571,7 +575,7 @@ int InvaderCollision(GameData * game, Invader * invader)
 
 int BombCollision(GameData * game, InvaderBomb * bomb)
 {
-	int i = 0;
+	int i,j;
 	if (bomb->fired) {
 		for (i = 0; i < game->num_players; i++) {
 			if (game->ship[i].x == bomb->x && game->ship[i].y == bomb->y && game->ship[i].lives >= 0) {
@@ -581,11 +585,13 @@ int BombCollision(GameData * game, InvaderBomb * bomb)
 				return 1;
 			}
 		}
-		for (i = 0; i < MAX_SHOTS; i++) {
-			if (game->shot[i].x == bomb->x && game->shot[i].y == bomb->y && game->shot[i].fired) {
-				ResetShot(&game->shot[i]);
-				ResetBomb(bomb);
-				return 1;
+		for (i = 0; i < game->num_players; i++) {
+			for (j = 0; j < MAX_SHOTS; j++) {
+				if (game->ship[i].shots[j].x == bomb->x && game->ship[i].shots[j].y == bomb->y && game->ship[i].shots[j].fired) {
+					ResetShot(&game->ship[i].shots[j]);
+					ResetBomb(bomb);
+					return 1;
+				}
 			}
 		}
 	}

@@ -1,28 +1,76 @@
 #include "algorithms.h"
 
-void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE *mutex) {
+DWORD WINAPI PowerUpTimer(LPVOID tParam) {
+
+	PUpTimer	timerStr = *(PUpTimer*)tParam;
+
+	for (int i = 0; i < 10 && (timerStr.ship->lives>=0); i++) {
+		Sleep(timerStr.pUp.duration / 10);
+	}
+
+	WaitForSingleObject(timerStr.mhStructSync, INFINITE);
+	switch (timerStr.pUp.type) {
+	case 0:
+		timerStr.ship->shield--;
+		break;
+	case 1:
+		timerStr.ship->drunk--;
+		break;
+	case 2:
+		timerStr.ship->turbo--;
+		break;
+	case 3:
+		timerStr.ship->laser_shots--;
+		break;
+	default:
+		break;
+	}
+	ReleaseMutex(timerStr.mhStructSync);
+
+	return 0;
+}
+
+void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE mutex) {
+
+	HANDLE		htPowerUpTimer;
+	PUpTimer	tParam;
+
+	tParam.mhStructSync = mutex;
+	tParam.ship = ship;
+	tParam.pUp = *pUp;
+
 
 	switch (pUp->type) {
 	case 0:
-		ship->shield = 1;
+		ship->shield++;
 		break;
 	case 1:
-		ship->drunk = 1;
+		ship->drunk++;
 		break;
 	case 2:
-		ship->turbo = 1;
+		ship->turbo++;
 		break;
 	case 3:
-		ship->laser_shots = 1;
+		ship->laser_shots++;
 		break;
 	default:
 		break;
 	}
 	
-	//Launch a thread with a timeout, dont forget to carry the structsync mutex along
+	//Launches a thread with the powerUp timeout
+	htPowerUpTimer = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		PowerUpTimer,								//Thread function name
+		(LPVOID)&tParam,								//Thread parameter struct
+		0,											//Creation flags
+		NULL);										//gets thread ID 
+	if (htPowerUpTimer == NULL) {
+		_tprintf(TEXT("[Error] Creating powerUpTimer thread (%d)\n"), GetLastError());
+	}
 }
 
-PowerUp GeneratePowerUp(int x_max) {
+PowerUp GeneratePowerUp(int x_max, int duration) {
 	
 	PowerUp pUp;
 
@@ -32,6 +80,7 @@ PowerUp GeneratePowerUp(int x_max) {
 	pUp.fired = 0;
 	pUp.type = RandomValue(3);		//Random type between 0 and 3
 
+	pUp.duration = duration;
 	return pUp;
 }
 
@@ -42,10 +91,16 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 
 	while (*ThreadMustGoOn) {
 
-		Sleep((1000 + RandomValue(1000))*(*ThreadMustGoOn));
+		//Sleep((10000 + RandomValue(10000))*(*ThreadMustGoOn));
+		for (int i = 0; i < 20 && *ThreadMustGoOn; i++) {
+			if (i > 10)
+				if (RandomValue(2))
+					break;
+			Sleep(1000);
+		}
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
-		cThread->localGameData.pUp = GeneratePowerUp(cThread->localGameData.xsize);
+		cThread->localGameData.pUp = GeneratePowerUp(cThread->localGameData.xsize, cThread->localGameData.pup_duration);
 		ReleaseMutex(cThread->mhStructSync);
 
 		//Flash the powerUp 5x before dropping it
@@ -67,8 +122,8 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 			cThread->localGameData.pUp.y = i;			//Drops powerUP one place
 
 
-			//
-			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
+			//Tests for collisions
+  			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
 				for (int j = 0; j < cThread->localGameData.num_players && cThread->localGameData.pUp.fired; j++) {
 					if (cThread->localGameData.pUp.x == cThread->localGameData.ship[j].x &&
 						cThread->localGameData.pUp.y == cThread->localGameData.ship[j].y) {
@@ -109,7 +164,7 @@ DWORD WINAPI InvadersBomb(LPVOID tParam) {
 			BombMovement,								//Thread function name
 			tParam,										//Thread parameter struct
 			0,											//Creation flags
-			&tBombLauncherID);							//gets thread ID to close it afterwards
+			&tBombLauncherID);							//gets thread ID 
 		if (htBombLauncher[i] == NULL) {
 			_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"),i, GetLastError());
 			return -1;
@@ -392,7 +447,7 @@ int UpdateLocalShip(ClientMoves *move) {
 			ShotMovement,								//Thread function name
 			move,										//Thread parameter struct
 			0,											//Creation flags
-			&tShotLauncherID);							//gets thread ID to close it afterwards
+			&tShotLauncherID);							//gets thread ID 
 		if (htShotLauncher == NULL) {
 			_tprintf(TEXT("[Error] Creating thread htShotLauncher (%d) at server\n"), GetLastError());
 			return -1;
@@ -419,6 +474,7 @@ int InstantiateGame(GameData *game) {
 	game->num_players = MAX_PLAYERS;				// Base num of players
 	game->ship_shot_speed = PROJECTL_SPEED;			// Base speed for defender ship
 	game->projectiles_speed = PROJECTL_SPEED;		// Base speed for Powerups and invader bombs
+	game->pup_duration = POWERUP_DUR;				// Base power up duration
 
 	for (i = 0; i < game->max_bombs; i++) {			//Instantiates all bombs outside of game and updates the status
 		ResetBomb(&game->bomb[i]);
@@ -447,7 +503,8 @@ int ShipCollision(GameData *game, Ship *ship) {
 		for (i = 0; i < game->max_bombs; i++) {
 			if (game->bomb[i].x == ship->x && game->bomb[i].y == ship->y && game->bomb[i].fired) { //ERROR?
 				ResetBomb(&game->bomb[i]);
-				DamageShip(ship);
+				if(!ship->shield)
+					DamageShip(ship);
 				return 1;
 			}
 		}
@@ -518,7 +575,8 @@ int BombCollision(GameData * game, InvaderBomb * bomb)
 	if (bomb->fired) {
 		for (i = 0; i < game->num_players; i++) {
 			if (game->ship[i].x == bomb->x && game->ship[i].y == bomb->y && game->ship[i].lives >= 0) {
-				DamageShip(&game->ship[i]);
+				if(!game->ship[i].shield)
+					DamageShip(&game->ship[i]);
 				ResetBomb(bomb);
 				return 1;
 			}

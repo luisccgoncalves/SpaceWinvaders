@@ -27,14 +27,15 @@
 #define YSIZE			25							//Terminal max row number
 
 #define MAX_PLAYERS		2							//Maximum number of concurrent players
-#define MAX_INVADER		100							//Maximum invaders by level
+#define MAX_INVADER		50							//Maximum invaders by level
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
 #define MAX_BOMBS		10							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 #define MAX_SHOTS		25							//Maximum shots a defender can have on the screen at same time
+#define POWERUP_DUR		5000						//Duration of a powerup buff
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
-#define RAND_INVADER	10							//Number of random path invaders
+#define RAND_INVADER	5							//Number of random path invaders
 
 typedef struct {
 
@@ -79,6 +80,7 @@ typedef struct {
 	int		y;
 	int		fired;			//dead or alive
 	int		type;			//0-shield 1-drunk 2-turbo 3-laser_shot
+	int		duration;
 } PowerUp;
 
 typedef struct {
@@ -131,6 +133,7 @@ typedef struct {			//Game data to use in communication
 	int max_invaders;						//total of invaders
 	int max_rand_invaders;					//number of rand invaders
 	int max_bombs;							//max boms on game (%invaders?)
+	int	pup_duration;
 
 	int	score;
 	HighScore	top10[10];					//Top 10 highest scores

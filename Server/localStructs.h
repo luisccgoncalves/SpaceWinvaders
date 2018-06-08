@@ -26,4 +26,10 @@ typedef struct {
 	HANDLE		*mhStructSync;						//Pointer to cThread's structSync mutex
 } ClientMoves;
 
+typedef struct {
+	HANDLE		mhStructSync;
+	Ship		*ship;
+	PowerUp		pUp;
+}PUpTimer;
+
 #endif /* LOCALSTRUCTS_H */

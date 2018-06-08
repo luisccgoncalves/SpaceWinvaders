@@ -131,7 +131,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		GameTick,									//Thread function name
 		(LPVOID)&sGTick,							//Thread parameter struct
 		0,											//Creation flags
-		&tGTickID);									//gets thread ID to close it afterwards
+		&tGTickID);									//gets thread ID 
 	if (htGTick == NULL) {
 		_tprintf(TEXT("[Error] Creating thread GTick (%d) at Server\n"), GetLastError());
 	}
@@ -144,7 +144,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		ShipInstruction,								//Thread function name
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
-		&tRGMsgID);									//gets thread ID to close it afterwards
+		&tRGMsgID);									//gets thread ID 
 	if (htGReadMsg == NULL) {
 		_tprintf(TEXT("[Error] Creating thread GReadMsg (%d) at Server\n"), GetLastError());
 	}
@@ -158,7 +158,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		StartGame,									//Thread function name
 		(LPVOID)&cThread,							//Thread parameter struct
 		0,											//Creation flags
-		&tGameID);									//gets thread ID to close it afterwards
+		&tGameID);									//gets thread ID 
 	if (htGame == NULL) {
 		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
 	}

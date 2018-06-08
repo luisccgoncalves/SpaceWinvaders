@@ -32,4 +32,12 @@ typedef struct {
 	PowerUp		pUp;
 }PUpTimer;
 
+typedef struct {
+	GameData	*game;								//Pointer to localGamedata
+	Invader		*invader;
+
+	int			*TheadmustGoOn;						//Pointer to cThread's exit condition
+	HANDLE		*mhStructSync;						//Pointer to cThread's structSync mutex
+}BombMoves;
+
 #endif /* LOCALSTRUCTS_H */

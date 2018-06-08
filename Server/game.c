@@ -6,7 +6,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
 
-	InstantiateGame(baseGame);
 
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
@@ -15,13 +14,20 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	HANDLE			htRandPathInvader;
 
 	DWORD			tInvadersBombID;
-	HANDLE			htInvadersBomb;
+	HANDLE			htInvadersBomb[MAX_INVADER];
 
 	DWORD			tPowerUpsID;
 	HANDLE			htPowerUps;
 
 	int i;
 
+	BombMoves	bombMoves;
+	bombMoves.mhStructSync = &((SMCtrl *)tParam)->mhStructSync;
+	bombMoves.TheadmustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	bombMoves.game = baseGame;
+	
+	InstantiateGame(baseGame);
+	
 	//Defines invader path
 	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
 		if (i < (baseGame->max_invaders - baseGame->max_rand_invaders))
@@ -51,9 +57,21 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		}
 	}
 
-	//Populates invaders with HP
+	//Populates invaders with HP 
 	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 		baseGame->invad[i].hp = 1;
+	}
+
+	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
+		bombMoves.invader = &baseGame->invad[i];
+
+		htInvadersBomb[i] = CreateThread(
+			NULL,										//Thread security attributes
+			0,											//Stack size
+			InvadersBomb,								//Thread function name
+			&bombMoves,									//Thread parameter struct
+			0,											//Creation flags
+			&tInvadersBombID);							//gets thread ID 
 	}
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
@@ -79,14 +97,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		0,											//Creation flags
 		&tRandPathInvaderID);						//gets thread ID 
 
-	htInvadersBomb = CreateThread(
-		NULL,										//Thread security attributes
-		0,											//Stack size
-		InvadersBomb,								//Thread function name
-		tParam,										//Thread parameter struct
-		0,											//Creation flags
-		&tInvadersBombID);							//gets thread ID 
-
 	htPowerUps = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size
@@ -97,7 +107,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
-	WaitForSingleObject(htInvadersBomb, INFINITE);
+	WaitForMultipleObjects(MAX_INVADER, htInvadersBomb, TRUE, INFINITE);
 
 	return 0;
 }

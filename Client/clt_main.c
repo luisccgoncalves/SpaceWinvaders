@@ -28,12 +28,21 @@ void printGame(GameData msg) {
 		}
 	}
 
-	for (i = 0; i < MAX_BOMBS; i++) {
-		if (msg.bomb[i].fired) {
-			gotoxy(msg.bomb[i].x, msg.bomb[i].y);
-			_tprintf(TEXT("o"));
+	for (i = 0; i < MAX_INVADER; i++) {
+		for (j = 0; j < MAX_BOMBS; j++) {
+			if (msg.invad[i].bomb[j].fired) {
+				gotoxy(msg.invad[i].bomb[j].x, msg.invad[i].bomb[j].y);
+				_tprintf(TEXT("o"));
+			}
 		}
 	}
+
+	//for (i = 0; i < MAX_BOMBS; i++) {
+	//	if (msg.bomb[i].fired) {
+	//		gotoxy(msg.bomb[i].x, msg.bomb[i].y);
+	//		_tprintf(TEXT("o"));
+	//	}
+	//}
 
 	for (i = 0; i < msg.num_players; i++) {
 		for (j = 0; j < MAX_SHOTS; j++) {

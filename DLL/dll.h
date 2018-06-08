@@ -30,10 +30,10 @@
 #define MAX_INVADER		50							//Maximum invaders by level
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
-#define MAX_BOMBS		10							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
+#define MAX_BOMBS		1							//Maximum bombs in the screen at any time for one invader
 #define MAX_SHOTS		99							//Maximum shots a defender can have on the screen at same time
 #define POWERUP_DUR		10000						//Duration of a powerup buff
-
+#define	BOMBRATE		10							//Number of steps between bomb launches 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
 #define RAND_INVADER	5							//Number of random path invaders
 
@@ -67,13 +67,22 @@ typedef struct {
 typedef struct {
 	int		x;				//ship x,y position
 	int		y;
-	int		x_init;			//ship x,y initial position
-	int		y_init;			//needed for relative coordinates
+	int		fired;			//dead or alive
+} InvaderBomb;
 
-	int		direction;		//ship movement
+typedef struct {
+	int				x;				//ship x,y position
+	int				y;
+	int				x_init;			//ship x,y initial position
+	int				y_init;			//needed for relative coordinates
 
-	int		hp;				//ship hit points
-	int		rand_path;		//true for random trajectory, false for zig-zag
+	InvaderBomb		bomb[MAX_BOMBS];		
+	int				invaderBombRate;		//Steps into invaders path (to bomb rate)
+
+	int				direction;		//ship movement
+
+	int				hp;				//ship hit points
+	int				rand_path;		//true for random trajectory, false for zig-zag
 } Invader;
 
 //typedef struct {
@@ -91,12 +100,6 @@ typedef struct {
 } PowerUp;
 
 typedef struct {
-	int		x;				//ship x,y position
-	int		y;
-	int		fired;			//dead or alive
-} InvaderBomb;
-
-typedef struct {
 	TCHAR	timestamp[SMALL_BUFF];
 	DWORD	score;
 }HighScore;
@@ -106,7 +109,7 @@ typedef struct {			//Game data to use in communication
 	//int			gameRunning;			
 
 	Invader			invad[MAX_INVADER];		//Array of maximum number invaders at one time
-	InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
+	//InvaderBomb		bomb[MAX_BOMBS];		//Percent of bombers (until some defined minimum)
 	Ship			ship[MAX_PLAYERS];		//number of ships/players in game
 	PowerUp			pUp;					//One powerUp only at any given time
 
@@ -116,7 +119,7 @@ typedef struct {			//Game data to use in communication
 	/*This are needed on server only*/
 	int invaders_speed;						//invaders speed
 	int ship_speed;							//ship speed
-
+	int bombRate;
 	int projectiles_speed;					//bombs, shots and powerUps base speed
 
 	/*Eventualy find a way to use them from projectiles speed*/

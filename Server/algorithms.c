@@ -425,19 +425,27 @@ int UpdateLocalShip(ClientMoves *move) {
 	//validate action
 	switch (move->localPacket.instruction) {
 	case 0:
-		if (move->game->ship[move->localPacket.owner].x < (move->game->xsize - 1) && move->game->ship[move->localPacket.owner].lives >= 0)
+		if (move->game->ship[move->localPacket.owner].x < (move->game->xsize - 1) && 
+			move->game->ship[move->localPacket.owner].lives >= 0)
+
 			move->game->ship[move->localPacket.owner].x++;
 		break;
 	case 1:
-		if (move->game->ship[move->localPacket.owner].y<(move->game->ysize - 1) && move->game->ship[move->localPacket.owner].lives >= 0)
+		if (move->game->ship[move->localPacket.owner].y<(move->game->ysize - 1) && 
+			move->game->ship[move->localPacket.owner].lives >= 0)
+
 			move->game->ship[move->localPacket.owner].y++;
 		break;
 	case 2:
-		if (move->game->ship[move->localPacket.owner].x>0 && move->game->ship[move->localPacket.owner].lives >= 0)
+		if (move->game->ship[move->localPacket.owner].x>0 && 
+			move->game->ship[move->localPacket.owner].lives >= 0)
+
 			move->game->ship[move->localPacket.owner].x--;
 		break;
 	case 3:
-		if (move->game->ship[move->localPacket.owner].y>(move->game->ysize - (move->game->ysize*0.2)) && move->game->ship[move->localPacket.owner].lives >= 0)
+		if (move->game->ship[move->localPacket.owner].y>(move->game->ysize - (move->game->ysize*0.2)) && 
+			move->game->ship[move->localPacket.owner].lives >= 0)
+
 			move->game->ship[move->localPacket.owner].y--;
 		break;
 	case 4:

@@ -9,10 +9,7 @@
 #include "debug.h"
 #pragma comment(lib,"Winmm.lib")
 
-typedef struct {
-	HANDLE	hPipe;
-	int		ThreadMustGoOn;
-}ThreadCtrl;
+
 
 void printGame(GameData msg) {
 
@@ -106,11 +103,11 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 
 	if (dwBytesRead < sizeof(msg)) {
 		if (GetLastError() == ERROR_BROKEN_PIPE) {
-			_tprintf(TEXT("Connection lost.\n"));
+			_tprintf(TEXT("[Error] Connection lost.\n"));
 			return -1;
 		}
 		else
-			_tprintf(TEXT("\nReadFile failed. Error = %d"), GetLastError());
+			_tprintf(TEXT("[Error] ReadFile failed. Error = %d \n"), GetLastError());
 	}
 
 	printGame(msg);
@@ -137,7 +134,7 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg) {
 	WaitForSingleObject(writeReady, INFINITE);
 	GetOverlappedResult(hPipe, &OvrWr, &dwBytesWritten, FALSE);
 	if (dwBytesWritten < sizeof(Packet))
-		_tprintf(TEXT("\nWriteFile failed. Error = %d\7"), GetLastError());
+		_tprintf(TEXT("[Error] WriteFile failed. Error = %d \7 \n"), GetLastError());
 
 	return 0;
 }
@@ -148,7 +145,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	HANDLE		heReadReady;
 
 	if (cThreadRdGame->hPipe == NULL) {
-		_tprintf(TEXT("ERROR casting pipe. (%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
 
@@ -188,7 +185,7 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 		FALSE,										//Initial state
 		NULL);										//Event name
 	if (heWriteReady == NULL) {
-		_tprintf(TEXT("[Error] Event ReadReady(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] Event WriteReady(%d)\n"), GetLastError());
 		return -1;
 	}
 
@@ -251,7 +248,7 @@ int StartPipeListener(HANDLE *hPipe) {
 	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
 	if (!h1stPipeInst) {
 		h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_1ST_PIPE);
-		_tprintf(TEXT("No pipe instances found. Waiting...\n"));
+		_tprintf(TEXT("[DEBUG] No pipe instances found. Waiting...\n"));
 		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
@@ -271,7 +268,7 @@ int StartPipeListener(HANDLE *hPipe) {
 			NULL);
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {
-			_tprintf(TEXT("Server full. Waiting for 30 seconds\n"));
+			_tprintf(TEXT("[DEBUG] Server full. Waiting for 30 seconds\n"));
 
 			bSuccess = WaitNamedPipe(PIPE_NAME, 30000);
 
@@ -283,7 +280,7 @@ int StartPipeListener(HANDLE *hPipe) {
 		}
 		else if (*hPipe == INVALID_HANDLE_VALUE) {
 
-			_tprintf(TEXT("ERROR opening pipe. (%d)\n"), GetLastError());
+			_tprintf(TEXT("[Error] opening pipe. (%d)\n"), GetLastError());
 			return -1;
 		}
 		else
@@ -291,7 +288,7 @@ int StartPipeListener(HANDLE *hPipe) {
 
 	} while (bRunning);
 
-	_tprintf(TEXT("Pipe connected.\nChanging pipe mode...\n"));
+	_tprintf(TEXT("[DEBUG] Pipe connected.\nChanging pipe mode...\n"));
 
 	dwPipeMode = PIPE_READMODE_MESSAGE;
 	bSuccess = SetNamedPipeHandleState(
@@ -301,7 +298,7 @@ int StartPipeListener(HANDLE *hPipe) {
 		NULL);
 
 	if (!bSuccess) {
-		_tprintf(TEXT("ERROR setting pipe mode. (%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] setting pipe mode. (%d)\n"), GetLastError());
 		return -1;
 	}
 
@@ -327,7 +324,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	cThreadRdGame.ThreadMustGoOn = 1;
 
 	if (!StartPipeListener(&hPipe)) {
-		_tprintf(TEXT("Error launching pipe listener...\n"));
+		_tprintf(TEXT("[Error] launching pipe listener...\n"));
 		return -1;
 	}
 
@@ -342,7 +339,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		&tReadGameID);								//gets thread ID to close it afterwards
 
 	if (htReadGame == NULL) {
-		_tprintf(TEXT("ERROR launching game thread. (%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
 		return -1;
 	}
 
@@ -355,7 +352,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		&tGetKeyID);								//gets thread ID to close it afterwards
 
 	if (htReadGame == NULL) {
-		_tprintf(TEXT("ERROR launching game thread. (%d)\n"), GetLastError());
+		_tprintf(TEXT("[Error] launching GetKey thread. (%d)\n"), GetLastError());
 		return -1;
 	}
 

@@ -147,6 +147,7 @@
     <ClCompile Include="debug.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="localStructs.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

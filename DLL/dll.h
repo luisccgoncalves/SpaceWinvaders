@@ -32,7 +32,7 @@
 #define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
 #define MAX_BOMBS		10							//Maximum bombs per invaders by level (TEMP: 10% invaders - consider min cases)
 #define MAX_SHOTS		25							//Maximum shots a defender can have on the screen at same time
-#define POWERUP_DUR		5000						//Duration of a powerup buff
+#define POWERUP_DUR		10000						//Duration of a powerup buff
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
 #define RAND_INVADER	5							//Number of random path invaders
@@ -175,9 +175,6 @@ typedef struct {
 	int				ThreadMustGoOn;			//Flag for thread shutdown
 
 	GameData		localGameData;			//structure that holds the local game
-
-	Packet			localPacket;			//local packet
-	HANDLE			heGotPacket;			
 
 } SMCtrl;
 

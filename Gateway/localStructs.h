@@ -2,6 +2,7 @@
 #define LOCALSTRUCTS_H
 
 #include <windows.h>
+#include <sddl.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <io.h>

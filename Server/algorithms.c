@@ -524,12 +524,12 @@ int ShipCollision(GameData *game, Ship *ship) {
 			}
 		}
 
-		//if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
-		////	//Update game status? like lauch a thread reset after a sleep?
-		////DamageShip(ship);
-		//	_tprintf(TEXT("\7"));
-		//	return 1;
-		//}
+		if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
+		//	//Update game status? like lauch a thread reset after a sleep?
+		//DamageShip(ship);
+			_tprintf(TEXT("\7"));
+			return 1;
+		}
 	}
 	return 0;
 }

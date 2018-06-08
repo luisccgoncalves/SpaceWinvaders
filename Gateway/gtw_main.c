@@ -95,16 +95,6 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	cThread.heGotPacket = CreateEvent(
-		NULL, 										//Event attributes
-		FALSE, 										//Manual reset (TRUE for auto-reset)
-		FALSE, 										//Initial state
-		NULL);										//Event name
-	if (cThread.heGotPacket == NULL) {
-		_tprintf(TEXT("[Error] Event server update (%d)\n"), GetLastError());
-		return -1;
-	}
-
 	//Opens a mapped file by the server
 	if (sharedMemory(&cThread.hSMem, NULL) == -1) {
 		_tprintf(TEXT("[Error] Opening file mapping (%d)\n"), GetLastError());

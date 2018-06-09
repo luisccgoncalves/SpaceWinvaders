@@ -27,3 +27,19 @@ int GiveInvadersHP(GameData *game, int *ThreadMustGoOn) { //Gives every invader 
 	}
 	return 0;
 }
+
+int PlaceDefenders(GameData *game, int *ThreadMustGoOn) { //Places defenders relatively to play area size
+	int i;
+	int slot = game->xsize / game->num_players;
+
+	if (*ThreadMustGoOn) {
+		for (i = 0; i < game->num_players; i++) {
+
+			game->ship[i].x = (slot*i) + (slot/2);
+			game->ship[i].y = game->ysize-1;
+		}
+
+		return 1;
+	}
+	return 0;
+}

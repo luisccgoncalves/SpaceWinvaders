@@ -148,35 +148,6 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 	return 0;
 }
 
-//DWORD WINAPI InvadersBomb(LPVOID tParam) {
-//
-//	GameData	*baseGame = ((BombMoves *)tParam)->game;
-//	Invader		*invader = ((BombMoves*)tParam)->invader;
-//
-//	DWORD		tBombLauncherID;
-//	HANDLE		htBombLauncher[MAX_BOMBS];  
-//
-//	int			i;
-//	if (invader->bombRateCounter = 1) {
-//		for (i = 0; i < baseGame->max_bombs; i++) {
-//			htBombLauncher[i] = CreateThread(
-//				NULL,										//Thread security attributes
-//				0,											//Stack size
-//				BombMovement,								//Thread function name
-//				tParam,										//Thread parameter struct
-//				0,											//Creation flags
-//				&tBombLauncherID);							//gets thread ID 
-//			if (htBombLauncher[i] == NULL) {
-//				_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
-//				return -1;
-//			}
-//
-//		}
-//	}
-//	WaitForMultipleObjects(MAX_BOMBS, htBombLauncher,TRUE, INFINITE);
-//	return 0;
-//}
-
 DWORD WINAPI BombMovement(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = ((BombMoves *)tParam)->TheadmustGoOn;
@@ -198,7 +169,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 		if (invader->bombRateCounter == 1) {
 
 			WaitForSingleObject(mhStructSync, INFINITE);
-			invader->bombRateCounter--;
+			invader->bombRateCounter++;
 			invader->bomb[bombNum].x = invader->x;							//give invaders coords to bomb
 			invader->bomb[bombNum].y = invader->y;
 			invader->bomb[bombNum].fired = 1;								//update bomb status
@@ -257,7 +228,10 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					else if ((i % (sidestep * 2)) > sidestep)
 						baseGame->invad[j].x--;														//Invader goes left
 
+					//Tests collision
 					InvaderCollision(baseGame, &baseGame->invad[j]);
+
+					//Updates bombrate loop counter
 					baseGame->invad[j].bombRateCounter = ++baseGame->invad[j].bombRateCounter % baseGame->bombRate;
 					ReleaseMutex(mhStructSync);
 
@@ -270,7 +244,6 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 						bombMoves.TheadmustGoOn = ThreadMustGoOn;
 						ReleaseMutex(mhStructSync);
 
-						_tprintf(TEXT("\7"));
 						htBombLauncher = CreateThread(
 							NULL,										//Thread security attributes
 							0,											//Stack size
@@ -304,8 +277,8 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	BombMoves		bombMoves;
 
 	while (*ThreadMustGoOn) {						//Thread main loop
-		/*WaitForSingleObject(mhStructSync, INFINITE);*/
-		for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
+
+		for (i = (baseGame->max_invaders - baseGame->max_rand_invaders); (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
 			if (baseGame->invad[i].rand_path && baseGame->invad[i].hp >0) {
 
 				WaitForSingleObject(mhStructSync, INFINITE);
@@ -360,14 +333,12 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					baseGame->invad[i].x = xTemp;
 					baseGame->invad[i].y = yTemp;
 				}
-				//if the game got here, then it does not move
-				//if we want we could kill the ship... last resort
-				//else {
-				//	baseGame->invad[i].hp = 0;
-				//}
 
+				//Tests collision
 				InvaderCollision(baseGame, &baseGame->invad[i]);
-				UpdateInvaderBombRate(baseGame->bombRate, &baseGame->invad[i]);
+				//Updates bombrate loop counter
+				baseGame->invad[i].bombRateCounter = ++baseGame->invad[i].bombRateCounter % baseGame->bombRate;
+
 				if (baseGame->invad[i].bombRateCounter == 1) {
 					bombMoves.game = baseGame;
 					bombMoves.invader = &baseGame->invad[i];
@@ -389,7 +360,6 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				ReleaseMutex(mhStructSync);
 			}
 		}
-		/*ReleaseMutex(mhStructSync);*/
 		Sleep((DWORD)(baseGame->invaders_speed *0.9)*(*ThreadMustGoOn));
 	}
 

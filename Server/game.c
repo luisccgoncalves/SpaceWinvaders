@@ -13,8 +13,8 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	DWORD			tRandPathInvaderID;
 	HANDLE			htRandPathInvader;
 
-	DWORD			tInvadersBombID;
-	HANDLE			htInvadersBomb[MAX_INVADER];
+	//DWORD			tInvadersBombID;
+	//HANDLE			htInvadersBomb[MAX_INVADER];
 
 	DWORD			tPowerUpsID;
 	HANDLE			htPowerUps;
@@ -62,17 +62,17 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		baseGame->invad[i].hp = 1;
 	}
 
-	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
-		bombMoves.invader = &baseGame->invad[i];
+	//for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
+	//	bombMoves.invader = &baseGame->invad[i];
 
-		htInvadersBomb[i] = CreateThread(
-			NULL,										//Thread security attributes
-			0,											//Stack size
-			InvadersBomb,								//Thread function name
-			&bombMoves,									//Thread parameter struct
-			0,											//Creation flags
-			&tInvadersBombID);							//gets thread ID 
-	}
+	//	htInvadersBomb[i] = CreateThread(
+	//		NULL,										//Thread security attributes
+	//		0,											//Stack size
+	//		InvadersBomb,								//Thread function name
+	//		&bombMoves,									//Thread parameter struct
+	//		0,											//Creation flags
+	//		&tInvadersBombID);							//gets thread ID 
+	//}
 
 	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
 	for (i = 0; i < baseGame->num_players; i++) {
@@ -107,7 +107,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
-	WaitForMultipleObjects(MAX_INVADER, htInvadersBomb, TRUE, INFINITE);
+	//WaitForMultipleObjects(MAX_INVADER, htInvadersBomb, TRUE, INFINITE);
 
 	return 0;
 }

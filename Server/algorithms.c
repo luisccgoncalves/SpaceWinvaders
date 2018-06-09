@@ -124,17 +124,18 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 
 			//Tests for collisions
   			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
-				for (int j = 0; j < cThread->localGameData.num_players && cThread->localGameData.pUp.fired; j++) {
-					if (cThread->localGameData.pUp.x == cThread->localGameData.ship[j].x &&
-						cThread->localGameData.pUp.y == cThread->localGameData.ship[j].y) {
+				PowerUpCollision(&cThread->localGameData, &cThread->localGameData.pUp, &cThread->mhStructSync);
+				//for (int j = 0; j < cThread->localGameData.num_players && cThread->localGameData.pUp.fired; j++) {
+				//	if (cThread->localGameData.pUp.x == cThread->localGameData.ship[j].x &&
+				//		cThread->localGameData.pUp.y == cThread->localGameData.ship[j].y) {
 
-						PowerUpShip(&cThread->localGameData.ship[j], 
-							&cThread->localGameData.pUp, 
-							cThread->mhStructSync);
+				//		PowerUpShip(&cThread->localGameData.ship[j], 
+				//			&cThread->localGameData.pUp, 
+				//			cThread->mhStructSync);
 
-						cThread->localGameData.pUp.fired = 0;
-					}
-				}
+				//		cThread->localGameData.pUp.fired = 0;
+				//	}
+				//}
 			}
 
 			ReleaseMutex(cThread->mhStructSync);
@@ -204,7 +205,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
-	int sidestep = 4;
+	int sidestep = 4;				//hardcoded
 	int totalsteps = (baseGame->ysize - (baseGame->max_invaders/ INVADER_BY_ROW)) * sidestep;
 	int regInvaderNr = (baseGame->max_invaders - baseGame->max_rand_invaders);
 
@@ -256,12 +257,12 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
-	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
+	int			* ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
 	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
-	int i, xTemp, yTemp, invalid, count;
-	BombMoves		bombMoves;
+	int			i, xTemp, yTemp, invalid, count;
+	BombMoves	bombMoves;
 
 	while (*ThreadMustGoOn) {						//Thread main loop
 
@@ -493,27 +494,28 @@ int UpdateLocalShip(ClientMoves *move) {
 
 int InstantiateGame(GameData *game) {
 	int i, j;
-
+	/*Ambient variables*/
 	game->xsize = XSIZE;
 	game->ysize = YSIZE;
 
-	game->invaders_speed = INVADER_SPEED;			// Base speed for invader
-	game->max_bombs = MAX_BOMBS;					// Base max num of bombs at same time
-	game->max_invaders = MAX_INVADER;				// Base num of invaders in the field
-	game->max_rand_invaders = RAND_INVADER;			// Base num of invaders in the field
-	game->num_players = MAX_PLAYERS;				// Base num of players
-	game->ship_shot_speed = PROJECTL_SPEED;			// Base speed for defender ship
-	game->projectiles_speed = PROJECTL_SPEED;		// Base speed for Powerups and invader bombs
-	game->pup_duration = POWERUP_DUR;				// Base power up duration
-	game->bombRate = BOMBRATE;						// Base steps until bomb launch
+	game->invaders_speed =		INVADER_SPEED;				// Base speed for invader
+	game->max_bombs =			MAX_BOMBS;					// Base max num of bombs at same time
+	game->max_invaders =		MAX_INVADER;				// Base num of invaders in the field
+	game->max_rand_invaders =	RAND_INVADER;				// Base num of invaders in the field
+	game->num_players =			MAX_PLAYERS;				// Base num of players
+	game->ship_shot_speed =		PROJECTL_SPEED;				// Base speed for defender ship
+	game->projectiles_speed =	PROJECTL_SPEED;				// Base speed for Powerups and invader bombs
+	game->pup_duration =		POWERUP_DUR;				// Base power up duration
+	game->bombRate =			BOMBRATE;					// Base steps until bomb launch
 
-	for (i = 0; i < game->max_invaders; i++) {			//Instantiates all bombs outside of game and updates the status
+	/*Bombs*/
+	for (i = 0; i < game->max_invaders; i++) {				//Instantiates all bombs outside of game and updates the status
 		for (j = 0; j < game->max_bombs; j++) {
 			ResetBomb(&game->invad[i].bomb[j]);
 		}
 		game->invad[i].bombRateCounter = RandomValue(10);
 	}
-	
+	/*Ships & shots*/
 	for (i = 0; i < game->num_players; i++) {
 		game->ship[i].drunk = 0;
 		game->ship[i].laser_shots = 0;
@@ -640,6 +642,21 @@ int BombCollision(GameData * game, InvaderBomb * bomb)
 					ResetBomb(bomb);
 					return 1;
 				}
+			}
+		}
+	}
+	return 0;
+}
+
+int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE *mhStructSync) {
+	int j;
+	if (pUp->y>(game->ysize*0.2)) {
+		for (j = 0; j < game->num_players && pUp->fired; j++) {
+			if (pUp->x == game->ship[j].x && pUp->y == game->ship[j].y) {
+
+				PowerUpShip(&game->ship[j],	pUp, mhStructSync);
+				pUp->fired = 0;
+				return 1;
 			}
 		}
 	}

@@ -5,5 +5,6 @@
 
 int DefineInvadersType(GameData *game, int *ThreadMustGoOn);
 int GiveInvadersHP(GameData *game, int *ThreadMustGoOn);
+int PlaceDefenders(GameData *game, int *ThreadMustGoOn);
 
 #endif // LEVEL_H

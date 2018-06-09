@@ -18,7 +18,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int i;
 
-	/* Fills bombMoves structure */
+	/* Fills bombMoves structure */ /*Needs work*/
 	BombMoves	bombMoves;
 	bombMoves.mhStructSync = &((SMCtrl *)tParam)->mhStructSync;
 	bombMoves.TheadmustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
@@ -26,12 +26,16 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	
 	InstantiateGame(baseGame); /*Needs work*/ /*Move into level later*/
 	
-	if (DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path
-		_tprintf(TEXT("[Error] Error defining invaders path! \n"));
+	if (!DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path
+		_tprintf(TEXT("[Error] Defining invaders path! \n"));
 	}
 
-	if (GiveInvadersHP(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
-		_tprintf(TEXT("[Error] Error giving invaders HP! \n"));
+	if (!GiveInvadersHP(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+		_tprintf(TEXT("[Error] Giving invaders HP! \n"));
+	}
+
+	if (!PlaceDefenders(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+		_tprintf(TEXT("[Error] placing defender ships ! \n"));
 	}
 
 	/*This needs thought and atomization*/
@@ -54,27 +58,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 			} while (ValidateInvaderPosition(baseGame, baseGame->invad[i].x, baseGame->invad[i].y, i));
 		}
-	}
-
-
-
-	//for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
-	//	bombMoves.invader = &baseGame->invad[i];
-
-	//	htInvadersBomb[i] = CreateThread(
-	//		NULL,										//Thread security attributes
-	//		0,											//Stack size
-	//		InvadersBomb,								//Thread function name
-	//		&bombMoves,									//Thread parameter struct
-	//		0,											//Creation flags
-	//		&tInvadersBombID);							//gets thread ID 
-	//}
-
-	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
-	for (i = 0; i < baseGame->num_players; i++) {
-
-		baseGame->ship[i].x = i+RandomValue(baseGame->xsize/4);
-		baseGame->ship[i].y = 23;
 	}
 
 	htRegPathInvader = CreateThread(

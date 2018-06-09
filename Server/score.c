@@ -20,6 +20,7 @@ int sortTop10(HighScore *top10) {
 		}
 	return 0;
 }
+
 int writeTop10ToReg(HighScore *top10) {
 
 	HKEY	key;

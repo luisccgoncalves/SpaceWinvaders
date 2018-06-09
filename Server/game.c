@@ -18,12 +18,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int i;
 
-	/* Fills bombMoves structure */ /*Needs work*/
-	BombMoves	bombMoves;
-	bombMoves.mhStructSync = &((SMCtrl *)tParam)->mhStructSync;
-	bombMoves.TheadmustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	bombMoves.game = baseGame;
-	
 	InstantiateGame(baseGame); /*Needs work*/ /*Move into level later*/
 	
 	if (!DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path
@@ -38,27 +32,31 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		_tprintf(TEXT("[Error] placing defender ships ! \n"));
 	}
 
+	if (!OriginalPosition(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+		_tprintf(TEXT("[Error] placing invaders ships ! \n"));
+	}
+
 	/*This needs thought and atomization*/
 	//Populates invaders with coords
-	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
+	//for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 
-		if (!(baseGame->invad[i].rand_path)) {			//If regular path
+	//	if (!(baseGame->invad[i].rand_path)) {			//If regular path
 
-													//deploys INVADER_BY_ROW invaders per line with a spacing of 2
-			baseGame->invad[i].x = baseGame->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
+	//												//deploys INVADER_BY_ROW invaders per line with a spacing of 2
+	//		baseGame->invad[i].x = baseGame->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
 
-			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
-			baseGame->invad[i].y = baseGame->invad[i].y_init = i / INVADER_BY_ROW;
-		}
-		else {
-			do {
-				baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue((baseGame->xsize / 2)) + (baseGame->xsize / 3);
-				baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
-				baseGame->invad[i].direction = RandomValue(3);
+	//		//Deploys 5 lines of invaders (MAX_INVADER/11=5)
+	//		baseGame->invad[i].y = baseGame->invad[i].y_init = i / INVADER_BY_ROW;
+	//	}
+	//	else {
+	//		do {
+	//			baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue((baseGame->xsize / 2)) + (baseGame->xsize / 3);
+	//			baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
+	//			baseGame->invad[i].direction = RandomValue(3);
 
-			} while (ValidateInvaderPosition(baseGame, baseGame->invad[i].x, baseGame->invad[i].y, i));
-		}
-	}
+	//		} while (ValidateInvaderPosition(baseGame, baseGame->invad[i].x, baseGame->invad[i].y, i));
+	//	}
+	//}
 
 	htRegPathInvader = CreateThread(
 		NULL,										//Thread security attributes
@@ -86,7 +84,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
-	//WaitForMultipleObjects(MAX_INVADER, htInvadersBomb, TRUE, INFINITE);
 
 	return 0;
 }

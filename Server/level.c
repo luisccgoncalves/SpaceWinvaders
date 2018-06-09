@@ -43,3 +43,33 @@ int PlaceDefenders(GameData *game, int *ThreadMustGoOn) { //Places defenders rel
 	}
 	return 0;
 }
+
+int OriginalPosition(GameData *game, int *ThreadMustGoOn) {
+	int i;
+	int regularsByRow = ((game->xsize / 4)); //Half of screen, half of positions on screen
+	int randomByRow	= ((game->xsize / 4));
+	int randInvaders = (game->max_invaders - game->max_rand_invaders);
+	
+	if (*ThreadMustGoOn) {
+		for (i = 0; i < game->max_invaders; i++) {
+			if (!(game->invad[i].rand_path)) {			//If regular path
+
+				game->invad[i].x = game->invad[i].x_init = (i % regularsByRow) * 2;
+				game->invad[i].y = game->invad[i].y_init = (i / regularsByRow) * 2;
+			}
+			else {
+				game->invad[i].x = game->invad[i].x_init = (game->xsize / 2) + (i % randomByRow) * 4;
+				game->invad[i].y = game->invad[i].y_init = ((i-randInvaders) / randomByRow) * 2;
+				game->invad[i].direction = -1;
+
+				//do {
+				//	game->invad[i].x = game->invad[i].x_init = RandomValue((game->xsize / 2)) + (game->xsize / 3);
+				//	game->invad[i].y = game->invad[i].y_init = RandomValue(game->ysize);
+				//	game->invad[i].direction = RandomValue(3);
+				//} while (ValidateInvaderPosition(game, game->invad[i].x, game->invad[i].y, i));
+			}
+		}
+		return 1;
+	}
+	return 0;
+}

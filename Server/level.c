@@ -47,27 +47,28 @@ int PlaceDefenders(GameData *game, int *ThreadMustGoOn) { //Places defenders rel
 int OriginalPosition(GameData *game, int *ThreadMustGoOn) {
 	int i;
 	int regularsByRow = ((game->xsize / 4)); //Half of screen, half of positions on screen
-	int randomByRow	= ((game->xsize / 4));
-	int randInvaders = (game->max_invaders - game->max_rand_invaders);
+	int regInvaders = (game->max_invaders - game->max_rand_invaders);
+	int randomByRow	= ((game->xsize / 8));
+	int randInvaders = (game->max_invaders - regInvaders);
 	
 	if (*ThreadMustGoOn) {
-		for (i = 0; i < game->max_invaders; i++) {
-			if (!(game->invad[i].rand_path)) {			//If regular path
+		for (i = 0; i < regInvaders; i++) {
 
-				game->invad[i].x = game->invad[i].x_init = (i % regularsByRow) * 2;
-				game->invad[i].y = game->invad[i].y_init = (i / regularsByRow) * 2;
-			}
-			else {
-				game->invad[i].x = game->invad[i].x_init = (game->xsize / 2) + (i % randomByRow) * 4;
-				game->invad[i].y = game->invad[i].y_init = ((i-randInvaders) / randomByRow) * 2;
-				game->invad[i].direction = -1;
+			game->invad[i].x = game->invad[i].x_init = (i % regularsByRow) * 2;
+			game->invad[i].y = game->invad[i].y_init = (i / regularsByRow) * 2;
 
-				//do {
-				//	game->invad[i].x = game->invad[i].x_init = RandomValue((game->xsize / 2)) + (game->xsize / 3);
-				//	game->invad[i].y = game->invad[i].y_init = RandomValue(game->ysize);
-				//	game->invad[i].direction = RandomValue(3);
-				//} while (ValidateInvaderPosition(game, game->invad[i].x, game->invad[i].y, i));
-			}
+		}
+
+		for(i = 0; i < randInvaders ; i++) {
+
+			game->invad[i + regInvaders].x = (game->xsize / 2) + (i % randomByRow) * 4;
+			game->invad[i + regInvaders].x_init = game->invad[i + regInvaders].x;
+
+			game->invad[i + regInvaders].y = (i / randomByRow) * 4;
+			game->invad[i + regInvaders].y_init = game->invad[i + regInvaders].y;
+
+			game->invad[i + regInvaders].direction = RandomValue(3);
+
 		}
 		return 1;
 	}

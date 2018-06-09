@@ -268,7 +268,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 	int * ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData *baseGame = &((SMCtrl *)tParam)->localGameData;
-	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
+	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, xTemp, yTemp, invalid, count;
 

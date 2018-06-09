@@ -208,8 +208,6 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 	int totalsteps = (baseGame->ysize - (baseGame->max_invaders/ INVADER_BY_ROW)) * sidestep;
 	int regInvaderNr = (baseGame->max_invaders - baseGame->max_rand_invaders);
 
-	DWORD			tBombLauncherID;
-	HANDLE			htBombLauncher;
 	BombMoves		bombMoves;
 	
 	while (*ThreadMustGoOn) {						//Thread main loop
@@ -244,16 +242,8 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 						bombMoves.TheadmustGoOn = ThreadMustGoOn;
 						ReleaseMutex(mhStructSync);
 
-						htBombLauncher = CreateThread(
-							NULL,										//Thread security attributes
-							0,											//Stack size
-							BombMovement,								//Thread function name
-							(LPVOID)&bombMoves,							//Thread parameter struct
-							0,											//Creation flags
-							&tBombLauncherID);							//gets thread ID 
-						if (htBombLauncher == NULL) {
-							_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
-							return -1;
+						if (!BombLauncher(&bombMoves)) {					/*Bomb thread launcher*/
+							_tprintf(TEXT("[Error] placing invaders ships ! \n"));
 						}
 					}
 				}
@@ -271,9 +261,6 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, xTemp, yTemp, invalid, count;
-
-	DWORD			tBombLauncherID;
-	HANDLE			htBombLauncher;
 	BombMoves		bombMoves;
 
 	while (*ThreadMustGoOn) {						//Thread main loop
@@ -344,17 +331,9 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					bombMoves.invader = &baseGame->invad[i];
 					bombMoves.mhStructSync = mhStructSync;
 					bombMoves.TheadmustGoOn = ThreadMustGoOn;
-
-					htBombLauncher = CreateThread(
-						NULL,										//Thread security attributes
-						0,											//Stack size
-						BombMovement,								//Thread function name
-						(LPVOID)&bombMoves,										//Thread parameter struct
-						0,											//Creation flags
-						&tBombLauncherID);							//gets thread ID 
-					if (htBombLauncher == NULL) {
-						_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
-						return -1;
+					
+					if (!BombLauncher(&bombMoves)) {					/*Bomb thread launcher*/
+						_tprintf(TEXT("[Error] placing invaders ships ! \n"));
 					}
 				}
 				ReleaseMutex(mhStructSync);
@@ -765,14 +744,23 @@ int UpdateCoords(GameData * game, int *y) {
 	return 0;
 }
 
-int UpdateInvaderBombRate(int bombRate, Invader *invader) {
-
-	//[0, 1, ... bombRate-1]
-	invader->bombRateCounter = ++invader->bombRateCounter % bombRate;
-
-	return 0;
+int BombLauncher(BombMoves *bombMoves) {
+	DWORD			tBombLauncherID;
+	HANDLE			htBombLauncher;
+	
+	htBombLauncher = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size
+		BombMovement,								//Thread function name
+		bombMoves,									//Thread parameter struct
+		0,											//Creation flags
+		&tBombLauncherID);							//gets thread ID 
+	if (htBombLauncher == NULL) {
+		_tprintf(TEXT("[Error] Creating thread htBombLauncher (%d) at server\n"), GetLastError());
+		return 0;
+	}
+	return 1;
 }
-
 
 
 

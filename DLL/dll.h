@@ -30,7 +30,7 @@
 #define MAX_INVADER		50							//Maximum invaders by level
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
-#define MAX_BOMBS		1							//Maximum bombs in the screen at any time for one invader
+#define MAX_BOMBS		3							//Maximum bombs in the screen at any time for one invader
 #define MAX_SHOTS		99							//Maximum shots a defender can have on the screen at same time
 #define POWERUP_DUR		10000						//Duration of a powerup buff
 #define	BOMBRATE		10							//Number of steps between bomb launches 

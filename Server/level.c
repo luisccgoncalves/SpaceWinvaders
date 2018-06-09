@@ -64,7 +64,7 @@ int OriginalPosition(GameData *game, int *ThreadMustGoOn) {
 			game->invad[i + regInvaders].x = (game->xsize / 2) + (i % randomByRow) * 4;
 			game->invad[i + regInvaders].x_init = game->invad[i + regInvaders].x;
 
-			game->invad[i + regInvaders].y = (i / randomByRow) * 4;
+			game->invad[i + regInvaders].y = ((i / randomByRow) * 4) + 2;
 			game->invad[i + regInvaders].y_init = game->invad[i + regInvaders].y;
 
 			game->invad[i + regInvaders].direction = RandomValue(3);

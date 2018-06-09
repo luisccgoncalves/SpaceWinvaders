@@ -157,7 +157,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 //	HANDLE		htBombLauncher[MAX_BOMBS];  
 //
 //	int			i;
-//	if (invader->invaderBombRate = 1) {
+//	if (invader->bombRateCounter = 1) {
 //		for (i = 0; i < baseGame->max_bombs; i++) {
 //			htBombLauncher[i] = CreateThread(
 //				NULL,										//Thread security attributes
@@ -194,7 +194,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 			}
 		}
 		if (bombNum > -1) {
-			if (invader->invaderBombRate == 1) {
+			if (invader->bombRateCounter == 1) {
 
 
 				invader->bomb[bombNum].x = invader->x;		//give invaders coords to bomb
@@ -254,7 +254,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					InvaderCollision(baseGame, &baseGame->invad[j]);
 					UpdateInvaderBombRate(baseGame, &baseGame->invad[j]);
 
-					if (baseGame->invad[j].invaderBombRate == 1) {
+					if (baseGame->invad[j].bombRateCounter == 1) {
 						if (baseGame->invad[j].hp > 0) {
 							bombMoves.game = baseGame;
 							bombMoves.invader = &baseGame->invad[j];
@@ -365,7 +365,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				InvaderCollision(baseGame, &baseGame->invad[i]);
 				UpdateInvaderBombRate(baseGame, &baseGame->invad[i]);
 
-				if (baseGame->invad[i].invaderBombRate == 1) {
+				if (baseGame->invad[i].bombRateCounter == 1) {
 					bombMoves.game = baseGame;
 					bombMoves.invader = &baseGame->invad[i];
 					bombMoves.mhStructSync = mhStructSync;
@@ -537,7 +537,7 @@ int InstantiateGame(GameData *game) {
 		for (j = 0; j < game->max_bombs; j++) {
 			ResetBomb(&game->invad[i].bomb[j]);
 		}
-		game->invad[i].invaderBombRate = RandomValue(10);
+		game->invad[i].bombRateCounter = RandomValue(10);
 	}
 	
 	for (i = 0; i < game->num_players; i++) {
@@ -761,9 +761,9 @@ int UpdateCoords(GameData * game, int *y) {
 
 int UpdateInvaderBombRate(GameData *game, Invader *invader) {
 	if (invader->hp > 0) {
-		invader->invaderBombRate++;
-		if (invader->invaderBombRate > game->bombRate) {
-			invader->invaderBombRate = 0;
+		invader->bombRateCounter++;
+		if (invader->bombRateCounter > game->bombRate) {
+			invader->bombRateCounter = 0;
 		}
 	}
 	return 0;

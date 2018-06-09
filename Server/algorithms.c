@@ -186,41 +186,42 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 	
 
 	/*This is maybe not needed... */
-		int			bombNum = -1;
-		for (int i = 0; i < baseGame->max_bombs; i++) {						//cicle to check if there is available slots to fire a bomb
-			if (!invader->bomb[i].fired) {
-				bombNum = i;
-				break;
-			}
+	int			bombNum = -1;
+
+	for (int i = 0; i < baseGame->max_bombs; i++) {							//cicle to check if there is available slots to fire a bomb
+		if (!invader->bomb[i].fired) {
+			bombNum = i;
+			break;
 		}
-		if (bombNum > -1) {
-			if (invader->bombRateCounter == 1) {
+	}
+	if (bombNum > -1) {
+		if (invader->bombRateCounter == 1) {
 
-				WaitForSingleObject(mhStructSync, INFINITE);
-				invader->bomb[bombNum].x = invader->x;		//give invaders coords to bomb
-				invader->bomb[bombNum].y = invader->y;
-				invader->bomb[bombNum].fired = 1;								//update bomb status
-				ReleaseMutex(mhStructSync);
+			WaitForSingleObject(mhStructSync, INFINITE);
+			invader->bomb[bombNum].x = invader->x;							//give invaders coords to bomb
+			invader->bomb[bombNum].y = invader->y;
+			invader->bomb[bombNum].fired = 1;								//update bomb status
+			ReleaseMutex(mhStructSync);
 
-				while (*ThreadMustGoOn && invader->bomb[bombNum].fired) {
+			while (*ThreadMustGoOn && invader->bomb[bombNum].fired) {
 
-					if (invader->bomb[bombNum].y < baseGame->ysize - 1) {		//if bomb has not reached the end of the play area
+				if (invader->bomb[bombNum].y < baseGame->ysize - 1) {		//if bomb has not reached the end of the play area
 
-						WaitForSingleObject(mhStructSync, INFINITE);
-						invader->bomb[bombNum].y++;							//update it's position, an wait for next tick 
-						BombCollision(baseGame, &invader->bomb[bombNum]);
-						ReleaseMutex(mhStructSync);
+					WaitForSingleObject(mhStructSync, INFINITE);
+					invader->bomb[bombNum].y++;								//update it's position, an wait for next tick 
+					BombCollision(baseGame, &invader->bomb[bombNum]);
+					ReleaseMutex(mhStructSync);
 
-						Sleep(baseGame->projectiles_speed * (*ThreadMustGoOn));	//Pratical assignment pdf, page 3, 4th rule
-					}
-					else {														//reset bomb to out of screen
-						WaitForSingleObject(mhStructSync, INFINITE);
-						ResetBomb(&invader->bomb[bombNum]);
-						ReleaseMutex(mhStructSync);
-					}
+					Sleep(baseGame->projectiles_speed * (*ThreadMustGoOn));	//Pratical assignment pdf, page 3, 4th rule
+				}
+				else {														//reset bomb to out of screen
+					WaitForSingleObject(mhStructSync, INFINITE);
+					ResetBomb(&invader->bomb[bombNum]);
+					ReleaseMutex(mhStructSync);
 				}
 			}
 		}
+	}
 	return 0;
 }
 
@@ -243,47 +244,45 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 		for (i = 0; (i < totalsteps) && *ThreadMustGoOn; i++) {
 
-			/*WaitForSingleObject(mhStructSync, INFINITE);*/
-
 			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn; j++) {
 				if (!baseGame->invad[j].rand_path && baseGame->invad[j].hp > 0) {
 
 					WaitForSingleObject(mhStructSync, INFINITE);
+
 					baseGame->invad[j].y = (i / sidestep) + baseGame->invad[j].y_init;				//Invader goes down after n sidesteps
 
 					if ((i % (sidestep * 2)) < sidestep)
-						baseGame->invad[j].x = (i % (sidestep * 2)) + baseGame->invad[j].x_init;		//Invader goes right
+						baseGame->invad[j].x = (i % (sidestep * 2)) + baseGame->invad[j].x_init;	//Invader goes right
 					else if ((i % (sidestep * 2)) > sidestep)
-						baseGame->invad[j].x--;													//Invader goes left
+						baseGame->invad[j].x--;														//Invader goes left
+
 					InvaderCollision(baseGame, &baseGame->invad[j]);
-					UpdateInvaderBombRate(baseGame, &baseGame->invad[j]);
+					baseGame->invad[j].bombRateCounter = ++baseGame->invad[j].bombRateCounter % baseGame->bombRate;
 					ReleaseMutex(mhStructSync);
 
 					if (baseGame->invad[j].bombRateCounter == 1) {
-						if (baseGame->invad[j].hp > 0) {
-							bombMoves.game = baseGame;
-							bombMoves.invader = &baseGame->invad[j];
-							bombMoves.mhStructSync = mhStructSync;
-							bombMoves.TheadmustGoOn = ThreadMustGoOn;
 
-							WaitForSingleObject(mhStructSync, INFINITE);
-							htBombLauncher = CreateThread(
-								NULL,										//Thread security attributes
-								0,											//Stack size
-								BombMovement,								//Thread function name
-								(LPVOID)&bombMoves,										//Thread parameter struct
-								0,											//Creation flags
-								&tBombLauncherID);							//gets thread ID 
-							if (htBombLauncher == NULL) {
-								_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
-								return -1;
-							}
-							ReleaseMutex(mhStructSync);
+						WaitForSingleObject(mhStructSync, INFINITE);
+						bombMoves.game = baseGame;
+						bombMoves.invader = &baseGame->invad[j];
+						bombMoves.mhStructSync = mhStructSync;
+						bombMoves.TheadmustGoOn = ThreadMustGoOn;
+						ReleaseMutex(mhStructSync);
+
+						htBombLauncher = CreateThread(
+							NULL,										//Thread security attributes
+							0,											//Stack size
+							BombMovement,								//Thread function name
+							(LPVOID)&bombMoves,							//Thread parameter struct
+							0,											//Creation flags
+							&tBombLauncherID);							//gets thread ID 
+						if (htBombLauncher == NULL) {
+							_tprintf(TEXT("[Error] Creating thread htBombLauncher[%d] (%d) at server\n"), i, GetLastError());
+							return -1;
 						}
 					}
 				}
 			}
-			//ReleaseMutex(mhStructSync);
 			Sleep(baseGame->invaders_speed*(*ThreadMustGoOn));
 		}
 	}
@@ -366,7 +365,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				//}
 
 				InvaderCollision(baseGame, &baseGame->invad[i]);
-				UpdateInvaderBombRate(baseGame, &baseGame->invad[i]);
+				UpdateInvaderBombRate(baseGame->bombRate, &baseGame->invad[i]);
 				if (baseGame->invad[i].bombRateCounter == 1) {
 					bombMoves.game = baseGame;
 					bombMoves.invader = &baseGame->invad[i];
@@ -593,18 +592,30 @@ int ShipCollision(GameData *game, Ship *ship) {
 }
 
 int ShotCollision(GameData *game, ShipShot *shot) {
+
 	int i,j;
+
 	if (shot->fired) {
+
+		//Tests shot collision with invaders
 		for (i = 0; i < game->max_invaders; i++) {
-			if (game->invad[i].x == shot->x && game->invad[i].y == shot->y && game->invad[i].hp > 0) {
+
+			if (game->invad[i].hp > 0 &&
+				game->invad[i].x == shot->x && 
+				game->invad[i].y == shot->y ) {
+
 				DamageInvader(&game->invad[i]);
 				ResetShot(shot);
 				return 1;
 			}
-		}
-		for (i = 0; i < game->max_invaders; i++) {
+
+			//Tests shot collision with bombs
 			for (j = 0; j < game->max_bombs; j++) {
-				if (game->invad[i].bomb[j].x == shot->x && game->invad[i].bomb[j].y == shot->y && game->invad[i].bomb[j].fired) {
+
+				if (game->invad[i].bomb[j].fired &&
+					game->invad[i].bomb[j].x == shot->x && 
+					game->invad[i].bomb[j].y == shot->y ) {
+
 					ResetBomb(&game->invad[i].bomb[j]);
 					ResetShot(shot);
 					return 1;
@@ -763,16 +774,11 @@ int UpdateCoords(GameData * game, int *y) {
 	return 0;
 }
 
-int UpdateInvaderBombRate(GameData *game, Invader *invader) {
-	if (invader->hp > 0) {
-		invader->bombRateCounter++;
-		if (invader->bombRateCounter > game->bombRate) {
-			invader->bombRateCounter = 0;
-		}
-	}
-	else {
-		ResetInvader(invader);
-	}
+int UpdateInvaderBombRate(int bombRate, Invader *invader) {
+
+	//[0, 1, ... bombRate-1]
+	invader->bombRateCounter = ++invader->bombRateCounter % bombRate;
+
 	return 0;
 }
 

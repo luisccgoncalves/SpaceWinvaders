@@ -33,6 +33,6 @@ int ResetBomb(InvaderBomb *in);
 int ValidateInvaderPosition(GameData *game, int x, int y, int index);
 int GetRegularLargerXPosition(GameData *game);
 int UpdateCoords(GameData * game, int *y);
-int UpdateInvaderBombRate(GameData *game, Invader *invader);
+int UpdateInvaderBombRate(int bombRate, Invader *invader);
 
 #endif /* ALGORITHMS_H */

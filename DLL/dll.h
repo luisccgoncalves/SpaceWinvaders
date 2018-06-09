@@ -101,7 +101,7 @@ typedef struct {
 	int		duration;
 } PowerUp;
 
-typedef struct {									//structure to use on regedit?
+typedef struct {									//structure to use on regestry
 	TCHAR	timestamp[SMALL_BUFF];
 	DWORD	score;
 }HighScore;
@@ -130,7 +130,7 @@ typedef struct {									//Game data to use in communication
 	int max_bombs;									//max boms on game (%invaders?)
 	int	pup_duration;
 
-	int	score;										//actual score if game if happening
+	int	score;										//actual score if game is happening
 	HighScore	top10[10];							//Top 10 highest scores
 } GameData;
 

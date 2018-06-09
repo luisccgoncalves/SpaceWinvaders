@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "algorithms.h"
+#include "level.h"
 //#include "localStructs.h"
 
 DWORD WINAPI StartGame(LPVOID tParam);

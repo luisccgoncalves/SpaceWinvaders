@@ -5,37 +5,36 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
-
-
+	
+	/*Thread Management*/
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
 
 	DWORD			tRandPathInvaderID;
 	HANDLE			htRandPathInvader;
 
-	//DWORD			tInvadersBombID;
-	//HANDLE			htInvadersBomb[MAX_INVADER];
-
 	DWORD			tPowerUpsID;
 	HANDLE			htPowerUps;
 
 	int i;
 
+	/* Fills bombMoves structure */
 	BombMoves	bombMoves;
 	bombMoves.mhStructSync = &((SMCtrl *)tParam)->mhStructSync;
 	bombMoves.TheadmustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	bombMoves.game = baseGame;
 	
-	InstantiateGame(baseGame);
+	InstantiateGame(baseGame); /*Needs work*/ /*Move into level later*/
 	
-	//Defines invader path
-	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
-		if (i < (baseGame->max_invaders - baseGame->max_rand_invaders))
-			baseGame->invad[i].rand_path = 0;
-		else
-			baseGame->invad[i].rand_path = 1;
+	if (DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path
+		_tprintf(TEXT("[Error] Error defining invaders path! \n"));
 	}
 
+	if (GiveInvadersHP(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+		_tprintf(TEXT("[Error] Error giving invaders HP! \n"));
+	}
+
+	/*This needs thought and atomization*/
 	//Populates invaders with coords
 	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 
@@ -57,10 +56,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		}
 	}
 
-	//Populates invaders with HP 
-	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
-		baseGame->invad[i].hp = 1;
-	}
+
 
 	//for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 	//	bombMoves.invader = &baseGame->invad[i];

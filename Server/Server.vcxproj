@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="algorithms.c" />
     <ClCompile Include="game.c" />
+    <ClCompile Include="level.c" />
     <ClCompile Include="score.c" />
     <ClCompile Include="srv_main.c" />
   </ItemGroup>
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="algorithms.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="level.h" />
     <ClInclude Include="localStructs.h" />
     <ClInclude Include="score.h" />
   </ItemGroup>

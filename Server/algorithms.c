@@ -198,6 +198,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 		if (invader->bombRateCounter == 1) {
 
 			WaitForSingleObject(mhStructSync, INFINITE);
+			invader->bombRateCounter--;
 			invader->bomb[bombNum].x = invader->x;							//give invaders coords to bomb
 			invader->bomb[bombNum].y = invader->y;
 			invader->bomb[bombNum].fired = 1;								//update bomb status
@@ -229,7 +230,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
-	HANDLE		*mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
+	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j;
 	int sidestep = 4;
@@ -269,6 +270,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 						bombMoves.TheadmustGoOn = ThreadMustGoOn;
 						ReleaseMutex(mhStructSync);
 
+						_tprintf(TEXT("\7"));
 						htBombLauncher = CreateThread(
 							NULL,										//Thread security attributes
 							0,											//Stack size

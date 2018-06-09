@@ -428,41 +428,43 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 	GameData	*baseGame = ((ClientMoves *)tParam)->game;
 	HANDLE		*mhStructSync = ((ClientMoves*)tParam)->mhStructSync;
-	
+
 	int			*ThreadMustGoOn = ((ClientMoves *)tParam)->TheadmustGoOn;
 	int			owner = ((ClientMoves*)tParam)->localPacket.owner;
 	int			i, shotNum = -1;
-		
-		for (i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a shot
-			if (!baseGame->ship[owner].shots[i].fired) {
-				shotNum = i;
-				break;
-			}
+
+	for (i = 0; i < MAX_SHOTS; i++) {						//cicle to check if there is available slots to fire a shot
+		if (!baseGame->ship[owner].shots[i].fired) {
+			shotNum = i;
+			break;
 		}
+	}
 
-		if (shotNum > -1) {
+	if (shotNum > -1) {
+		WaitForSingleObject(mhStructSync, INFINITE);
+		baseGame->ship[owner].shots[shotNum].x = baseGame->ship[owner].x;
+		baseGame->ship[owner].shots[shotNum].y = baseGame->ship[owner].y;
+		baseGame->ship[owner].shots[shotNum].fired = 1;
+		ReleaseMutex(mhStructSync);
+		while (*ThreadMustGoOn && baseGame->ship[owner].shots[shotNum].fired) {
 
-			baseGame->ship[owner].shots[shotNum].x = baseGame->ship[owner].x;
-			baseGame->ship[owner].shots[shotNum].y = baseGame->ship[owner].y;
-			baseGame->ship[owner].shots[shotNum].fired = 1;
+			if (baseGame->ship[owner].shots[shotNum].y > 0) {						//if bomb has not reached the end of the play area
 
-			while (*ThreadMustGoOn && baseGame->ship[owner].shots[shotNum].fired) {
-
-				if (baseGame->ship[owner].shots[shotNum].y > 0) {						//if bomb has not reached the end of the play area
-
-					WaitForSingleObject(mhStructSync, INFINITE);
-					baseGame->ship[owner].shots[shotNum].y--;							//update it's position, an wait for next tick 
-					ShotCollision(baseGame, &baseGame->ship[owner].shots[shotNum]);
-					ReleaseMutex(mhStructSync);
-					Sleep(baseGame->ship_shot_speed * (*ThreadMustGoOn));
-
-				}
-				else {														//reset bomb to out of screen
-					ResetShot(&baseGame->ship[owner].shots[shotNum]);
-				}
+				WaitForSingleObject(mhStructSync, INFINITE);
+				baseGame->ship[owner].shots[shotNum].y--;							//update it's position, an wait for next tick 
+				ShotCollision(baseGame, &baseGame->ship[owner].shots[shotNum]);
+				ReleaseMutex(mhStructSync);
+				Sleep(baseGame->ship_shot_speed * (*ThreadMustGoOn));
 
 			}
+			else {														//reset shot to out of screen
+				WaitForSingleObject(mhStructSync, INFINITE);
+				ResetShot(&baseGame->ship[owner].shots[shotNum]);
+				ReleaseMutex(mhStructSync);
+			}
+
 		}
+	}
 
 	return 0;
 }

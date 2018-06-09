@@ -60,27 +60,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		}
 	}
 
-
-
-	//for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
-	//	bombMoves.invader = &baseGame->invad[i];
-
-	//	htInvadersBomb[i] = CreateThread(
-	//		NULL,										//Thread security attributes
-	//		0,											//Stack size
-	//		InvadersBomb,								//Thread function name
-	//		&bombMoves,									//Thread parameter struct
-	//		0,											//Creation flags
-	//		&tInvadersBombID);							//gets thread ID 
-	//}
-
-	////Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
-	//for (i = 0; i < baseGame->num_players; i++) {
-
-	//	baseGame->ship[i].x = i+RandomValue(baseGame->xsize/4);
-	//	baseGame->ship[i].y = 23;
-	//}
-
 	htRegPathInvader = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size

@@ -17,7 +17,7 @@ int DefenderShipsCollision(GameData *game, int x, int y, int index);
 int UpdateLocalShip(ClientMoves *move);
 int InstantiateGame(GameData *game);
 
-int ShipCollision(GameData *game, Ship *ship);
+int ShipCollision(GameData *game, Ship ship, HANDLE mhStructSync);
 int ShotCollision(GameData *game, ShipShot *shot);
 int InvaderCollision(GameData *game, Invader *invader);
 int BombCollision(GameData *game, InvaderBomb *bomb);;
@@ -33,7 +33,6 @@ int ResetBomb(InvaderBomb *in);
 int ValidateInvaderPosition(GameData *game, int x, int y, int index);
 int GetRegularLargerXPosition(GameData *game);
 int UpdateCoords(GameData * game, int *y);
-int UpdateInvaderBombRate(int bombRate, Invader *invader);
 int BombLauncher(BombMoves *bombMoves);
 
 #endif /* ALGORITHMS_H */

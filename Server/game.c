@@ -16,8 +16,6 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	DWORD			tPowerUpsID;
 	HANDLE			htPowerUps;
 
-	int i;
-
 	InstantiateGame(baseGame); /*Needs work*/ /*Move into level later*/
 	
 	if (!DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path

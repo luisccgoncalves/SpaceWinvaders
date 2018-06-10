@@ -753,7 +753,7 @@ int GetRegularLargerXPosition(GameData *game) {
 
 int UpdateCoords(GameData * game, int *y) {
 	if (*y < 0) {
-		*y = game->ysize*0.8;
+		*y = (int)(game->ysize*0.8);
 	}
 	if (*y > game->ysize*0.8 ) {
 		*y = 0;

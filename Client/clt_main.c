@@ -259,16 +259,16 @@ int StartPipeListener(HANDLE *hPipe) {
 	HANDLE		hUserToken = NULL;
 	BOOL log;
 
-	LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
-	//LPCTSTR		lpFileName = TEXT("\\\\IMAC\\pipe\\SpaceWPipe");
+	//LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
+	LPCTSTR		lpFileName = TEXT("\\\\.\\pipe\\SpaceWPipe");
 
 	log = LogonUser(
 		TEXT("Potato"),
 		TEXT("ENIAC"),
 		NULL,
-		//TEXT("simaohsferreira@hotmail.com"),
-		//TEXT("IMAC"),
-		//TEXT("."),
+		//TEXT("blacksmith"),
+		//TEXT("local"),
+		//NULL,
 		LOGON32_LOGON_NEW_CREDENTIALS,
 		LOGON32_PROVIDER_DEFAULT,
 		&hUserToken);
@@ -284,26 +284,24 @@ int StartPipeListener(HANDLE *hPipe) {
 		return -1;
 	}
 
-	//h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
-	//if (!h1stPipeInst) {
-	//	h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_1ST_PIPE);
-	//	_tprintf(TEXT("[DEBUG] No pipe instances found. Waiting...\n"));
-	//	WaitForSingleObject(h1stPipeInst, INFINITE);
-	//}
+	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
+	if (!h1stPipeInst) {
+		h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_1ST_PIPE);
+		_tprintf(TEXT("[DEBUG] No pipe instances found. Waiting...\n"));
+		WaitForSingleObject(h1stPipeInst, INFINITE);
+	}
 
 	do {
 
 		*hPipe = CreateFile(
 			lpFileName,
-			GENERIC_READ |
+			GENERIC_READ | 
 			GENERIC_WRITE,
-			0 |
-			FILE_SHARE_READ |
+			0 |	FILE_SHARE_READ |
 			FILE_SHARE_WRITE,
 			NULL,
 			OPEN_EXISTING,
-			0 |
-			FILE_FLAG_OVERLAPPED,
+			0 | FILE_FLAG_OVERLAPPED,
 			NULL);
 
 		if (GetLastError() == ERROR_PIPE_BUSY) {

@@ -366,7 +366,7 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 
 		UpdateLocalShip(&move);									//Translates instructions into actions (movement, shots...)
 		ShipCollision(move.game,								//Tests if those actions are valid
-			move.game->ship[move.localPacket.owner],cThread->mhStructSync);
+			&move.game->ship[move.localPacket.owner],cThread->mhStructSync);
 
 		ReleaseMutex(cThread->mhStructSync);
 
@@ -532,30 +532,30 @@ int InstantiateGame(GameData *game) {
 	return 0;
 }
 
-int ShipCollision(GameData *game, Ship ship, HANDLE mhStructSync) {
+int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync) {
 	int i,j;
-	if (ship.lives >= 0) {
+	if (ship->lives >= 0) {
 		for (i = 0; i < game->max_invaders; i++) {
-			if (game->invad[i].x == ship.x && game->invad[i].y == ship.y && game->invad[i].hp > 0) {
+			if (game->invad[i].x == ship->x && game->invad[i].y == ship->y && game->invad[i].hp > 0) {
 				DamageInvader(&game->invad[i]);
-				DamageShip(&ship);
+				DamageShip(ship);
 				return 1;
 			}
 		}
 		for (i = 0; i < game->max_invaders; i++) {
 			for (j = 0; j < game->max_bombs; j++) {
-				if (game->invad[i].bomb[j].x == ship.x && game->invad[i].bomb[j].y == ship.y && game->invad[i].bomb[j].fired) { //ERROR?
+				if (game->invad[i].bomb[j].x == ship->x && game->invad[i].bomb[j].y == ship->y && game->invad[i].bomb[j].fired) { //ERROR?
 					ResetBomb(&game->invad[i].bomb[j]);
-					if (!ship.shield)
-						DamageShip(&ship);
+					if (!ship->shield)
+						DamageShip(ship);
 					return 1;
 				}
 			}
 		}
 
-		if (game->pUp.x == ship.x && game->pUp.y == ship.y && game->pUp.fired == 1) {
+		if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
 			//Update game status? like lauch a thread reset after a sleep?
-			PowerUpShip(&ship, &game->pUp, mhStructSync); 
+			PowerUpShip(ship, &game->pUp, mhStructSync); 
 			_tprintf(TEXT("\7"));
 			return 1;
 		}

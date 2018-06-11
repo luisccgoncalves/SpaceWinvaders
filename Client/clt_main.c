@@ -284,17 +284,17 @@ int StartPipeListener(HANDLE *hPipe) {
 		return -1;
 	}
 
-	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
-	if (!h1stPipeInst) {
-		h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_1ST_PIPE);
-		_tprintf(TEXT("[DEBUG] No pipe instances found. Waiting...\n"));
-		WaitForSingleObject(h1stPipeInst, INFINITE);
-	}
+	//h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
+	//if (!h1stPipeInst) {
+	//	h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_1ST_PIPE);
+	//	_tprintf(TEXT("[DEBUG] No pipe instances found. Waiting...\n"));
+	//	WaitForSingleObject(h1stPipeInst, INFINITE);
+	//}
 
 	do {
 
 		*hPipe = CreateFile(
-			PIPE_NAME,
+			lpFileName,
 			GENERIC_READ |
 			GENERIC_WRITE,
 			0 |

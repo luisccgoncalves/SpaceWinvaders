@@ -11,6 +11,8 @@
 #include "../DLL/dll.h"
 //#include "../Client/debug.h"
 
+#pragma comment(lib, "advapi32.lib")
+
 #define BUFSIZE 2048
 
 typedef struct {

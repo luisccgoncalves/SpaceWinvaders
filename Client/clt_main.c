@@ -7,6 +7,7 @@
 #include <process.h>
 #include "../DLL/dll.h"
 #include "debug.h"
+
 #pragma comment(lib,"Winmm.lib")
 
 
@@ -263,11 +264,11 @@ int StartPipeListener(HANDLE *hPipe) {
 
 	log = LogonUser(
 		TEXT("Potato"),
-		NULL,
 		TEXT("ENIAC"),
+		NULL,
 		//TEXT("simaohsferreira@hotmail.com"),
-		//TEXT("."),
 		//TEXT("IMAC"),
+		//TEXT("."),
 		LOGON32_LOGON_NEW_CREDENTIALS,
 		LOGON32_PROVIDER_DEFAULT,
 		&hUserToken);

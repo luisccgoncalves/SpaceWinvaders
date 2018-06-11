@@ -555,7 +555,8 @@ int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync) {
 
 		if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
 			//Update game status? like lauch a thread reset after a sleep?
-			PowerUpShip(ship, &game->pUp, mhStructSync); 
+			ShipPowerUpCollision(game, ship, &game->pUp, mhStructSync);
+			//PowerUpShip(ship, &game->pUp, mhStructSync); 
 			_tprintf(TEXT("\7"));
 			return 1;
 		}
@@ -655,6 +656,21 @@ int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE *mhStructSync) {
 			if (pUp->x == game->ship[j].x && pUp->y == game->ship[j].y) {
 
 				PowerUpShip(&game->ship[j],	pUp, mhStructSync);
+				pUp->fired = 0;
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int ShipPowerUpCollision(GameData * game, Ship * ship, PowerUp *pUp, HANDLE *mhStructSync) {
+	int j;
+	if (pUp->y>(game->ysize*0.2)) {
+		for (j = 0; j < game->num_players && pUp->fired; j++) {
+			if (pUp->x == ship->x && pUp->y == ship->y) {
+
+				PowerUpShip(ship, pUp, mhStructSync);
 				pUp->fired = 0;
 				return 1;
 			}

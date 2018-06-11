@@ -253,8 +253,35 @@ int StartPipeListener(HANDLE *hPipe) {
 	BOOL		bSuccess;
 	BOOL		bRunning;
 
-
 	bRunning = TRUE;
+
+	HANDLE		hUserToken = NULL;
+	BOOL log;
+
+	LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
+	//LPCTSTR		lpFileName = TEXT("\\\\IMAC\\pipe\\SpaceWPipe");
+
+	log = LogonUser(
+		TEXT("Potato"),
+		NULL,
+		TEXT("ENIAC"),
+		//TEXT("simaohsferreira@hotmail.com"),
+		//TEXT("."),
+		//TEXT("IMAC"),
+		LOGON32_LOGON_NEW_CREDENTIALS,
+		LOGON32_PROVIDER_DEFAULT,
+		&hUserToken);
+	if (log == 0) {
+		_tprintf(TEXT("[Error] Logging on user (%d)\7\n"), GetLastError());
+		return -1;
+	}
+
+	log = ImpersonateLoggedOnUser(hUserToken);
+
+	if (log == 0) {
+		_tprintf(TEXT("[Error] Logging on user (%d)\7\n"), GetLastError());
+		return -1;
+	}
 
 	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
 	if (!h1stPipeInst) {

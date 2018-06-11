@@ -17,7 +17,7 @@ int DefenderShipsCollision(GameData *game, int x, int y, int index);
 int UpdateLocalShip(ClientMoves *move);
 int InstantiateGame(GameData *game);
 
-int ShipCollision(GameData *game, Ship ship, HANDLE mhStructSync);
+int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync);
 int ShotCollision(GameData *game, ShipShot *shot);
 int InvaderCollision(GameData *game, Invader *invader);
 int BombCollision(GameData *game, InvaderBomb *bomb);;

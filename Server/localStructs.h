@@ -27,7 +27,7 @@ typedef struct {
 } ClientMoves;
 
 typedef struct {
-	HANDLE		mhStructSync;
+	HANDLE		*mhStructSync;
 	Ship		*ship;
 	PowerUp		pUp;
 }PUpTimer;

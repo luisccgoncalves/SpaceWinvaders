@@ -13,7 +13,7 @@
 typedef struct {
 	HANDLE			*hTick;							//Handle to event. Warns gateway about updates in shared memory
 	int				ThreadMustGoOn;
-	HANDLE			*mhGameData;
+	HANDLE			mhGameData;
 
 	GameData		*localGameData;
 	GameData		*smGameData;
@@ -23,11 +23,11 @@ typedef struct {
 	GameData	*game;								//Pointer to localGamedata
 	Packet		localPacket;						//stores a client packet to be translated into a game action
 	int			*TheadmustGoOn;						//Pointer to cThread's exit condition
-	HANDLE		*mhStructSync;						//Pointer to cThread's structSync mutex
+	HANDLE		mhStructSync;						//Pointer to cThread's structSync mutex
 } ClientMoves;
 
 typedef struct {
-	HANDLE		*mhStructSync;
+	HANDLE		mhStructSync;
 	Ship		*ship;
 	PowerUp		pUp;
 }PUpTimer;
@@ -37,7 +37,7 @@ typedef struct {
 	Invader		*invader;
 
 	int			*TheadmustGoOn;						//Pointer to cThread's exit condition
-	HANDLE		*mhStructSync;						//Pointer to cThread's structSync mutex
+	HANDLE		mhStructSync;						//Pointer to cThread's structSync mutex
 }BombMoves;
 
 #endif /* LOCALSTRUCTS_H */

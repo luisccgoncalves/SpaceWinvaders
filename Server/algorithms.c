@@ -4,7 +4,7 @@ DWORD WINAPI PowerUpTimer(LPVOID tParam) {
 
 	PUpTimer	timerStr = *(PUpTimer*)tParam;
 
-	for (int i = 0; i < 10 && (timerStr.ship->lives>=0); i++) {
+	for (int i = 0; i < 10 && (timerStr.ship->lives >=0 ); i++) {
 		Sleep(timerStr.pUp.duration / 10);
 	}
 
@@ -125,17 +125,6 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 			//Tests for collisions
   			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
 				PowerUpCollision(&cThread->localGameData, &cThread->localGameData.pUp, &cThread->mhStructSync);
-				//for (int j = 0; j < cThread->localGameData.num_players && cThread->localGameData.pUp.fired; j++) {
-				//	if (cThread->localGameData.pUp.x == cThread->localGameData.ship[j].x &&
-				//		cThread->localGameData.pUp.y == cThread->localGameData.ship[j].y) {
-
-				//		PowerUpShip(&cThread->localGameData.ship[j], 
-				//			&cThread->localGameData.pUp, 
-				//			cThread->mhStructSync);
-
-				//		cThread->localGameData.pUp.fired = 0;
-				//	}
-				//}
 			}
 
 			ReleaseMutex(cThread->mhStructSync);
@@ -649,7 +638,7 @@ int BombCollision(GameData * game, InvaderBomb * bomb)
 	return 0;
 }
 
-int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE *mhStructSync) {
+int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE mhStructSync) {
 	int j;
 	if (pUp->y>(game->ysize*0.2)) {
 		for (j = 0; j < game->num_players && pUp->fired; j++) {
@@ -664,7 +653,7 @@ int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE *mhStructSync) {
 	return 0;
 }
 
-int ShipPowerUpCollision(GameData * game, Ship * ship, PowerUp *pUp, HANDLE *mhStructSync) {
+int ShipPowerUpCollision(GameData * game, Ship * ship, PowerUp *pUp, HANDLE mhStructSync) {
 	int j;
 	if (pUp->y>(game->ysize*0.2)) {
 		for (j = 0; j < game->num_players && pUp->fired; j++) {

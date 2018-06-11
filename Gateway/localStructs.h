@@ -20,9 +20,9 @@ typedef struct {
 	HANDLE		hPipe;
 
 	int			*ThreadMustGoOn;
-	HANDLE		*hSMServerUpdate;
+	HANDLE		hSMServerUpdate;
 	GameData	*pSMemGameData;
-	HANDLE		*mhGameData;
+	HANDLE		mhGameData;
 
 }PipeInstWrt;
 

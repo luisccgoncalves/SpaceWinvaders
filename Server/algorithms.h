@@ -22,7 +22,8 @@ int ShotCollision(GameData *game, ShipShot *shot);
 int InvaderCollision(GameData *game, Invader *invader);
 int BombCollision(GameData *game, InvaderBomb *bomb);;
 
-int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE *mhStructSync);
+int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE mhStructSync);
+int ShipPowerUpCollision(GameData * game, Ship * ship, PowerUp *pUp, HANDLE mhStructSync);
 int DamageShip(Ship *in);
 int DamageInvader(Invader *in);
 

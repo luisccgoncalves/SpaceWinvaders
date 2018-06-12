@@ -59,43 +59,25 @@ void printGame(GameData msg) {
 
 	if (msg.pUp.fired==1) {
 		gotoxy(msg.pUp.x, msg.pUp.y);
-		switch (msg.pUp.type) {
-		case 0:
-			_tprintf(TEXT("*"));
-			break;
-		case 1:
-			_tprintf(TEXT("x"));
-			break;
-		case 2:
-			_tprintf(TEXT("@"));
-			break;
-		case 3:
-			_tprintf(TEXT("+"));
-			break;
-		default:
-			_tprintf(TEXT("?"));
-			break;
-		}
-		
+
+		_tprintf(TEXT("%d"), msg.pUp.type);
 	}
 
 }
 
-int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
+int readPipeMsg(HANDLE hPipe, HANDLE readReady, GameData * msg) {
 
 	OVERLAPPED	OvrRd = { 0 };
 	DWORD		dwBytesRead = 0;
 	BOOL		bSuccess = FALSE;
-
-	GameData	msg;
 
 	OvrRd.hEvent = readReady;
 	ResetEvent(readReady);
 
 	bSuccess = ReadFile(
 		hPipe,
-		&msg,
-		sizeof(msg),
+		msg,
+		sizeof(GameData),
 		&dwBytesRead,
 		&OvrRd);
 
@@ -107,7 +89,7 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 		&dwBytesRead,
 		FALSE);
 
-	if (dwBytesRead < sizeof(msg)) {
+	if (dwBytesRead < sizeof(GameData)) {
 		if (GetLastError() == ERROR_BROKEN_PIPE) {
 			_tprintf(TEXT("[Error] Connection lost.\n"));
 			return -1;
@@ -115,8 +97,6 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady) {
 		else
 			_tprintf(TEXT("[Error] ReadFile failed. Error = %d \n"), GetLastError());
 	}
-
-	printGame(msg);
 
 	return 0;
 }
@@ -139,8 +119,10 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg) {
 
 	WaitForSingleObject(writeReady, INFINITE);
 	GetOverlappedResult(hPipe, &OvrWr, &dwBytesWritten, FALSE);
-	if (dwBytesWritten < sizeof(Packet))
+	if (dwBytesWritten < sizeof(Packet)) {
 		_tprintf(TEXT("[Error] WriteFile failed. Error = %d \7 \n"), GetLastError());
+		return -1;
+	}
 
 	return 0;
 }
@@ -148,26 +130,17 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg) {
 DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
-	HANDLE		heReadReady;
+	GameData	localGame;
 
 	if (cThreadRdGame->hPipe == NULL) {
 		_tprintf(TEXT("[Error] casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	heReadReady = CreateEvent(
-		NULL,										//Event attributes
-		TRUE,										//Manual reset (TRUE for auto-reset)
-		FALSE,										//Initial state
-		NULL);										//Event name
-	if (heReadReady == NULL) {
-		_tprintf(TEXT("[Error] Event ReadReady(%d)\n"), GetLastError());
-		return -1;
-	}
-
 	while (cThreadRdGame->ThreadMustGoOn) {
 
-		readPipeMsg(cThreadRdGame->hPipe, heReadReady);
+		readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady,&localGame);
+		printGame(localGame);
 	}
 
 	return 0;
@@ -180,20 +153,7 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 
 	Packet	localpacket = { 0 };
 
-	HANDLE	heWriteReady;
-
 	int		packetUpd = 0;
-	//localpacket.owner = GetCurrentProcessId();
-
-	heWriteReady = CreateEvent(
-		NULL,										//Event attributes
-		TRUE,										//Manual reset (TRUE for auto-reset)
-		FALSE,										//Initial state
-		NULL);										//Event name
-	if (heWriteReady == NULL) {
-		_tprintf(TEXT("[Error] Event WriteReady(%d)\n"), GetLastError());
-		return -1;
-	}
 
 	while (cThread->ThreadMustGoOn) {
 		k_stroke = _gettch();
@@ -233,7 +193,7 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 		}
 
 		if (packetUpd) {
-			writePipeMsg(cThread->hPipe, heWriteReady, localpacket);
+			writePipeMsg(cThread->hPipe, cThread->heWriteReady, localpacket);
 			packetUpd = 0;
 		}
 	}
@@ -323,7 +283,7 @@ int StartPipeListener(HANDLE *hPipe) {
 
 	dwPipeMode = PIPE_READMODE_MESSAGE;
 	bSuccess = SetNamedPipeHandleState(
-		hPipe,
+		*hPipe,
 		&dwPipeMode,
 		NULL,
 		NULL);
@@ -336,14 +296,75 @@ int StartPipeListener(HANDLE *hPipe) {
 	return 0;
 }
 
+int createProdConsEvents(ThreadCtrl * ps) {
+
+	ps->heWriteReady = CreateEvent(
+		NULL,										//Event attributes
+		TRUE,										//Manual reset (TRUE for auto-reset)
+		FALSE,										//Initial state
+		NULL);										//Event name
+	if (ps->heWriteReady == NULL) {
+		_tprintf(TEXT("[Error] Event WriteReady(%d)\n"), GetLastError());
+		return -1;
+	}
+
+	ps->heReadReady = CreateEvent(
+		NULL,										//Event attributes
+		TRUE,										//Manual reset (TRUE for auto-reset)
+		FALSE,										//Initial state
+		NULL);										//Event name
+	if (ps->heReadReady == NULL) {
+		_tprintf(TEXT("[Error] Event ReadReady(%d)\n"), GetLastError());
+		return -1;
+	}
+
+	return 0;
+}
+
+int handShakeServer(ThreadCtrl * ps) {
+
+	Packet		lPacket;
+	GameData	localGame;
+	BOOL		isLogged=FALSE;
+
+	do {
+		_tprintf(TEXT("Username:"));
+		_tscanf_s(TEXT("%s"), lPacket.username, _countof(lPacket.username));
+
+		lPacket.Id = GetCurrentProcessId() + time(NULL);
+		lPacket.owner = -1;
+		lPacket.instruction = 5;
+
+		_tprintf(TEXT("Hello %s! Trying to login with the ID=%d\n"), lPacket.username, lPacket.Id);
+
+		writePipeMsg(ps->hPipe, ps->heWriteReady, lPacket);
+
+		for (int i = 0; i < 10; i++) {
+			readPipeMsg(ps->hPipe, ps->heReadReady, &localGame);
+			for (int j = 0; j < MAX_PLAYERS; j++) {
+				if (localGame.logged[j].Id == lPacket.Id) {
+					isLogged = TRUE;
+					break;
+				}
+			}
+		}
+
+		if(isLogged==FALSE)
+			_tprintf(TEXT("Login Failed. Try again.\n"));
+		else
+			_tprintf(TEXT("Logged in!.\n"));
+
+	} while (isLogged == FALSE);
+
+	return 0;
+}
+
 int _tmain(int argc, LPTSTR argv[]) {
 
 #ifdef UNICODE
 	_setmode(_fileno(stdin), _O_WTEXT);
 	_setmode(_fileno(stdout), _O_WTEXT);
 #endif
-
-	HANDLE		hPipe;						//Pipe handle
 
 	HANDLE		htReadGame;					//Game thread
 	DWORD		tReadGameID;				//Game thread ID
@@ -352,14 +373,19 @@ int _tmain(int argc, LPTSTR argv[]) {
 	DWORD		tGetKeyID;
 
 	ThreadCtrl	cThreadRdGame;
+
 	cThreadRdGame.ThreadMustGoOn = 1;
 
-	if (!StartPipeListener(&hPipe)) {
+	createProdConsEvents(&cThreadRdGame);
+
+	//Connect to gateway
+	if (StartPipeListener(&cThreadRdGame.hPipe)!=0) {
 		_tprintf(TEXT("[Error] launching pipe listener...\n"));
 		return -1;
 	}
 
-	cThreadRdGame.hPipe = hPipe;
+	//Connect to Server
+	//handShakeServer(&cThreadRdGame);
 
 	htReadGame = CreateThread(
 		NULL,										//Thread security attributes
@@ -389,7 +415,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	WaitForSingleObject(htGetKey, INFINITE);
 	WaitForSingleObject(htReadGame, INFINITE);
-	CloseHandle(hPipe);
+	CloseHandle(cThreadRdGame.hPipe);
 
 	return 0;
 }

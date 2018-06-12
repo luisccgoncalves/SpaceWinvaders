@@ -147,7 +147,7 @@ typedef struct {									//Game data to use in communication
 
 typedef struct {
 	int		owner;									//Index in ship array
-	int		Id;										//Unique ID from client
+	DWORD	Id;										//Unique ID from client
 	int		instruction;							//up, down, right, left, fire, shutdown,etc...	
 
 	TCHAR	username[SMALL_BUFF]; 

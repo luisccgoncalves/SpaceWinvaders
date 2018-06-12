@@ -62,7 +62,6 @@ typedef struct {
 	//powerups (only player specific)
 	int			shield;								//If shield is true, lives won't go down.
 	int			drunk;								//If true, controls are inverted.
-	int			battery;							//Speed up shots (all players)
 
 	int			turbo;								//Player will move faster. -(Ours)-
 	int			laser_shots;						//kills all invaders in sight -(Ours)-
@@ -93,8 +92,7 @@ typedef struct {
 	int				hp;								//ship hit points
 	int				rand_path;						//true for random trajectory, false for zig-zag
 	int				direction;						//ship movement
-	int				ice;							//Powerup effect (stops all inv for some time)
-	int				plusSpeed;						//PowerUp effect (speeds up all inv for some time)
+
 	} Invader;
 
 //typedef struct {
@@ -123,23 +121,25 @@ typedef struct {									//Game data to use in communication
 	Player			logged[MAX_PLAYERS];			//Numer of players logged on server (playing or not)
 	PowerUp			pUp;							//One powerUp only at any given time
 
-	int xsize;										//max y size of play area
-	int ysize;										//max x size of play area
+	int				xsize;							//max y size of play area
+	int				ysize;							//max x size of play area
 
 	/*Environment variables*/
-	int invaders_speed;								//invaders speed
-	int ship_speed;									//ship speed
-	int bombRate;									//bomb drop rate
-	int projectiles_speed;							//bombs, shots and powerUps base speed
+	int				invaders_speed;	  				//invaders speed
+	int				ship_speed;		  				//ship speed
+	int				bombRate;		  				//bomb drop rate
+	int				projectiles_speed;				//bombs, shots and powerUps base speed
+	int				 ship_shot_speed;				//defenders shot speed
 
-	/*Eventualy find a way to use them from projectiles speed*/
-	int ship_shot_speed;							//defenders shot speed
+	int				num_players;					//number of players per game
+	int				max_invaders;					//total of invaders
+	int				max_rand_invaders;				//number of rand invaders
+	int				max_bombs;						//max boms on game (%invaders?)
 
-	int num_players;								//number of players per game
-	int max_invaders;								//total of invaders
-	int max_rand_invaders;							//number of rand invaders
-	int max_bombs;									//max boms on game (%invaders?)
-	int	pup_duration;
+	int				pup_duration;
+	int				ice;							//Powerup effect invaders (stops all for some time)
+	int				plusSpeed;						//PowerUp effect invaders(speeds up inv for some time)
+	int				battery;						//PowerUp effect speed up shots (all players)
 
 	int	score;										//actual score if game is happening
 	HighScore	top10[10];							//Top 10 highest scores

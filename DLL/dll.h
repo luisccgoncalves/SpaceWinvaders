@@ -73,7 +73,7 @@ typedef struct {
 	int		Id;										//Unique ID from client
 
 	BOOL	isReady;								//Ready to play flag
-}player;
+}Player;
 
 typedef struct {
 	int		x;										//ship x,y position
@@ -118,7 +118,7 @@ typedef struct {									//Game data to use in communication
 	//int			gameRunning;			
 	Invader			invad[MAX_INVADER];				//Array of maximum number invaders at one time
 	Ship			ship[MAX_PLAYERS];				//number of ships in game
-	player			logged[MAX_PLAYERS];			//Numer of players logged on server (playing or not)
+	Player			logged[MAX_PLAYERS];			//Numer of players logged on server (playing or not)
 	PowerUp			pUp;							//One powerUp only at any given time
 
 	int xsize;										//max y size of play area

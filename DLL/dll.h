@@ -62,9 +62,10 @@ typedef struct {
 	//powerups (only player specific)
 	int			shield;								//If shield is true, lives won't go down.
 	int			drunk;								//If true, controls are inverted.
-	int			turbo;								//Player will move faster. -------(?)-------
-	int			laser_shots;						//kills all invaders in sight
-													//add more
+	int			battery;							//Speed up shots (all players)
+
+	int			turbo;								//Player will move faster. -(Ours)-
+	int			laser_shots;						//kills all invaders in sight -(Ours)-
 } Ship;
 
 typedef struct {

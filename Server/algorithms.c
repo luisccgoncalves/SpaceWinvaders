@@ -41,14 +41,16 @@ DWORD WINAPI PowerUpTimer(LPVOID tParam) {
 	return 0;
 }
 
-void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE mutex) {
+void PowerUpShip(GameData *game, Ship *ship, PowerUp *pUp, HANDLE mutex) {
 
 	HANDLE		htPowerUpTimer;
 	PUpTimer	tParam;
 
 	tParam.mhStructSync = mutex;
+	tParam.game = game;
 	tParam.ship = ship;
 	tParam.pUp = *pUp;
+	
 
 	//Decreases the corresponding powerup flag to account for double buffs
 	switch (pUp->type) {
@@ -63,6 +65,15 @@ void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE mutex) {
 		break;
 	case 3:
 		ship->laser_shots++;
+		break;
+	case 4:
+		game->ice++;
+		break;
+	case 5:
+		game->plusSpeed++;
+		break;
+	case 6:
+		game->battery++;
 		break;
 	default:
 		break;
@@ -659,7 +670,7 @@ int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE mhStructSync) {
 		for (j = 0; j < game->num_players && pUp->fired; j++) {
 			if (pUp->x == game->ship[j].x && pUp->y == game->ship[j].y) {
 
-				PowerUpShip(&game->ship[j],	pUp, mhStructSync);
+				PowerUpShip(game, &game->ship[j],	pUp, mhStructSync);
 				pUp->fired = 0;
 				return 1;
 			}
@@ -674,7 +685,7 @@ int ShipPowerUpCollision(GameData * game, Ship * ship, PowerUp *pUp, HANDLE mhSt
 		for (j = 0; j < game->num_players && pUp->fired; j++) {
 			if (pUp->x == ship->x && pUp->y == ship->y) {
 
-				PowerUpShip(ship, pUp, mhStructSync);
+				PowerUpShip(game, ship, pUp, mhStructSync);
 				pUp->fired = 0;
 				return 1;
 			}

@@ -239,7 +239,7 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 	return 0;
 }
 
-int StartPipeListener(HANDLE hPipe) {
+int StartPipeListener(HANDLE *hPipe) {
 
 	HANDLE		h1stPipeInst;
 	DWORD		dwPipeMode;					//Stores pipe mode
@@ -286,7 +286,7 @@ int StartPipeListener(HANDLE hPipe) {
 
 	do {
 
-		hPipe = CreateFile(
+		*hPipe = CreateFile(
 			lpFileName,
 			GENERIC_READ | 
 			GENERIC_WRITE,
@@ -308,7 +308,7 @@ int StartPipeListener(HANDLE hPipe) {
 				return -1;
 
 		}
-		else if (hPipe == INVALID_HANDLE_VALUE) {
+		else if (*hPipe == INVALID_HANDLE_VALUE) {
 
 			_tprintf(TEXT("[Error] opening pipe. (%d)\n"), GetLastError());
 			return -1;

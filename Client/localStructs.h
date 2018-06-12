@@ -24,7 +24,7 @@ typedef struct {
 void printGame(GameData msg);
 int readPipeMsg(HANDLE hPipe, HANDLE readReady);
 int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg);
-int StartPipeListener(HANDLE hPipe);
+int StartPipeListener(HANDLE *hPipe);
 
 DWORD WINAPI ReadGame(LPVOID tParam);
 DWORD WINAPI GetKey(LPVOID tParam);

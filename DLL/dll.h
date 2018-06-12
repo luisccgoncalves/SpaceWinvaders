@@ -143,6 +143,7 @@ typedef struct {									//Game data to use in communication
 } GameData;
 
 typedef struct {
+	int		owner;									//Index in ship array
 	int		Id;										//Unique ID from client
 	int		instruction;							//up, down, right, left, fire, shutdown,etc...	
 

@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <process.h>
-#include "../DLL/dll.h"
+#include "localStructs.h"
 #include "debug.h"
 
 #pragma comment(lib,"Winmm.lib")
@@ -37,13 +37,6 @@ void printGame(GameData msg) {
 			}
 		}
 	}
-
-	//for (i = 0; i < MAX_BOMBS; i++) {
-	//	if (msg.bomb[i].fired) {
-	//		gotoxy(msg.bomb[i].x, msg.bomb[i].y);
-	//		_tprintf(TEXT("o"));
-	//	}
-	//}
 
 	for (i = 0; i < msg.num_players; i++) {
 		for (j = 0; j < MAX_SHOTS; j++) {
@@ -182,7 +175,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 DWORD WINAPI GetKey(LPVOID tParam) {
 
 	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
-	wint_t k_stroke;
+	wint_t		k_stroke;
 
 	Packet	localpacket = { 0 };
 
@@ -246,7 +239,7 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 	return 0;
 }
 
-int StartPipeListener(HANDLE *hPipe) {
+int StartPipeListener(HANDLE hPipe) {
 
 	HANDLE		h1stPipeInst;
 	DWORD		dwPipeMode;					//Stores pipe mode
@@ -293,7 +286,7 @@ int StartPipeListener(HANDLE *hPipe) {
 
 	do {
 
-		*hPipe = CreateFile(
+		hPipe = CreateFile(
 			lpFileName,
 			GENERIC_READ | 
 			GENERIC_WRITE,
@@ -315,7 +308,7 @@ int StartPipeListener(HANDLE *hPipe) {
 				return -1;
 
 		}
-		else if (*hPipe == INVALID_HANDLE_VALUE) {
+		else if (hPipe == INVALID_HANDLE_VALUE) {
 
 			_tprintf(TEXT("[Error] opening pipe. (%d)\n"), GetLastError());
 			return -1;

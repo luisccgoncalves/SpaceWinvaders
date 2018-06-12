@@ -24,6 +24,15 @@ DWORD WINAPI PowerUpTimer(LPVOID tParam) {
 	case 3:
 		timerStr.ship->laser_shots--;
 		break;
+	case 4:
+		timerStr.game->ice--;
+		break;
+	case 5:
+		timerStr.game->plusSpeed--;
+		break;
+	case 6:
+		timerStr.game->battery--;
+		break;
 	default:
 		break;
 	}

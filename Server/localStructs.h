@@ -29,6 +29,7 @@ typedef struct {
 typedef struct {
 	HANDLE		mhStructSync;
 	Ship		*ship;
+	GameData	*game;
 	PowerUp		pUp;
 }PUpTimer;
 

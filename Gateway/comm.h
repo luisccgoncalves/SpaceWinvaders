@@ -5,6 +5,7 @@
 
 //DWORD WINAPI sendPacketServer(LPVOID tParam);
 //DWORD WINAPI ReadServerMsg(LPVOID tParam);
+void populateSecurityAtributes(SECURITY_ATTRIBUTES *pSA);
 
 DWORD WINAPI instanceThreadRead(LPVOID tParam);
 DWORD WINAPI instanceThreadWrite(LPVOID tParam);

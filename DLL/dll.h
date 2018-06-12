@@ -68,6 +68,13 @@ typedef struct {
 } Ship;
 
 typedef struct {
+	TCHAR	username[SMALL_BUFF];
+	int		Id;										//Unique ID from client
+
+	BOOL	isReady;								//Ready to play flag
+}player;
+
+typedef struct {
 	int		x;										//ship x,y position
 	int		y;
 	int		fired;									//dead or alive
@@ -109,7 +116,8 @@ typedef struct {									//structure to use on regestry
 typedef struct {									//Game data to use in communication
 	//int			gameRunning;			
 	Invader			invad[MAX_INVADER];				//Array of maximum number invaders at one time
-	Ship			ship[MAX_PLAYERS];				//number of ships/players in game
+	Ship			ship[MAX_PLAYERS];				//number of ships in game
+	player			logged[MAX_PLAYERS];			//Numer of players logged on server (playing or not)
 	PowerUp			pUp;							//One powerUp only at any given time
 
 	int xsize;										//max y size of play area
@@ -135,12 +143,10 @@ typedef struct {									//Game data to use in communication
 } GameData;
 
 typedef struct {
-	int		owner;									//player1, player2, server, gateway, etc..
+	int		Id;										//Unique ID from client
 	int		instruction;							//up, down, right, left, fire, shutdown,etc...	
 
-	//debatable -- WIP
-	TCHAR	text; 
-	int		auth;									//starts at 0, server changes it to 1 if auth=ok
+	TCHAR	username[SMALL_BUFF]; 
 }Packet;
 
 typedef struct {									//Message to use in the message view

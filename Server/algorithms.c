@@ -102,7 +102,7 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.y = 0;
 
 	pUp.fired = 0;
-	pUp.type = RandomValue(6);		//Random type between 0 and 3
+	pUp.type = 4;// RandomValue(6);		//Random type between 0 and 6
 
 	pUp.duration = duration;
 	return pUp;
@@ -230,19 +230,20 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 				if (!baseGame->invad[j].rand_path && baseGame->invad[j].hp > 0) {
 
 					WaitForSingleObject(mhStructSync, INFINITE);
+					if (baseGame->ice == 1) { //##### HERE
+						baseGame->invad[j].y = (i / sidestep) + baseGame->invad[j].y_init;				//Invader goes down after n sidesteps
 
-					baseGame->invad[j].y = (i / sidestep) + baseGame->invad[j].y_init;				//Invader goes down after n sidesteps
-
-					if ((i % (sidestep * 2)) < sidestep)
-						baseGame->invad[j].x = (i % (sidestep * 2)) + baseGame->invad[j].x_init;	//Invader goes right
-					else if ((i % (sidestep * 2)) > sidestep)
-						baseGame->invad[j].x--;														//Invader goes left
-
+						if ((i % (sidestep * 2)) < sidestep)
+							baseGame->invad[j].x = (i % (sidestep * 2)) + baseGame->invad[j].x_init;	//Invader goes right
+						else if ((i % (sidestep * 2)) > sidestep)
+							baseGame->invad[j].x--;														//Invader goes left
+					}
 					//Tests collision
 					InvaderCollision(baseGame, &baseGame->invad[j]);
 
 					//Updates bombrate loop counter
 					baseGame->invad[j].bombRateCounter = ++baseGame->invad[j].bombRateCounter % baseGame->bombRate;
+
 					ReleaseMutex(mhStructSync);
 
 					if (baseGame->invad[j].bombRateCounter == 1) {
@@ -255,12 +256,12 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 						ReleaseMutex(mhStructSync);
 
 						if (!BombLauncher(&bombMoves)) {					/*Bomb thread launcher*/
-							_tprintf(TEXT("[Error] placing invaders ships ! \n"));
+							_tprintf(TEXT("[Error] placing invader bombs ! \n"));
 						}
 					}
 				}
 			}
-			Sleep(baseGame->invaders_speed*(*ThreadMustGoOn));
+			Sleep((baseGame->invaders_speed/baseGame->plusSpeed)*(*ThreadMustGoOn));
 		}
 	}
 	return 0;
@@ -282,57 +283,59 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 				WaitForSingleObject(mhStructSync, INFINITE);
 				count = 0;
-				do {
-					xTemp = baseGame->invad[i].x;
-					yTemp = baseGame->invad[i].y;
+				if (baseGame->ice == 1) {
+					do {
+						xTemp = baseGame->invad[i].x;
+						yTemp = baseGame->invad[i].y;
 
-					switch (baseGame->invad[i].direction) {
-					case 0:
-						xTemp--;
-						yTemp--;
-						break;
-					case 1:
-						xTemp++;
-						yTemp--;
-						break;
-					case 2:
-						xTemp--;
-						yTemp++;
-						break;
-					case 3:
-						xTemp++;
-						yTemp++;
-						break;
-					case 4:
-						xTemp--;
-						break;
-					case 5:
-						xTemp++;
-						break;
-					case 6:
-						yTemp--;
-						break;
-					case 7:
-						yTemp++;
-						break;
-					}
+						switch (baseGame->invad[i].direction) {
+						case 0:
+							xTemp--;
+							yTemp--;
+							break;
+						case 1:
+							xTemp++;
+							yTemp--;
+							break;
+						case 2:
+							xTemp--;
+							yTemp++;
+							break;
+						case 3:
+							xTemp++;
+							yTemp++;
+							break;
+						case 4:
+							xTemp--;
+							break;
+						case 5:
+							xTemp++;
+							break;
+						case 6:
+							yTemp--;
+							break;
+						case 7:
+							yTemp++;
+							break;
+						}
+						UpdateCoords(baseGame, &yTemp);
 
-					UpdateCoords(baseGame, &yTemp);
-					
-					invalid = ValidateInvaderPosition(baseGame, xTemp, yTemp, i);
-					if (invalid && count < 50) {
-						baseGame->invad[i].direction = RandomValue(3);
-						count++;
-					}if (count >= 50) {  //if there is no option find another path
-						baseGame->invad[i].direction = RandomValue(3)+4;
-						count++;
+						invalid = ValidateInvaderPosition(baseGame, xTemp, yTemp, i);
+						if (invalid && count < 50) {
+							baseGame->invad[i].direction = RandomValue(3);
+							count++;
+						}
+						else if (count >= 50) {  //if there is no option find another path
+							baseGame->invad[i].direction = RandomValue(3) + 4;
+							count++;
+						}
+
+					} while (invalid && count < 100);
+					if (count < 100) {
+						baseGame->invad[i].x = xTemp;
+						baseGame->invad[i].y = yTemp;
 					}
-				} while (invalid && count < 100);
-				if (count < 100) {
-					baseGame->invad[i].x = xTemp;
-					baseGame->invad[i].y = yTemp;
 				}
-
 				//Tests collision
 				InvaderCollision(baseGame, &baseGame->invad[i]);
 				//Updates bombrate loop counter
@@ -351,7 +354,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				ReleaseMutex(mhStructSync);
 			}
 		}
-		Sleep((DWORD)(baseGame->invaders_speed *0.9)*(*ThreadMustGoOn));
+		Sleep((DWORD)((baseGame->invaders_speed / baseGame->plusSpeed) *0.9)*(*ThreadMustGoOn));
 	}
 
 	return 0;
@@ -415,7 +418,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 				baseGame->ship[owner].shots[shotNum].y--;							//update it's position, an wait for next tick 
 				ShotCollision(baseGame, &baseGame->ship[owner].shots[shotNum]);
 				ReleaseMutex(mhStructSync);
-				Sleep(baseGame->ship_shot_speed * (*ThreadMustGoOn));
+				Sleep((baseGame->ship_shot_speed)*(*ThreadMustGoOn));
 
 			}
 			else {														//reset shot to out of screen
@@ -447,6 +450,7 @@ int UpdateLocalShip(ClientMoves *move) {
 
 	DWORD			tShotLauncherID;
 	HANDLE			htShotLauncher;
+	DWORD			timeNow;
 
 	int xTemp, yTemp;
 	int index = move->localPacket.owner;
@@ -481,19 +485,23 @@ int UpdateLocalShip(ClientMoves *move) {
 			}
 		break;
 	case 4:
+		/* calculate time in millisenconds since last shot is fired*/
+		timeNow = GetTickCount();
+		if (timeNow - (move->game->ship[index].shotTimeStamp) >= (move->game->shotRate / move->game->battery)) {
+			move->game->ship[index].shotTimeStamp = timeNow;
 
-		htShotLauncher = CreateThread(
-			NULL,										//Thread security attributes
-			0,											//Stack size
-			ShotMovement,								//Thread function name
-			move,										//Thread parameter struct
-			0,											//Creation flags
-			&tShotLauncherID);							//gets thread ID 
-		if (htShotLauncher == NULL) {
-			_tprintf(TEXT("[Error] Creating thread htShotLauncher (%d) at server\n"), GetLastError());
-			return -1;
+			htShotLauncher = CreateThread(
+				NULL,										//Thread security attributes
+				0,											//Stack size
+				ShotMovement,								//Thread function name
+				move,										//Thread parameter struct
+				0,											//Creation flags
+				&tShotLauncherID);							//gets thread ID 
+			if (htShotLauncher == NULL) {
+				_tprintf(TEXT("[Error] Creating thread htShotLauncher (%d) at server\n"), GetLastError());
+				return -1;
+			}
 		}
-
 		break;
 
 	default:
@@ -502,6 +510,23 @@ int UpdateLocalShip(ClientMoves *move) {
 
 	return 0;
 }
+
+//int SystemTimeStamp(DWORD* timeStamp) {
+//	/*
+//	Creates a timestamp
+//	Used to display top 10
+//	*/
+//	SYSTEMTIME time;
+//	GetSystemTime(&time);									//Populates structure with system time
+//
+//	_stprintf_s(timeStamp,
+//		SMALL_BUFF,
+//		TEXT("(%02d:%02d %02d/%02d/%d)"),					//Copies the values with the format (HH:MM DD/MM/YYY)
+//		time.wHour, time.wMinute,
+//		time.wDay, time.wMonth, time.wYear);
+//
+//	return 0;
+//}
 
 int InstantiateGame(GameData *game) {
 	int i, j;
@@ -517,7 +542,11 @@ int InstantiateGame(GameData *game) {
 	game->ship_shot_speed =		PROJECTL_SPEED;				// Base speed for defender ship
 	game->projectiles_speed =	PROJECTL_SPEED;				// Base speed for Powerups and invader bombs
 	game->pup_duration =		POWERUP_DUR;				// Base power up duration
-	game->bombRate =			BOMBRATE;					// Base steps until bomb launch
+	game->bombRate =			BOM_BRATE;					// Base steps until bomb launch
+	game->shotRate =			SHOT_RATE;
+	game->plusSpeed = 1;
+	game->ice = 1;
+	game->battery = 1;
 
 	/*Bombs*/
 	for (i = 0; i < game->max_invaders; i++) {				//Instantiates all bombs outside of game and updates the status
@@ -537,6 +566,7 @@ int InstantiateGame(GameData *game) {
 		for (j = 0; j < MAX_SHOTS; j++) {				//Instantiates all shots outside of game and updates the status
 			ResetShot(&game->ship[i].shots[j]);
 		}
+		game->ship[i].shotTimeStamp = 0;
 		//...
 	}
 

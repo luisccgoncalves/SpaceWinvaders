@@ -102,7 +102,7 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.y = 0;
 
 	pUp.fired = 0;
-	pUp.type = 6;// RandomValue(6);		//Random type between 0 and 6
+	pUp.type = 4;// RandomValue(6);		//Random type between 0 and 6
 
 	pUp.duration = duration;
 	return pUp;
@@ -230,7 +230,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 				if (!baseGame->invad[j].rand_path && baseGame->invad[j].hp > 0) {
 
 					WaitForSingleObject(mhStructSync, INFINITE);
-					if (baseGame->ice == 1) {
+					if (baseGame->ice == 1) { //##### HERE
 						baseGame->invad[j].y = (i / sidestep) + baseGame->invad[j].y_init;				//Invader goes down after n sidesteps
 
 						if ((i % (sidestep * 2)) < sidestep)
@@ -283,57 +283,59 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 
 				WaitForSingleObject(mhStructSync, INFINITE);
 				count = 0;
-				do {
-					xTemp = baseGame->invad[i].x;
-					yTemp = baseGame->invad[i].y;
+				if (baseGame->ice == 1) {
+					do {
+						xTemp = baseGame->invad[i].x;
+						yTemp = baseGame->invad[i].y;
 
-					switch (baseGame->invad[i].direction) {
-					case 0:
-						xTemp--;
-						yTemp--;
-						break;
-					case 1:
-						xTemp++;
-						yTemp--;
-						break;
-					case 2:
-						xTemp--;
-						yTemp++;
-						break;
-					case 3:
-						xTemp++;
-						yTemp++;
-						break;
-					case 4:
-						xTemp--;
-						break;
-					case 5:
-						xTemp++;
-						break;
-					case 6:
-						yTemp--;
-						break;
-					case 7:
-						yTemp++;
-						break;
-					}
+						switch (baseGame->invad[i].direction) {
+						case 0:
+							xTemp--;
+							yTemp--;
+							break;
+						case 1:
+							xTemp++;
+							yTemp--;
+							break;
+						case 2:
+							xTemp--;
+							yTemp++;
+							break;
+						case 3:
+							xTemp++;
+							yTemp++;
+							break;
+						case 4:
+							xTemp--;
+							break;
+						case 5:
+							xTemp++;
+							break;
+						case 6:
+							yTemp--;
+							break;
+						case 7:
+							yTemp++;
+							break;
+						}
+						UpdateCoords(baseGame, &yTemp);
 
-					UpdateCoords(baseGame, &yTemp);
-					
-					invalid = ValidateInvaderPosition(baseGame, xTemp, yTemp, i);
-					if (invalid && count < 50) {
-						baseGame->invad[i].direction = RandomValue(3);
-						count++;
-					}if (count >= 50) {  //if there is no option find another path
-						baseGame->invad[i].direction = RandomValue(3)+4;
-						count++;
+						invalid = ValidateInvaderPosition(baseGame, xTemp, yTemp, i);
+						if (invalid && count < 50) {
+							baseGame->invad[i].direction = RandomValue(3);
+							count++;
+						}
+						else if (count >= 50) {  //if there is no option find another path
+							baseGame->invad[i].direction = RandomValue(3) + 4;
+							count++;
+						}
+
+					} while (invalid && count < 100);
+					if (count < 100) {
+						baseGame->invad[i].x = xTemp;
+						baseGame->invad[i].y = yTemp;
 					}
-				} while (invalid && count < 100);
-				if (count < 100) {
-					baseGame->invad[i].x = xTemp;
-					baseGame->invad[i].y = yTemp;
 				}
-
 				//Tests collision
 				InvaderCollision(baseGame, &baseGame->invad[i]);
 				//Updates bombrate loop counter

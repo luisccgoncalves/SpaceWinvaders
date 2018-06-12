@@ -4,10 +4,12 @@ DWORD WINAPI PowerUpTimer(LPVOID tParam) {
 
 	PUpTimer	timerStr = *(PUpTimer*)tParam;
 
+	//PowerUp duration timer
 	for (int i = 0; i < 10 && (timerStr.ship->lives >=0 ); i++) {
 		Sleep(timerStr.pUp.duration / 10);
 	}
 
+	//Decreases the corresponding powerup flag to account for double buffs
 	WaitForSingleObject(timerStr.mhStructSync, INFINITE);
 	switch (timerStr.pUp.type) {
 	case 0:
@@ -39,7 +41,7 @@ void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE mutex) {
 	tParam.ship = ship;
 	tParam.pUp = *pUp;
 
-
+	//Decreases the corresponding powerup flag to account for double buffs
 	switch (pUp->type) {
 	case 0:
 		ship->shield++;
@@ -57,17 +59,19 @@ void PowerUpShip(Ship *ship, PowerUp *pUp, HANDLE mutex) {
 		break;
 	}
 	
-	//Launches a thread with the powerUp timeout
+	//Launches a thread with the powerUp timeout, 
+	//kill the ship to exit this thread gracefully (no pointer to ThreadMustGoOn)
 	htPowerUpTimer = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size
 		PowerUpTimer,								//Thread function name
-		(LPVOID)&tParam,								//Thread parameter struct
+		(LPVOID)&tParam,							//Thread parameter struct
 		0,											//Creation flags
 		NULL);										//gets thread ID 
 	if (htPowerUpTimer == NULL) {
 		_tprintf(TEXT("[Error] Creating powerUpTimer thread (%d)\n"), GetLastError());
 	}
+
 }
 
 PowerUp GeneratePowerUp(int x_max, int duration) {
@@ -78,7 +82,7 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.y = 0;
 
 	pUp.fired = 0;
-	pUp.type = RandomValue(3);		//Random type between 0 and 3
+	pUp.type = RandomValue(4);		//Random type between 0 and 3
 
 	pUp.duration = duration;
 	return pUp;
@@ -91,12 +95,13 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 
 	while (*ThreadMustGoOn) {
 
-		//Sleep((10000 + RandomValue(10000))*(*ThreadMustGoOn));
+		//Sleeps for 10 seconds, afterwards flips a coin to break the loop every second
+		//This is the timeout between powerUp drops, not the duration
 		for (int i = 0; i < 20 && *ThreadMustGoOn; i++) {
 			if (i > 10)
 				if (RandomValue(2))
 					break;
-			Sleep(1000);
+			Sleep(1000 * (*ThreadMustGoOn));
 		}
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
@@ -121,18 +126,16 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 			WaitForSingleObject(cThread->mhStructSync,INFINITE);
 			cThread->localGameData.pUp.y = i;			//Drops powerUP one place
 
-
-			//Tests for collisions
-  			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2)) {
+			//Tests for collisions and apply the powerup if needed
+  			if (cThread->localGameData.pUp.y>(cThread->localGameData.ysize*0.2))
 				PowerUpCollision(&cThread->localGameData, &cThread->localGameData.pUp, &cThread->mhStructSync);
-			}
-
 			ReleaseMutex(cThread->mhStructSync);
+
 			Sleep(cThread->localGameData.projectiles_speed*(*ThreadMustGoOn));		//Pratical assignment pdf, page 3, 4th rule
 		}
 
+		//Hides the power up to restart the loop
 		cThread->localGameData.pUp.fired = 0;
-
 	}
 
 	return 0;
@@ -144,7 +147,6 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 	HANDLE		*mhStructSync = ((BombMoves*)tParam)->mhStructSync;
 	GameData	*baseGame = ((BombMoves *)tParam)->game;
 	Invader		*invader = ((BombMoves*)tParam)->invader;
-	
 
 	/*This is maybe not needed... */
 	int			bombNum = -1;
@@ -345,7 +347,6 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 
 	int	nextOut = 0;
 
-
 	while (cThread->ThreadMustGoOn) {
 
 		//Consume item from buffer (gets a packet with a client instruction)
@@ -355,10 +356,10 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 
 		UpdateLocalShip(&move);									//Translates instructions into actions (movement, shots...)
 		ShipCollision(move.game,								//Tests if those actions are valid
-			&move.game->ship[move.localPacket.owner],cThread->mhStructSync);
+						&move.game->ship[move.localPacket.owner],
+						cThread->mhStructSync);
 
 		ReleaseMutex(cThread->mhStructSync);
-
 	}
 
 	return 0;
@@ -474,6 +475,7 @@ int UpdateLocalShip(ClientMoves *move) {
 		}
 
 		break;
+
 	default:
 		break;
 	}
@@ -522,8 +524,12 @@ int InstantiateGame(GameData *game) {
 }
 
 int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync) {
+
 	int i,j;
+
 	if (ship->lives >= 0) {
+
+		//Check for collision with invaders
 		for (i = 0; i < game->max_invaders; i++) {
 			if (game->invad[i].x == ship->x && game->invad[i].y == ship->y && game->invad[i].hp > 0) {
 				DamageInvader(&game->invad[i]);
@@ -531,6 +537,8 @@ int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync) {
 				return 1;
 			}
 		}
+
+		//Check for collisions with bombs
 		for (i = 0; i < game->max_invaders; i++) {
 			for (j = 0; j < game->max_bombs; j++) {
 				if (game->invad[i].bomb[j].x == ship->x && game->invad[i].bomb[j].y == ship->y && game->invad[i].bomb[j].fired) { //ERROR?
@@ -542,11 +550,9 @@ int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync) {
 			}
 		}
 
+		//Check for collisions with powerups
 		if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
-			//Update game status? like lauch a thread reset after a sleep?
 			ShipPowerUpCollision(game, ship, &game->pUp, mhStructSync);
-			//PowerUpShip(ship, &game->pUp, mhStructSync); 
-			_tprintf(TEXT("\7"));
 			return 1;
 		}
 	}

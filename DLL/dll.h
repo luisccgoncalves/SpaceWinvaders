@@ -93,6 +93,8 @@ typedef struct {
 	int				hp;								//ship hit points
 	int				rand_path;						//true for random trajectory, false for zig-zag
 	int				direction;						//ship movement
+	int				ice;							//Powerup effect (stops all inv for some time)
+	int				plusSpeed;						//PowerUp effect (speeds up all inv for some time)
 	} Invader;
 
 //typedef struct {

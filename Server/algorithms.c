@@ -33,6 +33,8 @@ DWORD WINAPI PowerUpTimer(LPVOID tParam) {
 	case 6:
 		timerStr.game->battery--;
 		break;
+	case 7:
+		break;
 	default:
 		break;
 	}
@@ -75,6 +77,9 @@ void PowerUpShip(GameData *game, Ship *ship, PowerUp *pUp, HANDLE mutex) {
 	case 6:
 		game->battery++;
 		break;
+	case 7:
+		ship->lives++;
+		break;
 	default:
 		break;
 	}
@@ -102,7 +107,7 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.y = 0;
 
 	pUp.fired = 0;
-	pUp.type = 4;// RandomValue(6);		//Random type between 0 and 6
+	pUp.type = RandomValue(7);		//Random type between 0 and 6
 
 	pUp.duration = duration;
 	return pUp;
@@ -215,7 +220,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
 	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
-	int i, j;
+	int i, j,index;
 	int sidestep = 4;				//hardcoded
 	int totalsteps = (baseGame->ysize - (baseGame->max_invaders/ INVADER_BY_ROW)) * sidestep;
 	int regInvaderNr = (baseGame->max_invaders - baseGame->max_rand_invaders);
@@ -231,12 +236,16 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 					WaitForSingleObject(mhStructSync, INFINITE);
 					if (baseGame->ice == 1) { //##### HERE
-						baseGame->invad[j].y = (i / sidestep) + baseGame->invad[j].y_init;				//Invader goes down after n sidesteps
+						index = i;
+						baseGame->invad[j].y = (index / sidestep) + baseGame->invad[j].y_init;				//Invader goes down after n sidesteps
 
-						if ((i % (sidestep * 2)) < sidestep)
-							baseGame->invad[j].x = (i % (sidestep * 2)) + baseGame->invad[j].x_init;	//Invader goes right
-						else if ((i % (sidestep * 2)) > sidestep)
-							baseGame->invad[j].x--;														//Invader goes left
+						if ((index % (sidestep * 2)) < sidestep)
+							baseGame->invad[j].x = (index % (sidestep * 2)) + baseGame->invad[j].x_init;	//Invader goes right
+						else if ((index % (sidestep * 2)) > sidestep)
+							baseGame->invad[j].x--;															//Invader goes left
+					}
+					else {
+						i = index;
 					}
 					//Tests collision
 					InvaderCollision(baseGame, &baseGame->invad[j]);

@@ -73,6 +73,7 @@ void printGame(GameData msg) {
 			_tprintf(TEXT("+"));
 			break;
 		default:
+			_tprintf(TEXT("?"));
 			break;
 		}
 		

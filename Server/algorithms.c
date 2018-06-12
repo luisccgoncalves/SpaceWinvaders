@@ -52,7 +52,7 @@ void PowerUpShip(GameData *game, Ship *ship, PowerUp *pUp, HANDLE mutex) {
 	tParam.pUp = *pUp;
 	
 
-	//Decreases the corresponding powerup flag to account for double buffs
+	//Increases the corresponding powerup flag to account for double buffs
 	switch (pUp->type) {
 	case 0:
 		ship->shield++;
@@ -102,7 +102,7 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.y = 0;
 
 	pUp.fired = 0;
-	pUp.type = RandomValue(4);		//Random type between 0 and 3
+	pUp.type = RandomValue(6);		//Random type between 0 and 3
 
 	pUp.duration = duration;
 	return pUp;

@@ -165,6 +165,8 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 
 	pipeStructRead.cThread = cThread;
 
+
+	/* TO DELETE */
 	h1stPipeInst = CreateEvent(				//Creates the event to warn clients that the 1st pipe instance was created
 		NULL,										//Event attributes
 		TRUE,										//Manual reset (TRUE for auto-reset)
@@ -197,13 +199,12 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 			/* 
 			WaitForSingleObject while threadn<MAX_PLAYERS
 			right now it breaks the gateway
-			needs thought.
-
-
 			*/
 
 			return -1;
 			//continue;?
+
+			//SOLVE THIS
 		}
 		if (hPipe == INVALID_HANDLE_VALUE) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());

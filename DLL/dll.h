@@ -27,7 +27,7 @@
 #define YSIZE			25							//Terminal max row number
 
 #define MAX_PLAYERS		5							//Maximum number of concurrent players
-#define MAX_INVADER		1							//Maximum invaders by level
+#define MAX_INVADER		10							//Maximum invaders by level
 #define MAX_BOMBS		3							//Maximum bombs in the screen at any time for one invader
 #define MAX_SHOTS		99							//Maximum shots a defender can have on the screen at same time
 #define RAND_INVADER	0							//Number of random path invaders
@@ -36,7 +36,8 @@
 
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
-#define	BOMBRATE		10							//Number of steps between bomb launches 
+#define	BOM_BRATE		10							//Number of steps between bomb launches 
+#define SHOT_RATE		500						//Number that represents shots for milliseconds
 
 #define POWERUP_DUR		10000						//Duration of a powerup buff
 
@@ -58,6 +59,7 @@ typedef struct {
 	int			y;
 
 	ShipShot	shots[MAX_SHOTS];					//shots per ship
+	DWORD		shotTimeStamp;						//stores last shot timestamp
 	
 	//powerups (only player specific)
 	int			shield;								//If shield is true, lives won't go down.
@@ -129,7 +131,8 @@ typedef struct {									//Game data to use in communication
 	int				ship_speed;		  				//ship speed
 	int				bombRate;		  				//bomb drop rate
 	int				projectiles_speed;				//bombs, shots and powerUps base speed
-	int				 ship_shot_speed;				//defenders shot speed
+	int				ship_shot_speed;				//defenders shot speed
+	int				shotRate;						//shots launch rate
 
 	int				num_players;					//number of players per game
 	int				max_invaders;					//total of invaders

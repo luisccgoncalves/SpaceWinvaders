@@ -382,7 +382,7 @@ DWORD WINAPI PacketListener(LPVOID tParam) {
 	while (cThread->ThreadMustGoOn) {
 
 		//Consume item from buffer (gets a packet with a client instruction)
-		move.localPacket = consumePacket(cThread);	//Problem here: No exit condition
+		move.localPacket = consumePacket(cThread, &nextOut);	//Problem here: No exit condition
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 

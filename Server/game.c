@@ -7,12 +7,12 @@ DWORD WINAPI StartLobby(LPVOID tParam) {
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
 	Packet		lPacket;
-	//int			nextOut = 0;	//Possible problem here (move this to cThread?)
+	int			nextOut = 0;	//Possible problem here (move this to cThread?)
 	int			i;
 
 	while (*ThreadMustGoOn) {
 
-		lPacket = consumePacket(cThread);
+		lPacket = consumePacket(cThread, &nextOut);
 
 		if (lPacket.instruction == 5) {
 

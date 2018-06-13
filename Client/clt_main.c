@@ -387,7 +387,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Connect to Server (through gateway)
-	handShakeServer(&cThreadRdGame);
+	//handShakeServer(&cThreadRdGame);
 
 	htReadGame = CreateThread(
 		NULL,										//Thread security attributes

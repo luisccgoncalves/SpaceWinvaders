@@ -11,6 +11,7 @@ DWORD WINAPI PacketListener(LPVOID tParam);
 DWORD WINAPI BombMovement(LPVOID tParam);
 DWORD WINAPI ShotMovement(LPVOID tParam);
 
+int handShakeClient(ClientMoves *ps);
 void PowerUpShip(GameData *game, Ship *ship, PowerUp *pUp, HANDLE mutex);
 PowerUp GeneratePowerUp(int x_max, int duration);
 int DefenderShipsCollision(GameData *game, int x, int y, int index);

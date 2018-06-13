@@ -1,5 +1,46 @@
 #include "algorithms.h"
 
+int handShakeClient(ClientMoves *ps) {
+
+	int i;
+
+	if (ps->localPacket.instruction==5) {
+		//Authentication
+		_tprintf(TEXT("Received a Handshake request!\n"));
+
+		WaitForSingleObject(ps->mhStructSync, INFINITE);
+		for (i = MAX_PLAYERS; i >= 0; i--) {
+			if (ps->localPacket.Id == ps->game->logged[i].Id)
+				break;
+		}
+		ReleaseMutex(ps->mhStructSync);
+
+		if (i >= 0) {
+			_tprintf(TEXT("User already logged.\n"));
+		}
+		else {
+			WaitForSingleObject(ps->mhStructSync, INFINITE);
+			for (i = 0; i < MAX_PLAYERS; i++) {
+				if (ps->game->logged[i].Id == 0) {
+					ps->game->logged[i].Id = ps->localPacket.Id;
+					_tcscpy_s(ps->game->logged[i].username, SMALL_BUFF, ps->localPacket.username);
+					break;
+				}
+			}
+			ReleaseMutex(ps->mhStructSync);
+
+			if (i < MAX_PLAYERS)
+				_tprintf(TEXT("User \"%s\" logged in with the ID:%d.\n"), ps->localPacket.username, ps->localPacket.Id);
+			else
+				_tprintf(TEXT("Server is full!\n"));
+		}
+	}
+	else {
+		//Deauth
+	}
+	return 0;
+}
+
 DWORD WINAPI PowerUpTimer(LPVOID tParam) {
 
 	PUpTimer	timerStr = *(PUpTimer*)tParam;
@@ -383,14 +424,20 @@ DWORD WINAPI PacketListener(LPVOID tParam) {
 		//Consume item from buffer (gets a packet with a client instruction)
 		move.localPacket = consumePacket(cThread);	//Problem here: No exit condition
 
-		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+		if (move.localPacket.instruction < 5) {						
 
-		UpdateLocalShip(&move);									//Translates instructions into actions (movement, shots...)
-		ShipCollision(move.game,								//Tests if those actions are valid
-						&move.game->ship[move.localPacket.owner],
-						cThread->mhStructSync);
+			WaitForSingleObject(cThread->mhStructSync, INFINITE);
+			UpdateLocalShip(&move);									//Translates instructions into ship actions (movement, shots...)
+			ShipCollision(move.game,								//Tests if those actions are valid
+				&move.game->ship[move.localPacket.owner],
+				cThread->mhStructSync);
+			ReleaseMutex(cThread->mhStructSync);
+		}
+		else if (move.localPacket.instruction<7) {
 
-		ReleaseMutex(cThread->mhStructSync);
+			handShakeClient(&move);
+		}
+
 	}
 
 	return 0;

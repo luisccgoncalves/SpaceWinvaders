@@ -1,51 +1,35 @@
 #include "game.h"
 #include "..\Client\debug.h"
+#pragma warning(disable:4996)
 
 DWORD WINAPI StartLobby(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
-	Packet		lPacket;
-	int			i;
+	HANDLE			htGame;										//Handle to the game thread
+	DWORD			tGameID;									//stores the ID of the game thread
 
 	while (*ThreadMustGoOn) {
 
-		lPacket = consumePacket(cThread);
+		_tprintf(TEXT("Insert number of players:"));
+		_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
 
-		if (lPacket.instruction == 5) {
+		_tprintf(TEXT("Press ENTER to start game.\n"));
+		_gettchar();
 
-			_tprintf(TEXT("Received a Handshake request!\n"));
-
-			WaitForSingleObject(cThread->mhStructSync, INFINITE);
-			for (i = MAX_PLAYERS; i >=0; i--) {
-				if (lPacket.Id == cThread->localGameData.logged[i].Id)
-					break;
-			}
-			ReleaseMutex(cThread->mhStructSync);
-
-			if (i >= 0) {
-				_tprintf(TEXT("User already logged.\n"));
-			}
-			else {
-
-				WaitForSingleObject(cThread->mhStructSync, INFINITE);
-				for (i = 0; i < MAX_PLAYERS; i++) {
-					if (cThread->localGameData.logged[i].Id == 0) {
-						cThread->localGameData.logged[i].Id = lPacket.Id;
-						_tcscpy_s(cThread->localGameData.logged[i].username, SMALL_BUFF, lPacket.username);
-						break;
-					}
-				}
-				ReleaseMutex(cThread->mhStructSync);
-
-				if (i < MAX_PLAYERS)
-					_tprintf(TEXT("User \"%s\" logged in with the ID:%d.\n"),lPacket.username, lPacket.Id);
-				else 
-					_tprintf(TEXT("Server is full!\n"));
-			}
-
+		htGame = CreateThread(
+			NULL,													//Thread security attributes
+			0,														//Stack size (0 for default)
+			StartGame,												//Thread function name
+			(LPVOID)&cThread,										//Thread parameter struct
+			0,														//Creation flags
+			&tGameID);												//gets thread ID 
+		if (htGame == NULL) {
+			_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
 		}
+
+		WaitForSingleObject(htGame, INFINITE);
 	}
 
 	return 0;

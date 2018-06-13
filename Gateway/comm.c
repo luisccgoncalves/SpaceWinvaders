@@ -62,7 +62,6 @@ DWORD WINAPI instanceThreadRead(LPVOID tParam) {
 	HANDLE		heReadReady;
 	HANDLE		mhReadPipe;
 	BOOL		fSuccess = FALSE;
-	int			nextIn = 0;
 	
 	Packet		instancePacket;
 
@@ -95,11 +94,11 @@ DWORD WINAPI instanceThreadRead(LPVOID tParam) {
 	while (pipeStruct.cThread->ThreadMustGoOn) {
 
 		readPipePacket(pipeStruct.hPipe, heReadReady, &instancePacket);
-		_tprintf(TEXT("[DEBUG] GOT KEY (%d) \n"), instancePacket.instruction);
+		_tprintf(TEXT("[DEBUG] GOT KEY (%d) from user %s\n"), instancePacket.instruction, instancePacket.username);
 
 		WaitForSingleObject(mhReadPipe, INFINITE);
 
-		writePacket(pipeStruct.cThread, &nextIn, instancePacket);
+		writePacket(pipeStruct.cThread, instancePacket);
 
 		ReleaseMutex(mhReadPipe);
 

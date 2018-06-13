@@ -195,7 +195,7 @@ typedef struct {
 	DLL_IMP_API HANDLE createVacantSemaphore();
 
 	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *nextOut);												//Read from Consumer-Productor style array
-	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);					//Write(copy) in to Consumer-Productor style array
+	DLL_IMP_API int writePacket(SMCtrl *smCtrl, Packet localPacket);					//Write(copy) in to Consumer-Productor style array
 
 	DLL_IMP_API GameData consumeGameData(GameData *sharedMemory, HANDLE *mutex);					//Read from shared memory
 	DLL_IMP_API int writeGameData(GameData *sharedMemory, GameData *localGame, HANDLE *mutex);		//Write(copy) in to shared memory

@@ -37,7 +37,8 @@
 #define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
 #define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
 #define	BOM_BRATE		10							//Number of steps between bomb launches 
-#define SHOT_RATE		500						//Number that represents shots for milliseconds
+#define SHOT_RATE		500							//Number that represents shots for milliseconds
+#define MOVE_RATE		50							//Number that represents defender movement for milliseconds
 
 #define POWERUP_DUR		10000						//Duration of a powerup buff
 
@@ -60,6 +61,7 @@ typedef struct {
 
 	ShipShot	shots[MAX_SHOTS];					//shots per ship
 	DWORD		shotTimeStamp;						//stores last shot timestamp
+	DWORD		moveTimeStamp;						//stores last ship movement timestamp
 	
 	//powerups (only player specific)
 	int			shield;								//If shield is true, lives won't go down.
@@ -129,10 +131,12 @@ typedef struct {									//Game data to use in communication
 	/*Environment variables*/
 	int				invaders_speed;	  				//invaders speed
 	int				ship_speed;		  				//ship speed
-	int				bombRate;		  				//bomb drop rate
 	int				projectiles_speed;				//bombs, shots and powerUps base speed
 	int				ship_shot_speed;				//defenders shot speed
+
 	int				shotRate;						//shots launch rate
+	int				bombRate;		  				//bomb drop rate
+	int				moveRate;						//defenders rate
 
 	int				num_players;					//number of players per game
 	int				max_invaders;					//total of invaders

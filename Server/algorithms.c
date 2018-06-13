@@ -107,7 +107,7 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.y = 0;
 
 	pUp.fired = 0;
-	pUp.type = RandomValue(7);		//Random type between 0 and 6
+	pUp.type =  RandomValue(7);		//Random type between 0 and 6
 
 	pUp.duration = duration;
 	return pUp;
@@ -474,6 +474,8 @@ int UpdateLocalShip(ClientMoves *move) {
 	DWORD			tShotLauncherID;
 	HANDLE			htShotLauncher;
 	DWORD			timeNow;
+	DWORD			shotTimeStamp, shotRate;
+	DWORD			moveTimeStamp, moveRate;
 
 	int xTemp, yTemp;
 	int index = move->localPacket.owner;
@@ -481,36 +483,58 @@ int UpdateLocalShip(ClientMoves *move) {
 	xTemp = move->game->ship[index].x;
 	yTemp = move->game->ship[index].y;
 
+	shotTimeStamp = move->game->ship[index].shotTimeStamp;
+	shotRate = (move->game->shotRate / move->game->battery) / move->game->ship[index].laser_shots;
+
+	moveTimeStamp = move->game->ship[index].moveTimeStamp;
+	moveRate = (move->game->moveRate / move->game->ship[index].turbo);
+
 	//validate action
 	switch (move->localPacket.instruction) {
 	case 0:
-		if (move->game->ship[index].x < (move->game->xsize - 1) && move->game->ship[index].lives >= 0)
-			if (DefenderShipsCollision(move->game, ++xTemp, yTemp, index)) {
-				move->game->ship[index].x++;
-			}
+		timeNow = GetTickCount();
+		if ((timeNow - moveTimeStamp) >= moveRate) {
+			move->game->ship[index].moveTimeStamp = timeNow;
+			if (move->game->ship[index].x < (move->game->xsize - 1) && move->game->ship[index].lives >= 0)
+				if (DefenderShipsCollision(move->game, ++xTemp, yTemp, index)) {
+					move->game->ship[index].x++;
+				}
+		}
 		break;
 	case 1:
-		if (move->game->ship[index].y<(move->game->ysize - 1) && move->game->ship[index].lives >= 0)
-			if (DefenderShipsCollision(move->game, xTemp, ++yTemp, index)) {
-				move->game->ship[index].y++;
-			}
+		timeNow = GetTickCount();
+		if ((timeNow - moveTimeStamp) >= moveRate) {
+			move->game->ship[index].moveTimeStamp = timeNow;
+			if (move->game->ship[index].y < (move->game->ysize - 1) && move->game->ship[index].lives >= 0)
+				if (DefenderShipsCollision(move->game, xTemp, ++yTemp, index)) {
+					move->game->ship[index].y++;
+				}
+		}
 		break;
 	case 2:
-		if (move->game->ship[index].x>0 && move->game->ship[index].lives >= 0)
-			if (DefenderShipsCollision(move->game, --xTemp, yTemp, index)) {
-				move->game->ship[index].x--;
-			}
+		timeNow = GetTickCount();
+		if ((timeNow - moveTimeStamp) >= moveRate) {
+			move->game->ship[index].moveTimeStamp = timeNow;
+			if (move->game->ship[index].x > 0 && move->game->ship[index].lives >= 0)
+				if (DefenderShipsCollision(move->game, --xTemp, yTemp, index)) {
+					move->game->ship[index].x--;
+				}
+		}
 		break;
 	case 3:
-		if (move->game->ship[index].y>(move->game->ysize - (move->game->ysize*0.2)) && move->game->ship[index].lives >= 0)
-			if (DefenderShipsCollision(move->game, xTemp, --yTemp, index)) {
-				move->game->ship[index].y--;
-			}
+		timeNow = GetTickCount();
+		if ((timeNow - moveTimeStamp) >= moveRate) {
+			move->game->ship[index].moveTimeStamp = timeNow;
+			if (move->game->ship[index].y > (move->game->ysize - (move->game->ysize*0.2)) && move->game->ship[index].lives >= 0)
+				if (DefenderShipsCollision(move->game, xTemp, --yTemp, index)) {
+					move->game->ship[index].y--;
+				}
+		}
 		break;
 	case 4:
 		/* calculate time in millisenconds since last shot is fired*/
 		timeNow = GetTickCount();
-		if ((timeNow - (move->game->ship[index].shotTimeStamp)) >= ((move->game->shotRate / move->game->battery)/ move->game->ship[index].laser_shots)) {
+		if ((timeNow - shotTimeStamp) >= shotRate) {
 			move->game->ship[index].shotTimeStamp = timeNow;
 
 			htShotLauncher = CreateThread(
@@ -550,6 +574,7 @@ int InstantiateGame(GameData *game) {
 	game->pup_duration =		POWERUP_DUR;				// Base power up duration
 	game->bombRate =			BOM_BRATE;					// Base steps until bomb launch
 	game->shotRate =			SHOT_RATE;
+	game->moveRate =			MOVE_RATE;
 
 	game->plusSpeed = 1;
 	game->ice = 1;
@@ -564,8 +589,6 @@ int InstantiateGame(GameData *game) {
 	}
 	/*Ships & shots*/
 	for (i = 0; i < game->num_players; i++) {
-		game->ship[i].drunk = 0;
-		game->ship[i].laser_shots = 0;
 		game->ship[i].lives = 1; //represents 2 lives, 0 and 1
 		game->ship[i].x = 0;
 		game->ship[i].y = 0;

@@ -510,7 +510,7 @@ int UpdateLocalShip(ClientMoves *move) {
 	case 4:
 		/* calculate time in millisenconds since last shot is fired*/
 		timeNow = GetTickCount();
-		if ((timeNow - (move->game->ship[index].shotTimeStamp)) >= (move->game->shotRate / move->game->battery)) {
+		if ((timeNow - (move->game->ship[index].shotTimeStamp)) >= ((move->game->shotRate / move->game->battery)/ move->game->ship[index].laser_shots)) {
 			move->game->ship[index].shotTimeStamp = timeNow;
 
 			htShotLauncher = CreateThread(

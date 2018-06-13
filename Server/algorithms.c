@@ -384,6 +384,11 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 		//Consume item from buffer (gets a packet with a client instruction)
 		move.localPacket = consumePacket(cThread, &nextOut);	//Problem here: No exit condition
 
+		if (move.localPacket.instruction == 2)
+			move.localPacket.instruction = 0;
+		else if (move.localPacket.instruction == 0)
+			move.localPacket.instruction = 2;
+
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 
 		UpdateLocalShip(&move);									//Translates instructions into actions (movement, shots...)

@@ -356,6 +356,8 @@ int handShakeServer(ThreadCtrl * ps) {
 
 	} while (isLogged == FALSE);
 
+	_tprintf(TEXT("Press ENTER when ready\n"));
+	_gettch();
 	return 0;
 }
 
@@ -384,8 +386,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 		return -1;
 	}
 
-	//Connect to Server
-	//handShakeServer(&cThreadRdGame);
+	//Connect to Server (through gateway)
+	handShakeServer(&cThreadRdGame);
 
 	htReadGame = CreateThread(
 		NULL,										//Thread security attributes

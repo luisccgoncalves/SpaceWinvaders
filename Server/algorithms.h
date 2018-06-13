@@ -7,7 +7,7 @@ DWORD WINAPI PowerUpTimer(LPVOID tParam);
 DWORD WINAPI PowerUps(LPVOID tParam);
 DWORD WINAPI RegPathInvaders(LPVOID tParam);
 DWORD WINAPI RandPathInvaders(LPVOID tParam);
-DWORD WINAPI ShipInstruction(LPVOID tParam);
+DWORD WINAPI PacketListener(LPVOID tParam);
 DWORD WINAPI BombMovement(LPVOID tParam);
 DWORD WINAPI ShotMovement(LPVOID tParam);
 

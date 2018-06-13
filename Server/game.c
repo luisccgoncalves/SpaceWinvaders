@@ -1,6 +1,56 @@
 #include "game.h"
 #include "..\Client\debug.h"
 
+DWORD WINAPI StartLobby(LPVOID tParam) {
+
+	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMCtrl		*cThread = (SMCtrl*)tParam;
+
+	Packet		lPacket;
+	//int			nextOut = 0;	//Possible problem here (move this to cThread?)
+	int			i;
+
+	while (*ThreadMustGoOn) {
+
+		lPacket = consumePacket(cThread);
+
+		if (lPacket.instruction == 5) {
+
+			_tprintf(TEXT("Received a Handshake request!\n"));
+
+			WaitForSingleObject(cThread->mhStructSync, INFINITE);
+			for (i = MAX_PLAYERS; i >=0; i--) {
+				if (lPacket.Id == cThread->localGameData.logged[i].Id)
+					break;
+			}
+			ReleaseMutex(cThread->mhStructSync);
+
+			if (i >= 0) {
+				_tprintf(TEXT("User already logged.\n"));
+			}
+			else {
+
+				WaitForSingleObject(cThread->mhStructSync, INFINITE);
+				for (i = 0; i < MAX_PLAYERS; i++) {
+					if (cThread->localGameData.logged[i].Id == 0) {
+						cThread->localGameData.logged[i].Id = lPacket.Id;
+						_tcscpy_s(cThread->localGameData.logged[i].username, SMALL_BUFF, lPacket.username);
+						break;
+					}
+				}
+				ReleaseMutex(cThread->mhStructSync);
+
+				if (i < MAX_PLAYERS)
+					_tprintf(TEXT("User \"%s\" logged in with the ID:%d.\n"),lPacket.username, lPacket.Id);
+				else 
+					_tprintf(TEXT("Server is full!\n"));
+			}
+
+		}
+	}
+
+	return 0;
+}
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
@@ -105,7 +155,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 	while (sGTick->ThreadMustGoOn) {
 
 		Sleep(50);
-		spinnerSlash();
+		//spinnerSlash();
 
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 

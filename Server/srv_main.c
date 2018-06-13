@@ -18,14 +18,20 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE			htGTick;									//Handle to the game tick thread
 	DWORD			tGTickID;									//Stores the ID of GTick thread
 
-	//Gateway Message thread HANDLE/ID (uses cThread as parameter)
-	HANDLE			htGReadMsg;									//Handle to the Gateway Message thread
-	DWORD			tRGMsgID;									//Stores the ID of the Gateway Message thread
+	//Packet Listener thread HANDLE/ID (uses cThread as parameter)
+	HANDLE			htPacketListener;							//Handle to the Packet Listener thread
+	DWORD			tPacketListenerID;							//Stores the ID of the Gateway Message thread
+
+	//Start Lobby thread HANDLE/ID (uses cThread as parameter)
+	HANDLE			htStartLobby;								//Handle to the Start Lobby thread
+	DWORD			tStartLobbyID;								//Stores the ID of the Start Lobby thread;
 
 	HANDLE			hCanBootNow;								//Handle to event. Warns the gateway the shared memory is mapped
 	
 	SYSTEM_INFO		SysInfo;									//System info structure; Needed to extract dwAllocationGranularity
 	DWORD			dwSysGran;									//Stores system granularity (usually arround 65KB)
+
+	ZeroMemory(&cThread, sizeof(cThread));
 
 	GetSystemInfo(&SysInfo);									//Used to get system granularity
 	dwSysGran = SysInfo.dwAllocationGranularity;				//Used to get system granularity
@@ -131,31 +137,41 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	
-	_tprintf(TEXT("[DEBUG] Launching gateway message receiver thread...\n"));	//Launches gateway message receiver thread
-	htGReadMsg = CreateThread(
+	//_tprintf(TEXT("[DEBUG] Launching gateway message receiver thread...\n"));	//Launches gateway message receiver thread
+	//htPacketListener = CreateThread(
+	//	NULL,													//Thread security attributes
+	//	0,														//Stack size (0 for default)
+	//	PacketListener,											//Thread function name
+	//	(LPVOID)&cThread,										//Thread parameter struct
+	//	0,														//Creation flags
+	//	&tPacketListenerID);									//gets thread ID 
+	//if (htPacketListener == NULL) {
+	//	_tprintf(TEXT("[Error] Creating thread GReadMsg (%d) at Server\n"), GetLastError());
+	//}
+
+	htStartLobby = CreateThread(
 		NULL,													//Thread security attributes
 		0,														//Stack size (0 for default)
-		ShipInstruction,										//Thread function name
+		StartLobby,												//Thread function name
 		(LPVOID)&cThread,										//Thread parameter struct
 		0,														//Creation flags
-		&tRGMsgID);												//gets thread ID 
-	if (htGReadMsg == NULL) {
-		_tprintf(TEXT("[Error] Creating thread GReadMsg (%d) at Server\n"), GetLastError());
-	}
-
-	//Launches Game thread
-	_tprintf(TEXT("[DEBUG] Launching Game thread... ENTER to quit\n"));
-
-	htGame = CreateThread(
-		NULL,													//Thread security attributes
-		0,														//Stack size (0 for default)
-		StartGame,												//Thread function name
-		(LPVOID)&cThread,										//Thread parameter struct
-		0,														//Creation flags
-		&tGameID);												//gets thread ID 
-	if (htGame == NULL) {
+		&tStartLobbyID);										//gets thread ID 
+	if (htStartLobby == NULL) {
 		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
 	}
+	//Launches Game thread
+	//_tprintf(TEXT("[DEBUG] Launching Game thread... ENTER to quit\n"));
+
+	//htGame = CreateThread(
+	//	NULL,													//Thread security attributes
+	//	0,														//Stack size (0 for default)
+	//	StartGame,												//Thread function name
+	//	(LPVOID)&cThread,										//Thread parameter struct
+	//	0,														//Creation flags
+	//	&tGameID);												//gets thread ID 
+	//if (htGame == NULL) {
+	//	_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
+	//}
 
 	_gettchar();												//Enter to end thread and exit
 
@@ -163,11 +179,11 @@ int _tmain(int argc, LPTSTR argv[]) {
 	sGTick.ThreadMustGoOn = 0;									//Signals thread to gracefully exit
 
 	/* If this gets bigger we should maybe move all handles into an array and waitformultipleobjects instead */
-	WaitForSingleObject(htGame, INFINITE);						//Waits for thread to exit
+	//WaitForSingleObject(htGame, INFINITE);						//Waits for thread to exit
 	WaitForSingleObject(htGTick, INFINITE);						//Waits for thread to exit
 
 	/* Needs to interrupt prodcons algorithm */
-	WaitForSingleObject(htGReadMsg, INFINITE);					//Waits for thread to exit
+	//WaitForSingleObject(htPacketListener, INFINITE);			//Waits for thread to exit
 
 	UnmapViewOfFile(cThread.pSMemGameData);						//Unmaps view of shared memory
 	UnmapViewOfFile(cThread.pSMemMessage);						//Unmaps view of shared memory

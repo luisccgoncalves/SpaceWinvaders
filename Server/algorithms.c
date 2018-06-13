@@ -385,6 +385,9 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 		move.localPacket = consumePacket(cThread, &nextOut);	//Problem here: No exit condition
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
+		if (move.game->ship[move.localPacket.owner].drunk) {
+			GetDrunk(&move);
+		}
 
 		UpdateLocalShip(&move);									//Translates instructions into actions (movement, shots...)
 		ShipCollision(move.game,								//Tests if those actions are valid
@@ -395,6 +398,17 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	}
 
 	return 0;
+}
+
+void GetDrunk(ClientMoves *moves) {
+	if (moves->localPacket.instruction == 0)
+		moves->localPacket.instruction = 2;
+	else if (moves->localPacket.instruction == 1)
+		moves->localPacket.instruction = 3;
+	else if (moves->localPacket.instruction == 2)
+		moves->localPacket.instruction = 0;
+	else if (moves->localPacket.instruction == 3)
+		moves->localPacket.instruction = 1;
 }
 
 DWORD WINAPI ShotMovement(LPVOID tParam) {
@@ -496,7 +510,7 @@ int UpdateLocalShip(ClientMoves *move) {
 	case 4:
 		/* calculate time in millisenconds since last shot is fired*/
 		timeNow = GetTickCount();
-		if (timeNow - (move->game->ship[index].shotTimeStamp) >= (move->game->shotRate / move->game->battery)) {
+		if ((timeNow - (move->game->ship[index].shotTimeStamp)) >= (move->game->shotRate / move->game->battery)) {
 			move->game->ship[index].shotTimeStamp = timeNow;
 
 			htShotLauncher = CreateThread(
@@ -520,23 +534,6 @@ int UpdateLocalShip(ClientMoves *move) {
 	return 0;
 }
 
-//int SystemTimeStamp(DWORD* timeStamp) {
-//	/*
-//	Creates a timestamp
-//	Used to display top 10
-//	*/
-//	SYSTEMTIME time;
-//	GetSystemTime(&time);									//Populates structure with system time
-//
-//	_stprintf_s(timeStamp,
-//		SMALL_BUFF,
-//		TEXT("(%02d:%02d %02d/%02d/%d)"),					//Copies the values with the format (HH:MM DD/MM/YYY)
-//		time.wHour, time.wMinute,
-//		time.wDay, time.wMonth, time.wYear);
-//
-//	return 0;
-//}
-
 int InstantiateGame(GameData *game) {
 	int i, j;
 	/*Ambient variables*/
@@ -553,6 +550,7 @@ int InstantiateGame(GameData *game) {
 	game->pup_duration =		POWERUP_DUR;				// Base power up duration
 	game->bombRate =			BOM_BRATE;					// Base steps until bomb launch
 	game->shotRate =			SHOT_RATE;
+
 	game->plusSpeed = 1;
 	game->ice = 1;
 	game->battery = 1;
@@ -568,15 +566,18 @@ int InstantiateGame(GameData *game) {
 	for (i = 0; i < game->num_players; i++) {
 		game->ship[i].drunk = 0;
 		game->ship[i].laser_shots = 0;
-		game->ship[i].lives = 1;
+		game->ship[i].lives = 1; //represents 2 lives, 0 and 1
 		game->ship[i].x = 0;
 		game->ship[i].y = 0;
+		game->ship[i].shotTimeStamp = 0;
+
+		game->ship[i].laser_shots = 1;
 		game->ship[i].shield = 0;
+		game->ship[i].drunk = 0;
+		game->ship[i].turbo = 1;
 		for (j = 0; j < MAX_SHOTS; j++) {				//Instantiates all shots outside of game and updates the status
 			ResetShot(&game->ship[i].shots[j]);
 		}
-		game->ship[i].shotTimeStamp = 0;
-		//...
 	}
 
 	return 0;

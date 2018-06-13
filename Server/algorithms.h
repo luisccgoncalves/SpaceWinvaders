@@ -15,6 +15,7 @@ void PowerUpShip(GameData *game, Ship *ship, PowerUp *pUp, HANDLE mutex);
 PowerUp GeneratePowerUp(int x_max, int duration);
 int DefenderShipsCollision(GameData *game, int x, int y, int index);
 int UpdateLocalShip(ClientMoves *move);
+void GetDrunk(ClientMoves *moves);
 int InstantiateGame(GameData *game);
 
 int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync);

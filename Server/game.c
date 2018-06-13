@@ -22,7 +22,7 @@ DWORD WINAPI StartLobby(LPVOID tParam) {
 			NULL,													//Thread security attributes
 			0,														//Stack size (0 for default)
 			StartGame,												//Thread function name
-			(LPVOID)&cThread,										//Thread parameter struct
+			tParam,													//Thread parameter struct
 			0,														//Creation flags
 			&tGameID);												//gets thread ID 
 		if (htGame == NULL) {

@@ -370,6 +370,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 }
 
 DWORD WINAPI PacketListener(LPVOID tParam) {
+
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
 	ClientMoves move;
@@ -377,12 +378,10 @@ DWORD WINAPI PacketListener(LPVOID tParam) {
 	move.TheadmustGoOn = &cThread->ThreadMustGoOn;
 	move.mhStructSync = &cThread->mhStructSync;
 
-	int	nextOut = 0;
-
 	while (cThread->ThreadMustGoOn) {
 
 		//Consume item from buffer (gets a packet with a client instruction)
-		move.localPacket = consumePacket(cThread, &nextOut);	//Problem here: No exit condition
+		move.localPacket = consumePacket(cThread);	//Problem here: No exit condition
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 

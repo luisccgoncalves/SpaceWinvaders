@@ -361,8 +361,12 @@ int handShakeServer(ThreadCtrl * ps) {
 
 	lPacket.instruction = 7;
 	writePipeMsg(ps->hPipe, ps->heWriteReady, lPacket);
-
-	_gettch();
+	_tprintf(TEXT("READY TO PLAY\n"));
+	
+	while (!readPipeMsg(ps->hPipe, ps->heReadReady, &localGame)) {
+		if (localGame.gameRunning==1)
+			break;
+	}
 
 	return 0;
 }

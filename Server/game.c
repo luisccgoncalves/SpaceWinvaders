@@ -2,21 +2,53 @@
 #include "..\Client\debug.h"
 #pragma warning(disable:4996)
 
+int loadShips(Ship *ship, Player *player) {
+
+	int shipsLogged = 0;
+
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		if (player[i].isReady) {
+			ship[shipsLogged].id = player[i].Id;
+			_tcscpy_s(ship[shipsLogged].username, SMALL_BUFF, player[i].username);
+			shipsLogged++;
+		}
+	}
+
+	return shipsLogged;
+}
+
 DWORD WINAPI StartLobby(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
-	HANDLE			htGame;										//Handle to the game thread
-	DWORD			tGameID;									//stores the ID of the game thread
+	HANDLE		htGame;										//Handle to the game thread
+	DWORD		tGameID;									//stores the ID of the game thread
+
+	int			shipsLogged;
 
 	while (*ThreadMustGoOn) {
 
 		_tprintf(TEXT("Insert number of players:"));
 		_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
+		_gettchar();			//ignored because the \n in buffer
 
-		_tprintf(TEXT("Press ENTER to start game.\n"));
-		_gettchar();
+		do {
+
+			shipsLogged = 0;
+
+			_tprintf(TEXT("Press ENTER to start game.\n"));
+			_gettchar();
+
+			WaitForSingleObject(cThread->mhStructSync, INFINITE);
+			shipsLogged=loadShips(&cThread->localGameData.ship, &cThread->localGameData.logged);
+			ReleaseMutex(cThread->mhStructSync);
+
+			if(shipsLogged == 0)
+				_tprintf(TEXT("No players ready to start a game.\n"));
+
+		} while (shipsLogged==0);
+
 
 		htGame = CreateThread(
 			NULL,													//Thread security attributes

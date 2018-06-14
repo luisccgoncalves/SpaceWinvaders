@@ -625,6 +625,7 @@ int InstantiateGame(GameData *game) {
 	game->plusSpeed = 1;
 	game->ice = 1;
 	game->battery = 1;
+	game->gameRunning = 1;
 
 	/*Bombs*/
 	for (i = 0; i < game->max_invaders; i++) {				//Instantiates all bombs outside of game and updates the status

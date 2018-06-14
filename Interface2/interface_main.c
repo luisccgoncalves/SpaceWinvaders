@@ -1,5 +1,4 @@
-#include <windows.h>
-#include <tchar.h>
+#include "viewLogic.h"
 
 #ifdef _UNICODE									//Sets windows to unicode
 #define _tWinMain wWinMain
@@ -7,65 +6,35 @@
 #define _tWinMain WinMain
 #endif
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { //some warning here about  LPSTR lpCmdLine
 
-int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR LpCmdLine, int nCmdShow) {
+	TCHAR		*szAppName = TEXT("SpaceWinvaders");
+	HINSTANCE	hInste = hInstance;
 
-	static TCHAR *szAppName = TEXT("batatas");
-	HWND        hwnd;
-	MSG         msg;
-	WNDCLASSEX  wndclass;
+	
+	HWND        hWnd;
+	MSG         lpMsg;
 
-	wndclass.cbSize = sizeof(wndclass);
-	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WndProc;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wndclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(DKGRAY_BRUSH);
-	wndclass.lpszClassName = szAppName;
-	wndclass.lpszMenuName = NULL;
 
-	RegisterClassEx(&wndclass);
-
-	hwnd = CreateWindow(szAppName, TEXT("Éló üórledê!"),
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL, NULL, hInstance, NULL);
-
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
-
-	while (GetMessage(&msg, NULL, 0, 0)) {
-		TranslateMessage(&msg);   
-		DispatchMessage(&msg); 
-	}
-
-	return msg.wParam;
-}
-
-LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
-	PAINTSTRUCT ps;
-	HDC         hdc;
-
-	switch (iMsg) {
-	case WM_PAINT:
-
-		hdc = BeginPaint(hwnd, &ps);
-		TextOut(hdc, 100, 100, TEXT("Éló üórledê!"), 13);
-		EndPaint(hwnd, &ps);
+	if (!regClass(hInstance, szAppName)) {
+		_tprintf(TEXT("[Error] in regClass"));			//does this appear? :s
 		return 0;
-
-	case WM_DESTROY:
-
-		PostQuitMessage(0);
+	}
+	hWnd = winCreation(hInstance, szAppName);
+	if (hWnd == NULL) {
+		_tprintf(TEXT("[Error] in winCreation"));		//does this appear? :s
 		return 0;
 	}
 
+	SetWindowPos(hWnd, HWND_BOTTOM, 0, 0, 1300, 700, NULL);
+	ShowWindow(hWnd, nCmdShow);
+	UpdateWindow(hWnd);
 
-	return DefWindowProc(hwnd, iMsg, wParam, lParam);
+	while (GetMessage(&lpMsg, NULL, 0, 0)) {
+		TranslateMessage(&lpMsg);   
+		DispatchMessage(&lpMsg); 
+	}
+
+	return (int)lpMsg.wParam;
 }
+

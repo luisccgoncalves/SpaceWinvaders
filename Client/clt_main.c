@@ -329,9 +329,9 @@ int handShakeServer(ThreadCtrl * ps) {
 
 	do {
 		_tprintf(TEXT("Username:"));
-		_tscanf_s(TEXT("%s"), lPacket.username, _countof(lPacket.username));
+		_tscanf_s(TEXT("%s"), lPacket.username, (unsigned int)_countof(lPacket.username));
 
-		lPacket.Id = GetCurrentProcessId() + time(NULL);
+		lPacket.Id = GetCurrentProcessId() + (DWORD)time(NULL);
 		lPacket.owner = -1;
 		lPacket.instruction = 5;
 

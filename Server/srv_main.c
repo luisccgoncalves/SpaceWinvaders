@@ -8,10 +8,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 	_setmode(_fileno(stdout), _O_WTEXT);
 #endif
 
-	//StartGame thread STRUCT/HANDLE/ID
-	SMCtrl			cThread;									//Thread parameter structure
-	HANDLE			htGame;										//Handle to the game thread
-	DWORD			tGameID;									//stores the ID of the game thread
+	SMCtrl			cThread;									//Main structure
 
 	//GameTick thread STRUCT/HANDLE/ID
 	GTickStruct		sGTick;										//Thread parameter structure

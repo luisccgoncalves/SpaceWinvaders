@@ -362,6 +362,8 @@ int handShakeServer(ThreadCtrl * ps) {
 	lPacket.instruction = 7;
 	writePipeMsg(ps->hPipe, ps->heWriteReady, lPacket);
 
+	_gettch();
+
 	return 0;
 }
 

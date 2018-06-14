@@ -2,13 +2,21 @@
 
 int markPlayerReady(ClientMoves *ps) {
 	int i;
+
+	WaitForSingleObject(ps->mhStructSync, INFINITE);
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		if (ps->localPacket.Id == ps->game->logged[i].Id) {
 			ps->game->logged[i].isReady = TRUE;
-			return 0;										//Found a player, marked it as ready
+			_tprintf(TEXT("Player %s is ready to play!\n"), ps->game->logged[i].username);
+			break;										
 		}
 	}
-	return 1;												//No player was found with that ID
+	ReleaseMutex(ps->mhStructSync);
+
+	if (i < MAX_PLAYERS)
+		return 0;												//Found a player, marked it as ready
+	else
+		return 1;												//No player was found with that ID
 }
 
 int handShakeClient(ClientMoves *ps) {
@@ -557,7 +565,7 @@ int UpdateLocalShip(ClientMoves *move) {
 	case 4:
 		/* calculate time in millisenconds since last shot is fired*/
 		timeNow = GetTickCount();
-		if (timeNow - (move->game->ship[index].shotTimeStamp) >= (move->game->shotRate / move->game->battery)) {
+		if (timeNow - (move->game->ship[index].shotTimeStamp) >= (DWORD)(move->game->shotRate / move->game->battery)) {
 			move->game->ship[index].shotTimeStamp = timeNow;
 
 			htShotLauncher = CreateThread(

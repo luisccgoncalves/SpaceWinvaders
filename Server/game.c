@@ -118,19 +118,19 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	return 0;
 }
-void spinnerSlash() {
-	POINT			pt;
-	static int		i = 0;
-	char			spiner[8] = { '/','-','\\','|','/','-','\\','|' };
-
-	GetCursorPos(&pt);
-	gotoxy(79, 0);
-
-	_tprintf(TEXT("%c"), spiner[i++]);
-	gotoxy((int)pt.x, (int)pt.y);
-	i = i% 8;
-
-}
+//void spinnerSlash() {
+//	POINT			pt;
+//	static int		i = 0;
+//	char			spiner[8] = { '/','-','\\','|','/','-','\\','|' };
+//
+//	GetCursorPos(&pt);
+//	gotoxy(79, 0);
+//
+//	_tprintf(TEXT("%c"), spiner[i++]);
+//	gotoxy((int)pt.x, (int)pt.y);
+//	i = i% 8;
+//
+//}
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;

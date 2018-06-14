@@ -1,5 +1,16 @@
 #include "algorithms.h"
 
+int markPlayerReady(ClientMoves *ps) {
+	int i;
+	for (i = 0; i < MAX_PLAYERS; i++) {
+		if (ps->localPacket.Id == ps->game->logged[i].Id) {
+			ps->game->logged[i].isReady = TRUE;
+			return 0;										//Found a player, marked it as ready
+		}
+	}
+	return 1;												//No player was found with that ID
+}
+
 int handShakeClient(ClientMoves *ps) {
 
 	int i;
@@ -424,7 +435,7 @@ DWORD WINAPI PacketListener(LPVOID tParam) {
 		//Consume item from buffer (gets a packet with a client instruction)
 		move.localPacket = consumePacket(cThread);	//Problem here: No exit condition
 
-		if (move.localPacket.instruction < 5) {						
+		if (move.localPacket.instruction < 5) {						//Instructions [0,1,2,3,4]
 
 			WaitForSingleObject(cThread->mhStructSync, INFINITE);
 			UpdateLocalShip(&move);									//Translates instructions into ship actions (movement, shots...)
@@ -433,9 +444,13 @@ DWORD WINAPI PacketListener(LPVOID tParam) {
 				cThread->mhStructSync);
 			ReleaseMutex(cThread->mhStructSync);
 		}
-		else if (move.localPacket.instruction<7) {
+		else if (move.localPacket.instruction<7) {					//Instructions [5,6]
 
-			handShakeClient(&move);
+			handShakeClient(&move);									//Manages auth/deauth packets
+		}
+		else if (move.localPacket.instruction<8) {					//Instructions [7]
+
+			markPlayerReady(&move);
 		}
 
 	}

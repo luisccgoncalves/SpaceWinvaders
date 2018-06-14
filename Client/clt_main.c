@@ -358,6 +358,10 @@ int handShakeServer(ThreadCtrl * ps) {
 
 	_tprintf(TEXT("Press ENTER when ready\n"));
 	_gettch();
+
+	lPacket.instruction = 7;
+	writePipeMsg(ps->hPipe, ps->heWriteReady, lPacket);
+
 	return 0;
 }
 

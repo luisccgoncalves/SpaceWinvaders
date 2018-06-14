@@ -20,11 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{1941F078-F927-4BCA-923E-605EDC2B45EE}</ProjectGuid>
+    <ProjectGuid>{7859F5E9-DABE-40C9-884F-32F823829A22}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Interface2</RootNamespace>
+    <RootNamespace>ServerGUI</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
-    <ProjectName>ServerGUI</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -144,11 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="interface_main.c" />
-    <ClCompile Include="viewLogic.c" />
+    <ClInclude Include="view_logic.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="viewLogic.h" />
+    <ClCompile Include="server_main.c" />
+    <ClCompile Include="view_logic.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

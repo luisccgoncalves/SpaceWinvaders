@@ -1,9 +1,7 @@
-#include "viewLogic.h"
-
-
+#include "view_logic.h"
 
 ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
-	
+
 	WNDCLASSEX  wndClass;
 
 	wndClass.cbSize = sizeof(wndClass);
@@ -26,18 +24,18 @@ ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
 
 HWND winCreation(HINSTANCE hInstance, TCHAR * szAppName) {
 
-	 return CreateWindow(
-		 szAppName,
-		 TEXT("Space Winvaders Server"),
-		 WS_OVERLAPPEDWINDOW,
-		 CW_USEDEFAULT, 
-		 CW_USEDEFAULT,
-		 CW_USEDEFAULT, 
-		 CW_USEDEFAULT,
-		 NULL, 
-		 NULL, 
-		 hInstance, 
-		 NULL);
+	return CreateWindow(
+		szAppName,
+		TEXT("Space Winvaders Server"),
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		NULL,
+		NULL,
+		hInstance,
+		NULL);
 }
 
 LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {

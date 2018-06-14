@@ -1,4 +1,4 @@
-#include "viewLogic.h"
+#include "view_logic.h"
 
 #ifdef _UNICODE									//Sets windows to unicode
 #define _tWinMain wWinMain
@@ -11,7 +11,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	TCHAR		*szAppName = TEXT("SpaceWinvaders");
 	HINSTANCE	hInste = hInstance;
 
-	
+
 	HWND        hWnd;
 	MSG         lpMsg;
 
@@ -31,8 +31,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	UpdateWindow(hWnd);
 
 	while (GetMessage(&lpMsg, NULL, 0, 0)) {
-		TranslateMessage(&lpMsg);   
-		DispatchMessage(&lpMsg); 
+		TranslateMessage(&lpMsg);
+		DispatchMessage(&lpMsg);
 	}
 
 	return (int)lpMsg.wParam;

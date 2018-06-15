@@ -447,16 +447,13 @@ DWORD WINAPI PacketListener(LPVOID tParam) {
 		//Consume item from buffer (gets a packet with a client instruction)
 		move.localPacket = consumePacket(cThread);	//Problem here: No exit condition
 
-<<<<<<< HEAD
-		WaitForSingleObject(cThread->mhStructSync, INFINITE);
-		if (move.game->ship[move.localPacket.owner].drunk) {
-			GetDrunk(&move);
-		}
-=======
 		if (move.localPacket.instruction < 5) {						//Instructions [0,1,2,3,4]
->>>>>>> serverHandShake
 
 			WaitForSingleObject(cThread->mhStructSync, INFINITE);
+
+			if (move.game->ship[move.localPacket.owner].drunk) {
+				GetDrunk(&move);
+			}
 			UpdateLocalShip(&move);									//Translates instructions into ship actions (movement, shots...)
 			ShipCollision(move.game,								//Tests if those actions are valid
 				&move.game->ship[move.localPacket.owner],
@@ -611,11 +608,8 @@ int UpdateLocalShip(ClientMoves *move) {
 	case 4:
 		/* calculate time in millisenconds since last shot is fired*/
 		timeNow = GetTickCount();
-<<<<<<< HEAD
 		if ((timeNow - shotTimeStamp) >= shotRate) {
-=======
-		if (timeNow - (move->game->ship[index].shotTimeStamp) >= (DWORD)(move->game->shotRate / move->game->battery)) {
->>>>>>> serverHandShake
+
 			move->game->ship[index].shotTimeStamp = timeNow;
 
 			htShotLauncher = CreateThread(

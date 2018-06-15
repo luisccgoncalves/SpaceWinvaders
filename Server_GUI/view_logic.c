@@ -55,14 +55,13 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 		switch (LOWORD(wParam)) {
 		case ID_SETTINGS_CONFIGUREGAME:
 			//openBox?
+			break;
 		case ID_SETTINGS_CLOSESERVER:
 			PostQuitMessage(0);
 			return 0;
 		case ID_SETTINGS_ABOUTE:
-			//opne Window
-			//dialog(hInst);
-			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, NULL);
-
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutManager);
+			break;
 		default:
 			break;
 		}
@@ -78,8 +77,99 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 
-//int dialog(HINSTANCE hInstance) {
-//
-//	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
-//	return 1;
-//}
+LRESULT CALLBACK winAboutManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+
+	HWND		hwndOwner;
+	RECT		rc, rcDlg, rcOwner;
+
+	switch (iMsg) {
+	case WM_INITDIALOG:
+		if ((hwndOwner = GetParent(hWnd)) == NULL)
+		{
+			hwndOwner = GetDesktopWindow();
+		}
+		/*This gets the data from the original window so that is possible */
+		/*to calculate the central coordinate and centrally align the DialogBox*/
+		GetWindowRect(hwndOwner, &rcOwner);
+		GetWindowRect(hWnd, &rcDlg);
+		CopyRect(&rc, &rcOwner);
+		OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
+		OffsetRect(&rc, -rc.left, -rc.top);
+		OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
+
+		SetWindowPos(hWnd,
+			HWND_TOP,
+			rcOwner.left + (rc.right / 2),
+			rcOwner.top + (rc.bottom / 2),
+			0, 0,          // Ignores size arguments. 
+			SWP_NOSIZE);
+
+		if (GetDlgCtrlID((HWND)wParam) != IDD_DIALOG1)
+		{
+			SetFocus(GetDlgItem(hWnd, IDD_DIALOG1));
+			return FALSE;
+		}
+		return TRUE;
+
+	case WM_COMMAND:
+		switch (wParam)	{
+		case IDCLOSE:
+			//DestroyWindow(hWnd);
+			EndDialog(hWnd, 0);
+			return TRUE;
+		}
+	case WM_CLOSE:
+		EndDialog(hWnd, 0);
+		return TRUE;
+	}
+	return FALSE;
+
+}
+
+LRESULT CALLBACK winCloseManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+
+	HWND		hwndOwner;
+	RECT		rc, rcDlg, rcOwner;
+
+	switch (iMsg) {
+	case WM_INITDIALOG:
+		if ((hwndOwner = GetParent(hWnd)) == NULL)
+		{
+			hwndOwner = GetDesktopWindow();
+		}
+		/*This gets the data from the original window so that is possible */
+		/*to calculate the central coordinate and centrally align the DialogBox*/
+		GetWindowRect(hwndOwner, &rcOwner);
+		GetWindowRect(hWnd, &rcDlg);
+		CopyRect(&rc, &rcOwner);
+		OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
+		OffsetRect(&rc, -rc.left, -rc.top);
+		OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
+
+		SetWindowPos(hWnd,
+			HWND_TOP,
+			rcOwner.left + (rc.right / 2),
+			rcOwner.top + (rc.bottom / 2),
+			0, 0,          // Ignores size arguments. 
+			SWP_NOSIZE);
+
+		if (GetDlgCtrlID((HWND)wParam) != IDD_DIALOG1)
+		{
+			SetFocus(GetDlgItem(hWnd, IDD_DIALOG1));
+			return FALSE;
+		}
+		return TRUE;
+
+	case WM_COMMAND:
+		switch (wParam) {
+		case IDCLOSE:
+			EndDialog(hWnd, 0);
+			return TRUE;
+		}
+	case WM_CLOSE:
+		EndDialog(hWnd, 0);
+		return TRUE;
+	}
+	return FALSE;
+
+}

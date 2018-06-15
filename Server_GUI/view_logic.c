@@ -40,15 +40,15 @@ HWND winCreation(HINSTANCE hInstance, TCHAR * szAppName) {
 		NULL);
 }
 
-LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC         hdc;
 
 	switch (iMsg) { // for exploring yet
 	case WM_PAINT:
-		hdc = BeginPaint(hwnd, &ps);
+		hdc = BeginPaint(hWnd, &ps);
 		TextOut(hdc, 100, 100, TEXT("Éló üórledê!"), 13);
-		EndPaint(hwnd, &ps);
+		EndPaint(hWnd, &ps);
 		return 0;
 
 	case WM_COMMAND:
@@ -61,7 +61,7 @@ LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 		case ID_SETTINGS_ABOUTE:
 			//opne Window
 			//dialog(hInst);
-			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, NULL);
 
 		default:
 			break;
@@ -74,7 +74,7 @@ LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	}
 
 
-	return DefWindowProc(hwnd, iMsg, wParam, lParam);
+	return DefWindowProc(hWnd, iMsg, wParam, lParam);
 }
 
 

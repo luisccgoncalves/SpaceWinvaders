@@ -450,7 +450,7 @@ int _tmain(int argc, LPTSTR argv[]) {
 		cls(GetStdHandle(STD_OUTPUT_HANDLE));
 		gotoxy(0, 0);
 
-	} while (1);
+	} while (1); //this will be changed with the GUI
 
 
 	CloseHandle(cThreadRdGame.hPipe);

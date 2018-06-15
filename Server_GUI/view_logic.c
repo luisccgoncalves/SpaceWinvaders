@@ -52,12 +52,11 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 			//openBox?
 			break;
 		case ID_SETTINGS_CLOSESERVER:
-			//PostQuitMessage(0);
-			//return 0;
-			DestroyWindow(hWnd);
+			CloseServerMessageBox(hWnd);
+			//DestroyWindow(hWnd);
 			break;
 		case ID_SETTINGS_ABOUTE:
-			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutManager);
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutManager);
 			break;
 		default:
 			return DefWindowProc(hWnd, iMsg, wParam, lParam);
@@ -77,6 +76,23 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 		return DefWindowProc(hWnd, iMsg, wParam, lParam);
 	}
 	return 0;
+}
+
+int CloseServerMessageBox(HWND hWnd)
+{
+
+	int msgboxID = MessageBox(
+		NULL,
+		L"Do you realy want to shutdown the server?",
+		L"Shutdown",
+		MB_ICONEXCLAMATION | MB_YESNO
+	);
+
+	if (msgboxID == IDYES)
+	{
+		DestroyWindow(hWnd);
+	}
+	return msgboxID;
 }
 
 
@@ -129,50 +145,3 @@ LRESULT CALLBACK winAboutManager(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lPa
 
 }
 
-LRESULT CALLBACK winCloseManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
-
-	HWND		hwndOwner;
-	RECT		rc, rcDlg, rcOwner;
-
-	switch (iMsg) {
-	case WM_INITDIALOG:
-		if ((hwndOwner = GetParent(hWnd)) == NULL)
-		{
-			hwndOwner = GetDesktopWindow();
-		}
-		/*This gets the data from the original window so that is possible */
-		/*to calculate the central coordinate and centrally align the DialogBox*/
-		GetWindowRect(hwndOwner, &rcOwner);
-		GetWindowRect(hWnd, &rcDlg);
-		CopyRect(&rc, &rcOwner);
-		OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
-		OffsetRect(&rc, -rc.left, -rc.top);
-		OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
-
-		SetWindowPos(hWnd,
-			HWND_TOP,
-			rcOwner.left + (rc.right / 2),
-			rcOwner.top + (rc.bottom / 2),
-			0, 0,          // Ignores size arguments. 
-			SWP_NOSIZE);
-
-		if (GetDlgCtrlID((HWND)wParam) != IDD_DIALOG1)
-		{
-			SetFocus(GetDlgItem(hWnd, IDD_DIALOG1));
-			return FALSE;
-		}
-		return TRUE;
-
-	case WM_COMMAND:
-		switch (wParam) {
-		case IDCLOSE:
-			EndDialog(hWnd, 0);
-			return TRUE;
-		}
-	case WM_CLOSE:
-		EndDialog(hWnd, 0);
-		return TRUE;
-	}
-	return FALSE;
-
-}

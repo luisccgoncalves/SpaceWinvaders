@@ -1,7 +1,10 @@
 #include "view_logic.h"
+#include "resource.h"
+
+HINSTANCE hInst;
 
 ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
-
+	hInst = hInstance;
 	WNDCLASSEX  wndClass;
 
 	wndClass.cbSize = sizeof(wndClass);
@@ -13,7 +16,7 @@ ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
 	wndClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndClass.hbrBackground = (HBRUSH)GetStockObject(DKGRAY_BRUSH);
-	wndClass.lpszMenuName = NULL;
+	wndClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);;
 
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
@@ -42,12 +45,26 @@ LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT ps;
 	HDC         hdc;
 
-	switch (iMsg) {
+	switch (iMsg) { // for exploring yet
 	case WM_PAINT:
 		hdc = BeginPaint(hwnd, &ps);
 		TextOut(hdc, 100, 100, TEXT("Éló üórledê!"), 13);
 		EndPaint(hwnd, &ps);
 		return 0;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case ID_SETTINGS_CONFIGGAME:
+			//openBox?
+		case ID_SETTINGS_CLOSESERVER:
+			PostQuitMessage(0);
+			return 0;
+		case ID_SETTINGS_ABOUT:
+			//opne Window
+			dialog(hInst);
+		default:
+			break;
+		}
 
 	case WM_DESTROY:
 
@@ -57,4 +74,9 @@ LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
+}
+int dialog(HINSTANCE hInstance) {
+
+	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
+	return 1;
 }

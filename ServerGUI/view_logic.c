@@ -194,11 +194,13 @@ LRESULT CALLBACK winGameCreate(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lPara
 		switch (wParam) {
 		case IDC_COMBO1:
 			return TRUE;
-		case IDCLOSE:
+			break;
+		case IDOK:
 			EndDialog(hDlg, LOWORD(wParam));
 			return TRUE;
 			break;
 		}
+		break;
 	case WM_CLOSE:
 		EndDialog(hDlg, LOWORD(wParam));
 		return TRUE;

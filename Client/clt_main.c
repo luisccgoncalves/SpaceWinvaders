@@ -47,7 +47,7 @@ void printGame(GameData msg) {
 		}
 	}
 
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < msg.num_players; i++) {
 		if (msg.ship[i].lives >= 0) {
 			gotoxy(msg.ship[i].x, msg.ship[i].y);
 			if(msg.ship[i].shield)

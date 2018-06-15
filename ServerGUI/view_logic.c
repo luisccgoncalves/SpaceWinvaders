@@ -20,7 +20,6 @@ ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
 
-
 	return(RegisterClassEx(&wndClass));
 }
 
@@ -50,17 +49,16 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
-		//case ID_SETTINGS_CONFIGUREGAME:
-		//	DialogBox(hInst, MAKEINTRESOURCE(IDD_FORMVIEW), hWnd, winGameSettings);
-		//	//openBox?
-		//	break;
-		//case ID_SETTINGS_CLOSESERVER:
-		//	CloseServerMessageBox(hWnd);
+		case ID_SETTINGS_CREATEGAME:
+			//DialogBox(hInst, MAKEINTRESOURCE(IDD_FORMVIEW), hWnd, winGameSettings);
+			break;
+		case ID_SETTINGS_CLOSESERVER:
+			CloseServerMessageBox(hWnd);
 		//	//DestroyWindow(hWnd);
-		//	break;
-		//case ID_SETTINGS_ABOUTE:
-		//	DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutManager);
-		//	break;
+			break;
+		case ID_SETTINGS_ABOUT:
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutManager);
+			break;
 		default:
 			return DefWindowProc(hWnd, iMsg, wParam, lParam);
 		}
@@ -81,11 +79,11 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	return 0;
 }
 
-/* For cancel button*/
-void onCancel(HWND hDlg)
-{
-	SendMessage(hDlg, WM_CLOSE, 0, 0);
-}
+///* For cancel button*/
+//void onCancel(HWND hDlg)
+//{
+//	SendMessage(hDlg, WM_CLOSE, 0, 0);
+//}
 
 int CloseServerMessageBox(HWND hWnd)
 {
@@ -134,11 +132,11 @@ LRESULT CALLBACK winAboutManager(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lPa
 			0, 0,          // Ignores size arguments. 
 			SWP_NOSIZE);
 
-		//if (GetDlgCtrlID((HWND)wParam) != IDD_DIALOG1)
-		//{
-		//	SetFocus(GetDlgItem(hDlg, IDD_DIALOG1));
-		//	return FALSE;
-		//}
+		if (GetDlgCtrlID((HWND)wParam) != IDD_DIALOG1)
+		{
+			SetFocus(GetDlgItem(hDlg, IDD_DIALOG1));
+			return FALSE;
+		}
 		return TRUE;
 
 	case WM_COMMAND:

@@ -4,7 +4,6 @@
 HINSTANCE hInst;
 
 ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
-	hInst = hInstance;
 	WNDCLASSEX  wndClass;
 
 	wndClass.cbSize = sizeof(wndClass);
@@ -54,14 +53,16 @@ LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
-		case ID_SETTINGS_CONFIGGAME:
+		case ID_SETTINGS_CONFIGUREGAME:
 			//openBox?
 		case ID_SETTINGS_CLOSESERVER:
 			PostQuitMessage(0);
 			return 0;
-		case ID_SETTINGS_ABOUT:
+		case ID_SETTINGS_ABOUTE:
 			//opne Window
-			dialog(hInst);
+			//dialog(hInst);
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
+
 		default:
 			break;
 		}
@@ -75,8 +76,10 @@ LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
-int dialog(HINSTANCE hInstance) {
 
-	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
-	return 1;
-}
+
+//int dialog(HINSTANCE hInstance) {
+//
+//	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
+//	return 1;
+//}

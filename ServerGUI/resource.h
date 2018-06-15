@@ -5,11 +5,8 @@
 #define IDR_MENU1                       101
 #define IDD_DIALOG1                     102
 #define IDD_DIALOG2                     104
-#define IDC_SLIDER1                     1001
 #define IDC_COMBO1                      1002
 #define ID_SETTINGS_CREATEGAME          40001
-#define ID_CREATEGAME_SINGLEPLAYER      40002
-#define ID_CREATEGAME_MULTIPLAYER       40003
 #define ID_SETTINGS_ABOUT               40004
 #define ID_SETTINGS_CLOSESERVER         40005
 

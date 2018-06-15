@@ -66,7 +66,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	case WM_PAINT:
 	{
 		hdc = BeginPaint(hWnd, &ps);
-		TextOut(hdc, 100, 100, TEXT("�l� ��rled�!"), 13);
+		TextOut(hdc, 100, 100, TEXT("Luís & Simão!"), 13);
 		EndPaint(hWnd, &ps);
 	}
 	break;
@@ -190,6 +190,15 @@ LRESULT CALLBACK winGameCreate(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lPara
 		return TRUE;
 	}
 	break;
+	case WM_COMMAND:
+		switch (wParam) {
+		case IDC_COMBO1:
+			return TRUE;
+		case IDCLOSE:
+			EndDialog(hDlg, LOWORD(wParam));
+			return TRUE;
+			break;
+		}
 	case WM_CLOSE:
 		EndDialog(hDlg, LOWORD(wParam));
 		return TRUE;

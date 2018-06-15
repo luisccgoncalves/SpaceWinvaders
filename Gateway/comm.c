@@ -1,38 +1,5 @@
 #include "comm.h"
 
-//DWORD WINAPI sendPacketServer(LPVOID tParam) {
-//	/*
-//	This message calls the DLL function writePacket
-//	and sends a packet to the server trhough the Shared Memmory
-//	*/
-//
-//	SMCtrl		*cThread = (SMCtrl*)tParam;
-//	//Packet		localpacket;
-//	int			nextIn = 0;
-//
-//	while (cThread->ThreadMustGoOn) {
-//		WaitForSingleObject(cThread->heGotPacket, INFINITE);
-//		_tprintf(TEXT("[DEBUG] GOT KEY %d \n"), cThread->localPacket.instruction);
-//		writePacket(cThread, &nextIn, cThread->localPacket);
-//	}
-//
-//	return 0;
-//}
-
-//DWORD WINAPI ReadServerMsg(LPVOID tParam) {
-//
-//	SMCtrl		*cThread = (SMCtrl*)tParam;
-//
-//	while (cThread->ThreadMustGoOn) {
-//
-//		WaitForSingleObject(cThread->hSMServerUpdate, INFINITE);
-//		cThread->localGameData = consumeGameData(cThread->pSMemGameData, cThread->mhGameData);
-//		//setEvent to pipes
-//	}
-//
-//	return 0;
-//}
-
 void populateSecurityAtributes(SECURITY_ATTRIBUTES *pSA) {
 
 	BOOL bResult;
@@ -62,7 +29,6 @@ DWORD WINAPI instanceThreadRead(LPVOID tParam) {
 	HANDLE		heReadReady;
 	HANDLE		mhReadPipe;
 	BOOL		fSuccess = FALSE;
-	int			nextIn = 0;
 	
 	Packet		instancePacket;
 
@@ -95,11 +61,11 @@ DWORD WINAPI instanceThreadRead(LPVOID tParam) {
 	while (pipeStruct.cThread->ThreadMustGoOn) {
 
 		readPipePacket(pipeStruct.hPipe, heReadReady, &instancePacket);
-		_tprintf(TEXT("[DEBUG] GOT KEY (%d) \n"), instancePacket.instruction);
+		_tprintf(TEXT("[DEBUG] GOT KEY (%d) from user %s\n"), instancePacket.instruction, instancePacket.username);
 
 		WaitForSingleObject(mhReadPipe, INFINITE);
 
-		writePacket(pipeStruct.cThread, &nextIn, instancePacket);
+		writePacket(pipeStruct.cThread, instancePacket);
 
 		ReleaseMutex(mhReadPipe);
 

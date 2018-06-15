@@ -5,6 +5,7 @@
 #include "level.h"
 //#include "localStructs.h"
 
+DWORD WINAPI StartLobby(LPVOID tParam);
 DWORD WINAPI StartGame(LPVOID tParam);
 DWORD WINAPI GameTick(LPVOID tParam);
 

@@ -1,6 +1,74 @@
 #include "game.h"
 #include "..\Client\debug.h"
+#pragma warning(disable:4996)
 
+int loadShips(Ship *ship, Player *player) {
+
+	int shipsLogged = 0;
+
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		if (player[i].isReady) {
+			ship[shipsLogged].id = player[i].Id;
+			_tcscpy_s(ship[shipsLogged].username, SMALL_BUFF, player[i].username);
+			shipsLogged++;
+		}
+	}
+
+	return shipsLogged;
+}
+
+DWORD WINAPI StartLobby(LPVOID tParam) {
+
+	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMCtrl		*cThread = (SMCtrl*)tParam;
+
+	HANDLE		htGame;										//Handle to the game thread
+	DWORD		tGameID;									//stores the ID of the game thread
+
+	int			shipsLogged;
+
+	while (*ThreadMustGoOn) {
+
+		_tprintf(TEXT("Insert number of players (0 to quit):"));
+		_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
+		_gettchar();			//ignored because the \n in buffer
+
+		if (cThread->localGameData.num_players == 0)
+			break;
+
+		do {
+
+			shipsLogged = 0;
+
+			_tprintf(TEXT("Press ENTER to start game.\n"));
+			_gettchar();
+
+			WaitForSingleObject(cThread->mhStructSync, INFINITE);
+			shipsLogged=loadShips(cThread->localGameData.ship, cThread->localGameData.logged);
+			ReleaseMutex(cThread->mhStructSync);
+
+			if(shipsLogged == 0)
+				_tprintf(TEXT("No players ready to start a game.\n"));
+
+		} while (shipsLogged==0);
+
+
+		htGame = CreateThread(
+			NULL,													//Thread security attributes
+			0,														//Stack size (0 for default)
+			StartGame,												//Thread function name
+			tParam,													//Thread parameter struct
+			0,														//Creation flags
+			&tGameID);												//gets thread ID 
+		if (htGame == NULL) {
+			_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
+		}
+
+		WaitForSingleObject(htGame, INFINITE);
+	}
+
+	return 0;
+}
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
@@ -82,34 +150,45 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
+	WaitForSingleObject(htPowerUps, INFINITE);
 
 	return 0;
 }
-void spinnerSlash() {
-	POINT			pt;
-	static int		i = 0;
-	char			spiner[8] = { '/','-','\\','|','/','-','\\','|' };
-
-	GetCursorPos(&pt);
-	gotoxy(79, 0);
-
-	_tprintf(TEXT("%c"), spiner[i++]);
-	gotoxy((int)pt.x, (int)pt.y);
-	i = i% 8;
-
-}
+//void spinnerSlash() {
+//	POINT			pt;
+//	static int		i = 0;
+//	char			spiner[8] = { '/','-','\\','|','/','-','\\','|' };
+//
+//	GetCursorPos(&pt);
+//	gotoxy(79, 0);
+//
+//	_tprintf(TEXT("%c"), spiner[i++]);
+//	gotoxy((int)pt.x, (int)pt.y);
+//	i = i% 8;
+//
+//}
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;
+	int i;
 
 	while (sGTick->ThreadMustGoOn) {
 
 		Sleep(50);
-		spinnerSlash();
+		//spinnerSlash();
 
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 
 		SetEvent(sGTick->hTick);
+
+		if (sGTick->localGameData->gameRunning) {
+			for (i = 0; i < sGTick->localGameData->num_players; i++) {
+				if (sGTick->localGameData->ship[i].lives >= 0)
+					break;
+			}
+			if (i == sGTick->localGameData->num_players)
+				sGTick->localGameData->gameRunning = 0;
+		}
 	}
 	return 0;
 }

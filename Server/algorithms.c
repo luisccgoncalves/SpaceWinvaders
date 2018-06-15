@@ -1,5 +1,65 @@
 #include "algorithms.h"
 
+int markPlayerReady(ClientMoves *ps) {
+	int i;
+
+	WaitForSingleObject(ps->mhStructSync, INFINITE);
+	for (i = 0; i < MAX_PLAYERS; i++) {
+		if (ps->localPacket.Id == ps->game->logged[i].Id) {
+			ps->game->logged[i].isReady = TRUE;
+			_tprintf(TEXT("Player %s is ready to play!\n"), ps->game->logged[i].username);
+			break;										
+		}
+	}
+	ReleaseMutex(ps->mhStructSync);
+
+	if (i < MAX_PLAYERS)
+		return 0;												//Found a player, marked it as ready
+	else
+		return 1;												//No player was found with that ID
+}
+
+int handShakeClient(ClientMoves *ps) {
+
+	int i;
+
+	if (ps->localPacket.instruction==5) {
+		//Authentication
+		_tprintf(TEXT("Received a Handshake request!\n"));
+
+		WaitForSingleObject(ps->mhStructSync, INFINITE);
+		for (i = MAX_PLAYERS; i >= 0; i--) {
+			if (ps->localPacket.Id == ps->game->logged[i].Id)
+				break;
+		}
+		ReleaseMutex(ps->mhStructSync);
+
+		if (i >= 0) {
+			_tprintf(TEXT("User already logged.\n"));
+		}
+		else {
+			WaitForSingleObject(ps->mhStructSync, INFINITE);
+			for (i = 0; i < MAX_PLAYERS; i++) {
+				if (ps->game->logged[i].Id == 0) {
+					ps->game->logged[i].Id = ps->localPacket.Id;
+					_tcscpy_s(ps->game->logged[i].username, SMALL_BUFF, ps->localPacket.username);
+					break;
+				}
+			}
+			ReleaseMutex(ps->mhStructSync);
+
+			if (i < MAX_PLAYERS)
+				_tprintf(TEXT("User \"%s\" logged in with the ID:%d.\n"), ps->localPacket.username, ps->localPacket.Id);
+			else
+				_tprintf(TEXT("Server is full!\n"));
+		}
+	}
+	else {
+		//Deauth
+	}
+	return 0;
+}
+
 DWORD WINAPI PowerUpTimer(LPVOID tParam) {
 
 	PUpTimer	timerStr = *(PUpTimer*)tParam;
@@ -118,7 +178,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 	SMCtrl	*cThread = (SMCtrl*)tParam;
 	int		*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 
-	while (*ThreadMustGoOn) {
+	while (*ThreadMustGoOn && cThread->localGameData.gameRunning) {
 
 		//Sleeps for 10 seconds, afterwards flips a coin to break the loop every second
 		//This is the timeout between powerUp drops, not the duration
@@ -126,7 +186,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 			if (i > 10)
 				if (RandomValue(2))
 					break;
-			Sleep(1000 * (*ThreadMustGoOn));
+			Sleep(1000 * (*ThreadMustGoOn)*(cThread->localGameData.gameRunning));
 		}
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
@@ -134,9 +194,9 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 		ReleaseMutex(cThread->mhStructSync);
 
 		//Flash the powerUp 5x before dropping it
-		for (int i = 0; i < 5 && *ThreadMustGoOn; i++) {
+		for (int i = 0; i < 5 && *ThreadMustGoOn && cThread->localGameData.gameRunning; i++) {
 
-			Sleep(500 * (*ThreadMustGoOn));
+			Sleep(500 * (*ThreadMustGoOn)*(cThread->localGameData.gameRunning));
 
 			WaitForSingleObject(cThread->mhStructSync, INFINITE);
 			cThread->localGameData.pUp.fired ^= 1;		//Bit shift blinker
@@ -146,7 +206,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 		Sleep(1000 * (*ThreadMustGoOn)); //Waits 1 sec
 
 		//Drops the powerUp
-		for (int i = 0; i < cThread->localGameData.ysize && cThread->localGameData.pUp.fired && *ThreadMustGoOn; i++) {
+		for (int i = 0; i < cThread->localGameData.ysize && cThread->localGameData.pUp.fired && *ThreadMustGoOn && cThread->localGameData.gameRunning; i++) {
 
 			WaitForSingleObject(cThread->mhStructSync,INFINITE);
 			cThread->localGameData.pUp.y = i;			//Drops powerUP one place
@@ -156,7 +216,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 				PowerUpCollision(&cThread->localGameData, &cThread->localGameData.pUp, &cThread->mhStructSync);
 			ReleaseMutex(cThread->mhStructSync);
 
-			Sleep(cThread->localGameData.projectiles_speed*(*ThreadMustGoOn));		//Pratical assignment pdf, page 3, 4th rule
+			Sleep(cThread->localGameData.projectiles_speed*(*ThreadMustGoOn)*(cThread->localGameData.gameRunning));		//Pratical assignment pdf, page 3, 4th rule
 		}
 
 		//Hides the power up to restart the loop
@@ -227,11 +287,11 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	BombMoves		bombMoves;
 	
-	while (*ThreadMustGoOn) {						//Thread main loop
+	while (*ThreadMustGoOn && baseGame->gameRunning) {						//Thread main loop
 
-		for (i = 0; (i < totalsteps) && *ThreadMustGoOn; i++) {
+		for (i = 0; (i < totalsteps) && *ThreadMustGoOn && baseGame->gameRunning; i++) {
 
-			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn; j++) {
+			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn && baseGame->gameRunning; j++) {
 				if (!baseGame->invad[j].rand_path && baseGame->invad[j].hp > 0) {
 
 					WaitForSingleObject(mhStructSync, INFINITE);
@@ -270,9 +330,10 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					}
 				}
 			}
-			Sleep((baseGame->invaders_speed/baseGame->plusSpeed)*(*ThreadMustGoOn));
+			Sleep((baseGame->invaders_speed/baseGame->plusSpeed)*(*ThreadMustGoOn)*(baseGame->gameRunning));
 		}
 	}
+
 	return 0;
 }
 
@@ -285,9 +346,12 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	int			i, xTemp, yTemp, invalid, count;
 	BombMoves	bombMoves;
 
-	while (*ThreadMustGoOn) {						//Thread main loop
+	while (*ThreadMustGoOn && baseGame->gameRunning) {						//Thread main loop
 
-		for (i = (baseGame->max_invaders - baseGame->max_rand_invaders); (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
+		for (i = (baseGame->max_invaders - baseGame->max_rand_invaders); 
+			(i < baseGame->max_invaders) && *ThreadMustGoOn && baseGame->gameRunning;
+			i++) {
+
 			if (baseGame->invad[i].rand_path && baseGame->invad[i].hp >0) {
 
 				WaitForSingleObject(mhStructSync, INFINITE);
@@ -363,13 +427,14 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				ReleaseMutex(mhStructSync);
 			}
 		}
-		Sleep((DWORD)((baseGame->invaders_speed / baseGame->plusSpeed) *0.9)*(*ThreadMustGoOn));
+		Sleep((DWORD)((baseGame->invaders_speed / baseGame->plusSpeed) *0.9)*(*ThreadMustGoOn)*(baseGame->gameRunning));
 	}
 
 	return 0;
 }
 
-DWORD WINAPI ShipInstruction(LPVOID tParam) {
+DWORD WINAPI PacketListener(LPVOID tParam) {
+
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 
 	ClientMoves move;
@@ -377,24 +442,36 @@ DWORD WINAPI ShipInstruction(LPVOID tParam) {
 	move.TheadmustGoOn = &cThread->ThreadMustGoOn;
 	move.mhStructSync = &cThread->mhStructSync;
 
-	int	nextOut = 0;
-
 	while (cThread->ThreadMustGoOn) {
 
 		//Consume item from buffer (gets a packet with a client instruction)
-		move.localPacket = consumePacket(cThread, &nextOut);	//Problem here: No exit condition
+		move.localPacket = consumePacket(cThread);	//Problem here: No exit condition
 
+<<<<<<< HEAD
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
 		if (move.game->ship[move.localPacket.owner].drunk) {
 			GetDrunk(&move);
 		}
+=======
+		if (move.localPacket.instruction < 5) {						//Instructions [0,1,2,3,4]
+>>>>>>> serverHandShake
 
-		UpdateLocalShip(&move);									//Translates instructions into actions (movement, shots...)
-		ShipCollision(move.game,								//Tests if those actions are valid
-						&move.game->ship[move.localPacket.owner],
-						cThread->mhStructSync);
+			WaitForSingleObject(cThread->mhStructSync, INFINITE);
+			UpdateLocalShip(&move);									//Translates instructions into ship actions (movement, shots...)
+			ShipCollision(move.game,								//Tests if those actions are valid
+				&move.game->ship[move.localPacket.owner],
+				cThread->mhStructSync);
+			ReleaseMutex(cThread->mhStructSync);
+		}
+		else if (move.localPacket.instruction<7) {					//Instructions [5,6]
 
-		ReleaseMutex(cThread->mhStructSync);
+			handShakeClient(&move);									//Manages auth/deauth packets
+		}
+		else if (move.localPacket.instruction<8) {					//Instructions [7]
+
+			markPlayerReady(&move);
+		}
+
 	}
 
 	return 0;
@@ -534,7 +611,11 @@ int UpdateLocalShip(ClientMoves *move) {
 	case 4:
 		/* calculate time in millisenconds since last shot is fired*/
 		timeNow = GetTickCount();
+<<<<<<< HEAD
 		if ((timeNow - shotTimeStamp) >= shotRate) {
+=======
+		if (timeNow - (move->game->ship[index].shotTimeStamp) >= (DWORD)(move->game->shotRate / move->game->battery)) {
+>>>>>>> serverHandShake
 			move->game->ship[index].shotTimeStamp = timeNow;
 
 			htShotLauncher = CreateThread(
@@ -568,7 +649,7 @@ int InstantiateGame(GameData *game) {
 	game->max_bombs =			MAX_BOMBS;					// Base max num of bombs at same time
 	game->max_invaders =		MAX_INVADER;				// Base num of invaders in the field
 	game->max_rand_invaders =	RAND_INVADER;				// Base num of invaders in the field
-	game->num_players =			MAX_PLAYERS;				// Base num of players
+	//game->num_players =			MAX_PLAYERS;				// Base num of players
 	game->ship_shot_speed =		PROJECTL_SPEED;				// Base speed for defender ship
 	game->projectiles_speed =	PROJECTL_SPEED;				// Base speed for Powerups and invader bombs
 	game->pup_duration =		POWERUP_DUR;				// Base power up duration
@@ -579,6 +660,7 @@ int InstantiateGame(GameData *game) {
 	game->plusSpeed = 1;
 	game->ice = 1;
 	game->battery = 1;
+	game->gameRunning = 1;
 
 	/*Bombs*/
 	for (i = 0; i < game->max_invaders; i++) {				//Instantiates all bombs outside of game and updates the status

@@ -119,7 +119,7 @@ typedef struct {									//structure to use on regestry
 }HighScore;
 
 typedef struct {									//Game data to use in communication
-	//int			gameRunning;			
+	int				gameRunning;			
 	Invader			invad[MAX_INVADER];				//Array of maximum number invaders at one time
 	Ship			ship[MAX_PLAYERS];				//number of ships in game
 	Player			logged[MAX_PLAYERS];			//Numer of players logged on server (playing or not)
@@ -198,8 +198,8 @@ typedef struct {
 	DLL_IMP_API HANDLE createOccupiedSemaphore();
 	DLL_IMP_API HANDLE createVacantSemaphore();
 
-	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl, int *next);									//Read from Consumer-Productor style array
-	DLL_IMP_API int writePacket(SMCtrl *smCtrl, int *nextIn, Packet localPacket);					//Write(copy) in to Consumer-Productor style array
+	DLL_IMP_API Packet consumePacket(SMCtrl *smCtrl);												//Read from Consumer-Productor style array
+	DLL_IMP_API int writePacket(SMCtrl *smCtrl, Packet localPacket);								//Write(copy) in to Consumer-Productor style array
 
 	DLL_IMP_API GameData consumeGameData(GameData *sharedMemory, HANDLE *mutex);					//Read from shared memory
 	DLL_IMP_API int writeGameData(GameData *sharedMemory, GameData *localGame, HANDLE *mutex);		//Write(copy) in to shared memory

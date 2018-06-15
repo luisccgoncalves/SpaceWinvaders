@@ -616,7 +616,7 @@ int InstantiateGame(GameData *game) {
 	game->max_bombs =			MAX_BOMBS;					// Base max num of bombs at same time
 	game->max_invaders =		MAX_INVADER;				// Base num of invaders in the field
 	game->max_rand_invaders =	RAND_INVADER;				// Base num of invaders in the field
-	game->num_players =			MAX_PLAYERS;				// Base num of players
+	//game->num_players =			MAX_PLAYERS;				// Base num of players
 	game->ship_shot_speed =		PROJECTL_SPEED;				// Base speed for defender ship
 	game->projectiles_speed =	PROJECTL_SPEED;				// Base speed for Powerups and invader bombs
 	game->pup_duration =		POWERUP_DUR;				// Base power up duration

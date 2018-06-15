@@ -155,6 +155,8 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 
 	int		packetUpd = 0;
 
+	localpacket.owner = cThread->owner;
+
 	while (cThread->ThreadMustGoOn) {
 		k_stroke = _gettch();
 
@@ -214,7 +216,7 @@ int StartPipeListener(HANDLE *hPipe) {
 	BOOL log;
 
 	//LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
-	LPCTSTR		lpFileName = TEXT("\\\\.\\pipe\\SpaceWPipe");
+	LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
 
 	log = LogonUser(
 		TEXT("Potato"),
@@ -364,8 +366,14 @@ int handShakeServer(ThreadCtrl * ps) {
 	_tprintf(TEXT("READY TO PLAY\n"));
 	
 	while (!readPipeMsg(ps->hPipe, ps->heReadReady, &localGame)) {
-		if (localGame.gameRunning==1)
+		if (localGame.gameRunning == 1) {
+			for (int i = 0; i < MAX_PLAYERS; i++) {
+				if (localGame.ship[i].id == lPacket.Id)
+					ps->owner = i;
+			}
 			break;
+		}
+			
 	}
 
 	return 0;

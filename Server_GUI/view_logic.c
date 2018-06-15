@@ -44,12 +44,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT ps;
 	HDC         hdc;
 
-	switch (iMsg) { // for exploring yet
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		TextOut(hdc, 100, 100, TEXT("Éló üórledê!"), 13);
-		EndPaint(hWnd, &ps);
-		return 0;
+	switch (iMsg) { 
 
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
@@ -57,47 +52,55 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 			//openBox?
 			break;
 		case ID_SETTINGS_CLOSESERVER:
-			PostQuitMessage(0);
-			return 0;
+			//PostQuitMessage(0);
+			//return 0;
+			DestroyWindow(hWnd);
+			break;
 		case ID_SETTINGS_ABOUTE:
 			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutManager);
 			break;
 		default:
-			break;
+			return DefWindowProc(hWnd, iMsg, wParam, lParam);
 		}
 
-	case WM_DESTROY:
-
-		PostQuitMessage(0);
-		return 0;
+	case WM_PAINT:
+	{
+		hdc = BeginPaint(hWnd, &ps);
+		TextOut(hdc, 100, 100, TEXT("Éló üórledê!"), 13);
+		EndPaint(hWnd, &ps);
 	}
-
-
-	return DefWindowProc(hWnd, iMsg, wParam, lParam);
+	break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hWnd, iMsg, wParam, lParam);
+	}
+	return 0;
 }
 
 
-LRESULT CALLBACK winAboutManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK winAboutManager(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 
 	HWND		hwndOwner;
 	RECT		rc, rcDlg, rcOwner;
 
 	switch (iMsg) {
 	case WM_INITDIALOG:
-		if ((hwndOwner = GetParent(hWnd)) == NULL)
+		if ((hwndOwner = GetParent(hDlg)) == NULL)
 		{
 			hwndOwner = GetDesktopWindow();
 		}
 		/*This gets the data from the original window so that is possible */
 		/*to calculate the central coordinate and centrally align the DialogBox*/
 		GetWindowRect(hwndOwner, &rcOwner);
-		GetWindowRect(hWnd, &rcDlg);
+		GetWindowRect(hDlg, &rcDlg);
 		CopyRect(&rc, &rcOwner);
 		OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
 		OffsetRect(&rc, -rc.left, -rc.top);
 		OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
 
-		SetWindowPos(hWnd,
+		SetWindowPos(hDlg,
 			HWND_TOP,
 			rcOwner.left + (rc.right / 2),
 			rcOwner.top + (rc.bottom / 2),
@@ -106,7 +109,7 @@ LRESULT CALLBACK winAboutManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lPa
 
 		if (GetDlgCtrlID((HWND)wParam) != IDD_DIALOG1)
 		{
-			SetFocus(GetDlgItem(hWnd, IDD_DIALOG1));
+			SetFocus(GetDlgItem(hDlg, IDD_DIALOG1));
 			return FALSE;
 		}
 		return TRUE;
@@ -114,12 +117,12 @@ LRESULT CALLBACK winAboutManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lPa
 	case WM_COMMAND:
 		switch (wParam)	{
 		case IDCLOSE:
-			//DestroyWindow(hWnd);
-			EndDialog(hWnd, 0);
+			EndDialog(hDlg, LOWORD(wParam));
 			return TRUE;
+			break;
 		}
 	case WM_CLOSE:
-		EndDialog(hWnd, 0);
+		EndDialog(hDlg, LOWORD(wParam));
 		return TRUE;
 	}
 	return FALSE;

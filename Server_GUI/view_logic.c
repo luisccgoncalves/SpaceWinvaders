@@ -90,7 +90,9 @@ int CloseServerMessageBox(HWND hWnd)
 
 	if (msgboxID == IDYES)
 	{
-		DestroyWindow(hWnd);
+		//DestroyWindow(hWnd);
+		PostQuitMessage(0);
+		return 0;
 	}
 	return msgboxID;
 }

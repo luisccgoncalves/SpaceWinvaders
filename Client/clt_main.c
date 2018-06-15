@@ -120,7 +120,7 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg) {
 	WaitForSingleObject(writeReady, INFINITE);
 	GetOverlappedResult(hPipe, &OvrWr, &dwBytesWritten, FALSE);
 	if (dwBytesWritten < sizeof(Packet)) {
-		_tprintf(TEXT("[Error] WriteFile failed. Error = %d \7 \n"), GetLastError());
+		_tprintf(TEXT("[Error] WriteFile failed. Error = %d \n"), GetLastError());
 		return -1;
 	}
 
@@ -137,7 +137,9 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 		return -1;
 	}
 
-	while (cThreadRdGame->ThreadMustGoOn) {
+	localGame.gameRunning = 1;				//Needed to enter the loop
+
+	while (cThreadRdGame->ThreadMustGoOn && localGame.gameRunning) {
 
 		readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady,&localGame);
 		printGame(localGame);
@@ -204,7 +206,6 @@ DWORD WINAPI GetKey(LPVOID tParam) {
 
 int StartPipeListener(HANDLE *hPipe) {
 
-	HANDLE		h1stPipeInst;
 	DWORD		dwPipeMode;					//Stores pipe mode
 
 	BOOL		bSuccess;
@@ -229,22 +230,15 @@ int StartPipeListener(HANDLE *hPipe) {
 		LOGON32_PROVIDER_DEFAULT,
 		&hUserToken);
 	if (log == 0) {
-		_tprintf(TEXT("[Error] Logging on user (%d)\7\n"), GetLastError());
+		_tprintf(TEXT("[Error] Logging on user (%d)\n"), GetLastError());
 		return -1;
 	}
 
 	log = ImpersonateLoggedOnUser(hUserToken);
 
 	if (log == 0) {
-		_tprintf(TEXT("[Error] Logging on user (%d)\7\n"), GetLastError());
+		_tprintf(TEXT("[Error] Logging on user (%d)\n"), GetLastError());
 		return -1;
-	}
-
-	h1stPipeInst = OpenEvent(EVENT_ALL_ACCESS, FALSE, EVE_1ST_PIPE);
-	if (!h1stPipeInst) {
-		h1stPipeInst = CreateEvent(NULL, FALSE, FALSE, EVE_1ST_PIPE);
-		_tprintf(TEXT("[DEBUG] No pipe instances found. Waiting...\n"));
-		WaitForSingleObject(h1stPipeInst, INFINITE);
 	}
 
 	do {
@@ -323,7 +317,31 @@ int createProdConsEvents(ThreadCtrl * ps) {
 	return 0;
 }
 
-int handShakeServer(ThreadCtrl * ps) {
+int markPlayerReady(ThreadCtrl * ps, Packet token) {
+
+	GameData	localGame;
+
+	_tprintf(TEXT("Press ENTER when ready\n"));
+	_gettch();
+
+	token.instruction = 7;
+	writePipeMsg(ps->hPipe, ps->heWriteReady, token);
+	_tprintf(TEXT("READY TO PLAY\n"));
+
+	while (!readPipeMsg(ps->hPipe, ps->heReadReady, &localGame)) {
+		if (localGame.gameRunning == 1) {
+			for (int i = 0; i < MAX_PLAYERS; i++) {
+				if (localGame.ship[i].id == token.Id)
+					ps->owner = i;
+			}
+			break;
+		}
+	}
+
+	return 0;
+}
+
+Packet handShakeServer(ThreadCtrl * ps) {
 
 	Packet		lPacket;
 	GameData	localGame;
@@ -358,25 +376,8 @@ int handShakeServer(ThreadCtrl * ps) {
 
 	} while (isLogged == FALSE);
 
-	_tprintf(TEXT("Press ENTER when ready\n"));
-	_gettch();
 
-	lPacket.instruction = 7;
-	writePipeMsg(ps->hPipe, ps->heWriteReady, lPacket);
-	_tprintf(TEXT("READY TO PLAY\n"));
-	
-	while (!readPipeMsg(ps->hPipe, ps->heReadReady, &localGame)) {
-		if (localGame.gameRunning == 1) {
-			for (int i = 0; i < MAX_PLAYERS; i++) {
-				if (localGame.ship[i].id == lPacket.Id)
-					ps->owner = i;
-			}
-			break;
-		}
-			
-	}
-
-	return 0;
+	return lPacket;
 }
 
 int _tmain(int argc, LPTSTR argv[]) {
@@ -392,6 +393,8 @@ int _tmain(int argc, LPTSTR argv[]) {
 	HANDLE		htGetKey;
 	DWORD		tGetKeyID;
 
+	Packet		token;
+
 	ThreadCtrl	cThreadRdGame;
 
 	cThreadRdGame.ThreadMustGoOn = 1;
@@ -405,36 +408,51 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//Connect to Server (through gateway)
-	handShakeServer(&cThreadRdGame);
+	token=handShakeServer(&cThreadRdGame);
 
-	htReadGame = CreateThread(
-		NULL,										//Thread security attributes
-		0,											//Stack size (0 for default)
-		ReadGame,									//Thread function name
-		(LPVOID)&cThreadRdGame,						//Thread parameter struct
-		0,											//Creation flags
-		&tReadGameID);								//gets thread ID 
+	do {
 
-	if (htReadGame == NULL) {
-		_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
-		return -1;
-	}
+		cThreadRdGame.ThreadMustGoOn = 1;
 
-	htGetKey = CreateThread(
-		NULL,										//Thread security attributes
-		0,											//Stack size (0 for default)
-		GetKey,										//Thread function name
-		(LPVOID)&cThreadRdGame,						//Thread parameter struct
-		0,											//Creation flags
-		&tGetKeyID);								//gets thread ID 
+		markPlayerReady(&cThreadRdGame, token);
 
-	if (htReadGame == NULL) {
-		_tprintf(TEXT("[Error] launching GetKey thread. (%d)\n"), GetLastError());
-		return -1;
-	}
+		htReadGame = CreateThread(
+			NULL,										//Thread security attributes
+			0,											//Stack size (0 for default)
+			ReadGame,									//Thread function name
+			(LPVOID)&cThreadRdGame,						//Thread parameter struct
+			0,											//Creation flags
+			&tReadGameID);								//gets thread ID 
 
-	WaitForSingleObject(htGetKey, INFINITE);
-	WaitForSingleObject(htReadGame, INFINITE);
+		if (htReadGame == NULL) {
+			_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
+			return -1;
+		}
+
+		htGetKey = CreateThread(
+			NULL,										//Thread security attributes
+			0,											//Stack size (0 for default)
+			GetKey,										//Thread function name
+			(LPVOID)&cThreadRdGame,						//Thread parameter struct
+			0,											//Creation flags
+			&tGetKeyID);								//gets thread ID 
+
+		if (htGetKey == NULL) {
+			_tprintf(TEXT("[Error] launching GetKey thread. (%d)\n"), GetLastError());
+			return -1;
+		}
+
+		WaitForSingleObject(htReadGame, INFINITE);
+
+		cThreadRdGame.ThreadMustGoOn = 0;
+		WaitForSingleObject(htGetKey, INFINITE);
+		
+		cls(GetStdHandle(STD_OUTPUT_HANDLE));
+		gotoxy(0, 0);
+
+	} while (1);
+
+
 	CloseHandle(cThreadRdGame.hPipe);
 
 	return 0;

@@ -29,9 +29,12 @@ DWORD WINAPI StartLobby(LPVOID tParam) {
 
 	while (*ThreadMustGoOn) {
 
-		_tprintf(TEXT("Insert number of players:"));
+		_tprintf(TEXT("Insert number of players (0 to quit):"));
 		_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
 		_gettchar();			//ignored because the \n in buffer
+
+		if (cThread->localGameData.num_players == 0)
+			break;
 
 		do {
 
@@ -41,7 +44,7 @@ DWORD WINAPI StartLobby(LPVOID tParam) {
 			_gettchar();
 
 			WaitForSingleObject(cThread->mhStructSync, INFINITE);
-			shipsLogged=loadShips(&cThread->localGameData.ship, &cThread->localGameData.logged);
+			shipsLogged=loadShips(cThread->localGameData.ship, cThread->localGameData.logged);
 			ReleaseMutex(cThread->mhStructSync);
 
 			if(shipsLogged == 0)
@@ -147,6 +150,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
+	WaitForSingleObject(htPowerUps, INFINITE);
 
 	return 0;
 }
@@ -166,6 +170,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;
+	int i;
 
 	while (sGTick->ThreadMustGoOn) {
 
@@ -175,6 +180,15 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 
 		SetEvent(sGTick->hTick);
+
+		if (sGTick->localGameData->gameRunning) {
+			for (i = 0; i < sGTick->localGameData->num_players; i++) {
+				if (sGTick->localGameData->ship[i].lives >= 0)
+					break;
+			}
+			if (i == sGTick->localGameData->num_players)
+				sGTick->localGameData->gameRunning = 0;
+		}
 	}
 	return 0;
 }

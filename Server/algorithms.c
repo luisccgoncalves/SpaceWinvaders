@@ -178,7 +178,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 	SMCtrl	*cThread = (SMCtrl*)tParam;
 	int		*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 
-	while (*ThreadMustGoOn) {
+	while (*ThreadMustGoOn && cThread->localGameData.gameRunning) {
 
 		//Sleeps for 10 seconds, afterwards flips a coin to break the loop every second
 		//This is the timeout between powerUp drops, not the duration
@@ -186,7 +186,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 			if (i > 10)
 				if (RandomValue(2))
 					break;
-			Sleep(1000 * (*ThreadMustGoOn));
+			Sleep(1000 * (*ThreadMustGoOn)*(cThread->localGameData.gameRunning));
 		}
 
 		WaitForSingleObject(cThread->mhStructSync, INFINITE);
@@ -194,9 +194,9 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 		ReleaseMutex(cThread->mhStructSync);
 
 		//Flash the powerUp 5x before dropping it
-		for (int i = 0; i < 5 && *ThreadMustGoOn; i++) {
+		for (int i = 0; i < 5 && *ThreadMustGoOn && cThread->localGameData.gameRunning; i++) {
 
-			Sleep(500 * (*ThreadMustGoOn));
+			Sleep(500 * (*ThreadMustGoOn)*(cThread->localGameData.gameRunning));
 
 			WaitForSingleObject(cThread->mhStructSync, INFINITE);
 			cThread->localGameData.pUp.fired ^= 1;		//Bit shift blinker
@@ -206,7 +206,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 		Sleep(1000 * (*ThreadMustGoOn)); //Waits 1 sec
 
 		//Drops the powerUp
-		for (int i = 0; i < cThread->localGameData.ysize && cThread->localGameData.pUp.fired && *ThreadMustGoOn; i++) {
+		for (int i = 0; i < cThread->localGameData.ysize && cThread->localGameData.pUp.fired && *ThreadMustGoOn && cThread->localGameData.gameRunning; i++) {
 
 			WaitForSingleObject(cThread->mhStructSync,INFINITE);
 			cThread->localGameData.pUp.y = i;			//Drops powerUP one place
@@ -216,7 +216,7 @@ DWORD WINAPI PowerUps(LPVOID tParam) {
 				PowerUpCollision(&cThread->localGameData, &cThread->localGameData.pUp, &cThread->mhStructSync);
 			ReleaseMutex(cThread->mhStructSync);
 
-			Sleep(cThread->localGameData.projectiles_speed*(*ThreadMustGoOn));		//Pratical assignment pdf, page 3, 4th rule
+			Sleep(cThread->localGameData.projectiles_speed*(*ThreadMustGoOn)*(cThread->localGameData.gameRunning));		//Pratical assignment pdf, page 3, 4th rule
 		}
 
 		//Hides the power up to restart the loop
@@ -287,11 +287,11 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 
 	BombMoves		bombMoves;
 	
-	while (*ThreadMustGoOn) {						//Thread main loop
+	while (*ThreadMustGoOn && baseGame->gameRunning) {						//Thread main loop
 
-		for (i = 0; (i < totalsteps) && *ThreadMustGoOn; i++) {
+		for (i = 0; (i < totalsteps) && *ThreadMustGoOn && baseGame->gameRunning; i++) {
 
-			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn; j++) {
+			for (j = 0; (j < regInvaderNr) && *ThreadMustGoOn && baseGame->gameRunning; j++) {
 				if (!baseGame->invad[j].rand_path && baseGame->invad[j].hp > 0) {
 
 					WaitForSingleObject(mhStructSync, INFINITE);
@@ -330,9 +330,10 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 					}
 				}
 			}
-			Sleep((baseGame->invaders_speed/baseGame->plusSpeed)*(*ThreadMustGoOn));
+			Sleep((baseGame->invaders_speed/baseGame->plusSpeed)*(*ThreadMustGoOn)*(baseGame->gameRunning));
 		}
 	}
+
 	return 0;
 }
 
@@ -345,9 +346,12 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	int			i, xTemp, yTemp, invalid, count;
 	BombMoves	bombMoves;
 
-	while (*ThreadMustGoOn) {						//Thread main loop
+	while (*ThreadMustGoOn && baseGame->gameRunning) {						//Thread main loop
 
-		for (i = (baseGame->max_invaders - baseGame->max_rand_invaders); (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
+		for (i = (baseGame->max_invaders - baseGame->max_rand_invaders); 
+			(i < baseGame->max_invaders) && *ThreadMustGoOn && baseGame->gameRunning;
+			i++) {
+
 			if (baseGame->invad[i].rand_path && baseGame->invad[i].hp >0) {
 
 				WaitForSingleObject(mhStructSync, INFINITE);
@@ -423,7 +427,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 				ReleaseMutex(mhStructSync);
 			}
 		}
-		Sleep((DWORD)((baseGame->invaders_speed / baseGame->plusSpeed) *0.9)*(*ThreadMustGoOn));
+		Sleep((DWORD)((baseGame->invaders_speed / baseGame->plusSpeed) *0.9)*(*ThreadMustGoOn)*(baseGame->gameRunning));
 	}
 
 	return 0;

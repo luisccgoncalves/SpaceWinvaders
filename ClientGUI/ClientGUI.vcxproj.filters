@@ -29,10 +29,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="ClientGUI.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClientGUI.cpp">
+    <ClCompile Include="stdafx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,5 +48,11 @@
     <Image Include="ClientGUI.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="invader.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

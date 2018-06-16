@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="controller.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="view_logic.h" />
   </ItemGroup>
@@ -150,6 +151,7 @@
     <ResourceCompile Include="ServerGUI.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="controller.c" />
     <ClCompile Include="server_main.c" />
     <ClCompile Include="view_logic.c" />
   </ItemGroup>

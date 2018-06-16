@@ -161,6 +161,8 @@ LRESULT CALLBACK winGameCreate(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lPara
 	switch (iMsg) {
 	case WM_INITDIALOG:
 	{
+		setCreateGameDlgValues(hDlg);
+
 		if ((hwndOwner = GetParent(hDlg)) == NULL)
 		{
 			hwndOwner = GetDesktopWindow();
@@ -187,15 +189,28 @@ LRESULT CALLBACK winGameCreate(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lPara
 			return FALSE;
 		}
 
+
 		return TRUE;
 	}
 	break;
+
 	case WM_COMMAND:
 		switch (wParam) {
-		case IDC_COMBO1:
-			return TRUE;
-			break;
 		case IDOK:
+		{
+			BOOL fError;
+			int numPlayers;
+
+			numPlayers = GetDlgItemInt(hDlg, IDC_EDIT1, &fError, TRUE);
+			//chamar o controller com numPlayers
+			//get result, and:
+			//switch (result) {
+			//case 1:
+			if(numPlayers==1)
+				MessageBox(hDlg, TEXT("Invalid number of players!"), TEXT("Start Game"), MB_OK);
+			break;		//closes warning!
+		}
+		case IDCANCEL:
 			EndDialog(hDlg, LOWORD(wParam));
 			return TRUE;
 			break;
@@ -207,5 +222,6 @@ LRESULT CALLBACK winGameCreate(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lPara
 	}
 	return FALSE;
 }
+
 
 

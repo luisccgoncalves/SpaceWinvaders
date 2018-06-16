@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include <CommCtrl.h>
+#include "controller.h"
 
 HINSTANCE hInstance;
 

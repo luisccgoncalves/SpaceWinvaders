@@ -21,6 +21,9 @@
     <ClInclude Include="view_logic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ServerGUI.rc">
@@ -32,6 +35,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="view_logic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="controller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -14,3 +14,29 @@ setCreateGameDlgValues(HWND hDlg) {
 	return 1;
 }
 
+centerDialogWnd(HWND hDlg) {
+
+	HWND		hwndOwner;
+	RECT		rc, rcDlg, rcOwner;
+
+		if ((hwndOwner = GetParent(hDlg)) == NULL)
+		{
+			hwndOwner = GetDesktopWindow();
+		}
+		/*This gets the data from the original window so that is possible */
+		/*to calculate the central coordinate and centrally align the DialogBox*/
+		GetWindowRect(hwndOwner, &rcOwner);
+		GetWindowRect(hDlg, &rcDlg);
+		CopyRect(&rc, &rcOwner);
+		OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
+		OffsetRect(&rc, -rc.left, -rc.top);
+		OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
+
+		SetWindowPos(hDlg,
+			HWND_TOP,
+			rcOwner.left + (rc.right / 2),
+			rcOwner.top + (rc.bottom / 2),
+			0, 0,          // Ignores size arguments. 
+			SWP_NOSIZE);
+		return 1;
+}

@@ -7,5 +7,6 @@
 
 
 int setCreateGameDlgValues(HWND hDlg);
+int centerDialogWnd(HWND hDlg);
 
 #endif // CONTROLLER_H

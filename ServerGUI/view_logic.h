@@ -12,8 +12,8 @@ ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName);
 HWND winCreation(HINSTANCE hInstance, TCHAR * szAppName);
 
 LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK winAboutManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK winGameCreate(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK winAboutDlg(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
 
 int CloseServerMessageBox(HWND hWnd);
 

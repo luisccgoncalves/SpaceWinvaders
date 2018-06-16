@@ -21,12 +21,18 @@
     <ClInclude Include="client_view_logic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="client_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="client_view_logic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client_controller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

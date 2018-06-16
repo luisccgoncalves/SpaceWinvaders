@@ -2,14 +2,9 @@
 #define CLIENT_VIEW_LOGIC_H
 
 #include <windows.h>
-
-// C RunTime Header Files
 #include <stdlib.h>
-#include <malloc.h>
-#include <memory.h>
 #include <tchar.h>
-
-#include "resource.h"
+#include "client_controller.h"
 
 #define MAX_LOADSTRING 100
 

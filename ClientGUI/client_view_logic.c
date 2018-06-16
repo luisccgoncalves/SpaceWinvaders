@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDM_EXIT:
 			//Replicates WM_CLOSE
-			SendMessage(hWnd, WM_CLOSE, NULL, NULL);
+			SendMessage(hWnd, WM_CLOSE, 0, 0);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);

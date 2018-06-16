@@ -185,9 +185,8 @@ INT_PTR CALLBACK HighScores(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 
 	switch (message) {
 	case WM_INITDIALOG:
-
-		for (int i = 0; i<10; i++)
-			SetDlgItemText(hDlg, IDC_STATIC, TEXT("BATATAS"));
+		loadTop10(hDlg);
+		
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:

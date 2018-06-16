@@ -1,9 +1,6 @@
 #ifndef CLIENT_VIEW_LOGIC_H
 #define CLIENT_VIEW_LOGIC_H
 
-#include <windows.h>
-#include <stdlib.h>
-#include <tchar.h>
 #include "client_controller.h"
 
 #define MAX_LOADSTRING 100

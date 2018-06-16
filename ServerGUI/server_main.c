@@ -6,7 +6,7 @@
 #define _tWinMain WinMain
 #endif
 
-int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { //some warning here about  LPSTR lpCmdLine
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) { //some warning here about  LPSTR lpCmdLine
 
 	TCHAR		*szAppName = TEXT("SpaceWinvaders");
 	HINSTANCE	hInste = hInstance;

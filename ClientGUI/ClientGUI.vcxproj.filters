@@ -15,24 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClientGUI.h">
+    <ClInclude Include="client_view_logic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClientGUI.c">
+    <ClCompile Include="client_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.c">
+    <ClCompile Include="client_view_logic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

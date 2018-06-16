@@ -52,7 +52,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 		case ID_SETTINGS_CREATEGAME:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWnd, winGameCreateDlg);
 			break;
-		case ID_SETTINGS_ABOUT:
+		case ID_HELP_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutDlg);
 			break;
 		case ID_SETTINGS_CLOSESERVER:
@@ -136,17 +136,43 @@ LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lP
 		switch (wParam) {
 		case IDOK:
 		{
-			BOOL fError;
-			int numPlayers;
-
-			numPlayers = GetDlgItemInt(hDlg, IDC_EDIT1, &fError, TRUE);
-			//chamar o controller com numPlayers
-			//get result, and:
-			//switch (result) {
-			//case 1:
-			if(numPlayers==1)
-				MessageBox(hDlg, TEXT("Invalid number of players!"), TEXT("Start Game"), MB_OK);
-			break;		//closes warning!
+			int result = validateCreateGameDlgValues(hDlg);
+			switch (result) {
+			case 0:
+				//do something like send values
+				break;
+			case 1:
+				MessageBox(hDlg, TEXT("Invalid number of players!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 2:
+				MessageBox(hDlg, TEXT("Invalid number of Invaders!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 3:
+				MessageBox(hDlg, TEXT("Invalid number of Hard Invaders!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 10:
+				MessageBox(hDlg, TEXT("Invalid number of Hard Invaders - More than Max Invaders!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 4:
+				MessageBox(hDlg, TEXT("Invalid Invader Speed!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 11:
+				MessageBox(hDlg, TEXT("Invalid Projectile Speed!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 6:
+				MessageBox(hDlg, TEXT("Invalid Bomb Rate!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 7:
+				MessageBox(hDlg, TEXT("Invalid Shot Rate!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 8:
+				MessageBox(hDlg, TEXT("Invalid Move Rate!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 9:
+				MessageBox(hDlg, TEXT("Invalid PowerUp Duration!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			}
+			break;
 		}
 		case IDCANCEL:
 			EndDialog(hDlg, LOWORD(wParam));

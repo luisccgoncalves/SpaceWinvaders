@@ -186,6 +186,12 @@ typedef struct {
 	GameData		localGameData;					//structure that holds the local game
 } SMCtrl;
 
+typedef struct {
+	int players, maxInvaders, hardInvaders;
+	int invadersSpeed, projectileSpeed, pUpDuration;
+	int bombRate, shotRate, moveRate;
+} ConfigurableVars;
+
 	DLL_IMP_API int sharedMemory(HANDLE * hSMem, LARGE_INTEGER * SMemSize);
 
 	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl);														//Maps Msg area - ALL ACCESS

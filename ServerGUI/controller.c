@@ -111,4 +111,23 @@ centerDialogWnd(HWND hDlg) {
 		return 1;
 }
 
+sendCreateGameValuesToServer(HWND hDlg) {
+	BOOL				fError;
+	ConfigurableVars	vars;
+
+	vars.players = GetDlgItemInt(hDlg, IDC_EDIT1, &fError, TRUE);
+	vars.maxInvaders = GetDlgItemInt(hDlg, IDC_EDIT2, &fError, TRUE);
+	vars.hardInvaders = GetDlgItemInt(hDlg, IDC_EDIT3, &fError, TRUE);
+	vars.invadersSpeed = GetDlgItemInt(hDlg, IDC_EDIT4, &fError, TRUE);
+	vars.projectileSpeed = GetDlgItemInt(hDlg, IDC_EDIT5, &fError, TRUE);
+	vars.bombRate = GetDlgItemInt(hDlg, IDC_EDIT6, &fError, TRUE);
+	vars.shotRate = GetDlgItemInt(hDlg, IDC_EDIT7, &fError, TRUE);
+	vars.moveRate = GetDlgItemInt(hDlg, IDC_EDIT8, &fError, TRUE);
+	vars.pUpDuration = GetDlgItemInt(hDlg, IDC_EDIT9, &fError, TRUE);
+
+	//if(updateConfigGameValues(vars)){
+	//return 1;
+	return 0;
+}
+
 

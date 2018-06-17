@@ -128,7 +128,7 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 		NULL,													//Thread security attributes
 		0,														//Stack size (0 for default)
 		PacketListener,											//Thread function name
-		(LPVOID)&cThread,										//Thread parameter struct
+		(LPVOID)cThread,										//Thread parameter struct
 		0,														//Creation flags
 		&tPacketListenerID);									//gets thread ID 
 	if (htPacketListener == NULL) {

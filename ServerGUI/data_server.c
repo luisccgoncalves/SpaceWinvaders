@@ -189,6 +189,8 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 	DWORD			tPowerUpsID;
 	HANDLE			htPowerUps;
 
+	baseGame->gameRunning = 1;
+
 	if (!DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path
 		_tprintf(TEXT("[Error] Defining invaders path! \n"));
 	}

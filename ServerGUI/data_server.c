@@ -13,8 +13,8 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 	DWORD			tPacketListenerID;							//Stores the ID of the Gateway Message thread
 
 																//Start Lobby thread HANDLE/ID (uses cThread as parameter)
-	HANDLE			htStartLobby;								//Handle to the Start Lobby thread
-	DWORD			tStartLobbyID;								//Stores the ID of the Start Lobby thread;
+	//HANDLE			htStartLobby;								//Handle to the Start Lobby thread
+	//DWORD			tStartLobbyID;								//Stores the ID of the Start Lobby thread;
 
 	HANDLE			hCanBootNow;								//Handle to event. Warns the gateway the shared memory is mapped
 
@@ -139,16 +139,16 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 		_tprintf(TEXT("[Error] Creating thread GReadMsg (%d) at Server\n"), GetLastError());
 	}
 
-	htStartLobby = CreateThread(
-		NULL,													//Thread security attributes
-		0,														//Stack size (0 for default)
-		StartLobby,												//Thread function name
-		(LPVOID)&cThread,										//Thread parameter struct
-		0,														//Creation flags
-		&tStartLobbyID);										//gets thread ID 
-	if (htStartLobby == NULL) {
-		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
-	}
+	//htStartLobby = CreateThread(
+	//	NULL,													//Thread security attributes
+	//	0,														//Stack size (0 for default)
+	//	StartLobby,												//Thread function name
+	//	(LPVOID)&cThread,										//Thread parameter struct
+	//	0,														//Creation flags
+	//	&tStartLobbyID);										//gets thread ID 
+	//if (htStartLobby == NULL) {
+	//	_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
+	//}
 
 	/* If this gets bigger we should maybe move all handles into an array and waitformultipleobjects instead */
 	WaitForSingleObject(htGTick, INFINITE);						//Waits for thread to exit
@@ -163,56 +163,29 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 
 }
 
-DWORD WINAPI StartLobby(LPVOID tParam) {
+int StartLobby(SMCtrl * cThread) {
 
-	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
-	SMCtrl		*cThread = (SMCtrl*)tParam;
 
 	HANDLE		htGame;										//Handle to the game thread
 	DWORD		tGameID;									//stores the ID of the game thread
 
-	int			shipsLogged;
+	cThread->localGameData.num_players = 1;
 
-	while (*ThreadMustGoOn) {
-		///* THIS HERE*/
-		//_tprintf(TEXT("Insert number of players (0 to quit):"));
-		//_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
-		//_gettchar();			//ignored because the \n in buffer
-
-		cThread->localGameData.num_players = 1;
-
-		if (cThread->localGameData.num_players == 0)
-			break;
-
-		do {
-
-			shipsLogged = 0;
-
-			//_tprintf(TEXT("Press ENTER to start game.\n"));
-			//_gettchar();
-
-			WaitForSingleObject(cThread->mhStructSync, INFINITE);
-			shipsLogged = loadShips(cThread->localGameData.ship, cThread->localGameData.logged);
-			ReleaseMutex(cThread->mhStructSync);
-
-			if (shipsLogged == 0)
-				_tprintf(TEXT("No players ready to start a game.\n"));
-
-		} while (shipsLogged == 0);
+	WaitForSingleObject(cThread->mhStructSync, INFINITE);
+	loadShips(cThread->localGameData.ship, cThread->localGameData.logged);
+	ReleaseMutex(cThread->mhStructSync);
 
 
-		htGame = CreateThread(
-			NULL,													//Thread security attributes
-			0,														//Stack size (0 for default)
-			StartGame,												//Thread function name
-			tParam,													//Thread parameter struct
-			0,														//Creation flags
-			&tGameID);												//gets thread ID 
-		if (htGame == NULL) {
-			_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
-		}
 
-		WaitForSingleObject(htGame, INFINITE);
+	htGame = CreateThread(
+		NULL,													//Thread security attributes
+		0,														//Stack size (0 for default)
+		StartGame,												//Thread function name
+		(LPVOID)cThread,													//Thread parameter struct
+		0,														//Creation flags
+		&tGameID);												//gets thread ID 
+	if (htGame == NULL) {
+		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
 	}
 
 	return 0;

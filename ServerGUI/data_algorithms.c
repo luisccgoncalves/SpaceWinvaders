@@ -633,7 +633,7 @@ int UpdateLocalShip(ClientMoves *move) {
 	return 0;
 }
 
-int InstantiateGame(GameData *game) {
+int LoadGDataDefaults(GameData *game) {
 	int i, j;
 	/*Ambient variables*/
 	game->xsize = XSIZE;

@@ -5,6 +5,8 @@ SMCtrl		cThread;
 
 int startServer() {
 
+	LoadGDataDefaults(&cThread.localGameData);
+
 	//Start server thread HANDLE/ID (uses cThread as parameter)
 	HANDLE			htStartServer;								//Handle to the Start server thread
 	DWORD			tStartServerID;								//Stores the ID of the Start server thread;

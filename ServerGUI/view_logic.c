@@ -1,5 +1,4 @@
 ﻿#include "view_logic.h"
-#include "resource.h"
 
 HINSTANCE	hInst;
 BOOL		gameConfigured = 0;
@@ -16,7 +15,7 @@ ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
 	wndClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndClass.hbrBackground = (HBRUSH)GetStockObject(DKGRAY_BRUSH);
-	wndClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);;
+	wndClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
 
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
@@ -44,6 +43,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT ps;
 	HDC         hdc;
 
+	/*this needs to be outside of here*/
 	TCHAR text[3];
 	TCHAR text2[3];
 	TCHAR text3[3];
@@ -67,13 +67,14 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 				MessageBox(hWnd, TEXT("You need to configure a Game first!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			}
-			else if(gameConfigured){
+			else if(!getPlayersReady()){
 				//change the flag to getPlayersReady
 				MessageBox(hWnd, TEXT("There are no players ready!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			}
 			else {
-				//setGameToStart
+				MessageBox(hWnd, TEXT("Game started"), TEXT("Message"), MB_OK);
+				startGameProcedure();
 			}
 			break;
 		case ID_SETTINGS_CLOSESERVER:
@@ -85,7 +86,6 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT:
 	{
-		EnableMenuItem(GetSystemMenu(hWnd, FALSE), ID_SETTINGS_STARTGAME, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 		hdc = BeginPaint(hWnd, &ps);
 		//getLoggedClients
 		TextOut(hdc, 100, 100, TEXT("Clients logged: "), 20);
@@ -171,7 +171,7 @@ LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lP
 			int result = validateCreateGameDlgValues(hDlg);
 			switch (result) {
 			case 0:
-				//do something like send values
+				sendCreateGameValuesToServer(hDlg);
 				gameConfigured = 1;
 				EndDialog(hDlg, LOWORD(wParam));
 				return TRUE;

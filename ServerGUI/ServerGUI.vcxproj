@@ -143,20 +143,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="data_algorithms.h" />
     <ClInclude Include="controller.h" />
+    <ClInclude Include="data_level.h" />
+    <ClInclude Include="data_structs.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="data_score.h" />
+    <ClInclude Include="data_server.h" />
     <ClInclude Include="view_logic.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ServerGUI.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="data_algorithms.c" />
     <ClCompile Include="controller.c" />
-    <ClCompile Include="server_main.c" />
+    <ClCompile Include="data_level.c" />
+    <ClCompile Include="data_score.c" />
+    <ClCompile Include="data_server.c" />
+    <ClCompile Include="main_server.c" />
     <ClCompile Include="view_logic.c" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="invader.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DLL\DLL.vcxproj">
+      <Project>{9e21106a-e867-4267-aaf7-2f91606b957c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -120,6 +120,8 @@ typedef struct {									//structure to use on regestry
 
 typedef struct {									//Game data to use in communication
 	int				gameRunning;			
+	int				gameCreated;
+
 	Invader			invad[MAX_INVADER];				//Array of maximum number invaders at one time
 	Ship			ship[MAX_PLAYERS];				//number of ships in game
 	Player			logged[MAX_PLAYERS];			//Numer of players logged on server (playing or not)
@@ -186,6 +188,12 @@ typedef struct {
 	GameData		localGameData;					//structure that holds the local game
 } SMCtrl;
 
+typedef struct {
+	int players, maxInvaders, hardInvaders;
+	int invadersSpeed, projectileSpeed, pUpDuration;
+	int bombRate, shotRate, moveRate;
+} ConfigurableVars;
+
 	DLL_IMP_API int sharedMemory(HANDLE * hSMem, LARGE_INTEGER * SMemSize);
 
 	DLL_IMP_API int mapMsgView(SMCtrl *smCtrl);														//Maps Msg area - ALL ACCESS
@@ -202,6 +210,6 @@ typedef struct {
 	DLL_IMP_API int writePacket(SMCtrl *smCtrl, Packet localPacket);								//Write(copy) in to Consumer-Productor style array
 
 	DLL_IMP_API GameData consumeGameData(GameData *sharedMemory, HANDLE *mutex);					//Read from shared memory
-	DLL_IMP_API int writeGameData(GameData *sharedMemory, GameData *localGame, HANDLE *mutex);		//Write(copy) in to shared memory
+	DLL_IMP_API int writeGameData(GameData *sharedMemory, GameData *localGame, HANDLE mutex);		//Write(copy) in to shared memory
 
 	DLL_IMP_API int RandomValue(int value);															//Self explanatory - [0, value-1]

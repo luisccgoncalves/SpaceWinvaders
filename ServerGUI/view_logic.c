@@ -1,7 +1,6 @@
 ﻿#include "view_logic.h"
 
 HINSTANCE	hInst;
-SMCtrl		cThread;
 BOOL		gameConfigured = 0;
 
 ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
@@ -16,7 +15,7 @@ ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
 	wndClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndClass.hbrBackground = (HBRUSH)GetStockObject(DKGRAY_BRUSH);
-	wndClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);;
+	wndClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
 
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
@@ -43,9 +42,6 @@ HWND winCreation(HINSTANCE hInstance, TCHAR * szAppName) {
 LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC         hdc;
-
-	startServer(&cThread);
-
 
 	/*this needs to be outside of here*/
 	TCHAR text[3];

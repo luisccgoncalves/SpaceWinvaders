@@ -1,7 +1,6 @@
 #ifndef VIEW_LOGIC_H
 #define VIEW_LOGIC_H
 
-#include "resource.h"
 #include "controller.h"
 
 HINSTANCE hInstance;

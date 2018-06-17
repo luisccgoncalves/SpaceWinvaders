@@ -15,6 +15,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 	HWND        hWnd;
 	MSG         lpMsg;
 
+	startServer();
 
 	if (!regClass(hInstance, szAppName)) {
 		_tprintf(TEXT("[Error] in regClass"));			//does this appear? :s

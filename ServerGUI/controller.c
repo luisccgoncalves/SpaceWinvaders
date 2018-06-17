@@ -1,5 +1,6 @@
 #include "controller.h"
 
+
 SMCtrl		cThread;
 
 int startServer() {
@@ -22,9 +23,9 @@ int startServer() {
 	return 1;
 }
 
-int startGame() {
+int startGameProcedure() {
 
-	startLobby(&cThread);
+	StartLobby(&cThread);
 
 	return 0;
 }

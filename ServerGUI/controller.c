@@ -22,6 +22,13 @@ int startServer() {
 	return 1;
 }
 
+int startGame() {
+
+	startLobby(&cThread);
+
+	return 0;
+}
+
 setCreateGameDlgValues(HWND hDlg) {
 	//get define values and set them here
 	SetDlgItemText(hDlg, IDC_EDIT1, TEXT("1"));

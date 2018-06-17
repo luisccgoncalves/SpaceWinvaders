@@ -74,6 +74,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 			//}
 			else {
 				//setGameToStart
+				startGame();
 			}
 			break;
 		case ID_SETTINGS_CLOSESERVER:

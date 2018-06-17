@@ -6,10 +6,10 @@
 #include "data_level.h"
 
 DWORD WINAPI LaunchServer(SMCtrl *cThread);
-DWORD WINAPI StartLobby(LPVOID tParam);
 DWORD WINAPI StartGame(LPVOID tParam);
 DWORD WINAPI GameTick(LPVOID tParam);
 
+int StartLobby(SMCtrl * cThread);
 int loadShips(Ship *ship, Player *player);
 
 #endif /* DATA_SERVER_H */

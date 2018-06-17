@@ -67,13 +67,13 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 				MessageBox(hWnd, TEXT("You need to configure a Game first!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			}
-			//else if(getPlayersReady==0){
-			//	//change the flag to getPlayersReady
-			//	MessageBox(hWnd, TEXT("There are no players ready!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-			//	break;
-			//}
+			else if(!getPlayersReady()){
+				//change the flag to getPlayersReady
+				MessageBox(hWnd, TEXT("There are no players ready!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			}
 			else {
-				//setGameToStart
+				
 				startGameProcedure();
 			}
 			break;

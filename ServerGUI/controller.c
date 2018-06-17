@@ -134,4 +134,16 @@ int sendCreateGameValuesToServer(HWND hDlg) {
 	return 0;
 }
 
+int getPlayersReady() {
+
+	int i;
+
+	for (i = 0; i < cThread.localGameData.num_players; i++) {
+		if (cThread.localGameData.logged[i].isReady)
+			return 1;
+	}
+	
+	return 0;
+}
+
 

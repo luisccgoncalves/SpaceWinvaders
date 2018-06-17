@@ -172,7 +172,7 @@ LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lP
 			int result = validateCreateGameDlgValues(hDlg);
 			switch (result) {
 			case 0:
-				//do something like send values
+				sendCreateGameValuesToServer(hDlg);
 				gameConfigured = 1;
 				EndDialog(hDlg, LOWORD(wParam));
 				return TRUE;

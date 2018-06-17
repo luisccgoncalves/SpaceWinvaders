@@ -1,6 +1,6 @@
 #include "controller_client.h"
 
-SMCtrl		cThread;
+ThreadCtrl		cThread;
 
 int startClient(){
 
@@ -24,7 +24,6 @@ int startClient(){
 
 
 int loadTop10(HWND hDlg) {
-
 	//Fills in timestamps
 	for (int i = IDC_TIME1; i < (IDC_TIME1+10); i++)
 		SetDlgItemText(hDlg, i, TEXT("placeholder"));

@@ -153,7 +153,6 @@
   <ItemGroup>
     <ClInclude Include="controller_client.h" />
     <ClInclude Include="data_client.h" />
-    <ClInclude Include="data_comm.h" />
     <ClInclude Include="data_structs.h" />
     <ClInclude Include="view_client.h" />
     <ClInclude Include="Resource.h" />
@@ -161,7 +160,6 @@
   <ItemGroup>
     <ClCompile Include="controller_client.c" />
     <ClCompile Include="data_client.c" />
-    <ClCompile Include="data_comm.c" />
     <ClCompile Include="main_client.c" />
     <ClCompile Include="view_client.c" />
   </ItemGroup>

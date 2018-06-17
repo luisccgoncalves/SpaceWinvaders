@@ -30,9 +30,6 @@
     <ClInclude Include="data_structs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="data_comm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main_client.c">
@@ -45,9 +42,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="view_client.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="data_comm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

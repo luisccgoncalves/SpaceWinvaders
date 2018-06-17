@@ -1,5 +1,4 @@
 #include "view_client.h"
-#include "resource.h"
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {

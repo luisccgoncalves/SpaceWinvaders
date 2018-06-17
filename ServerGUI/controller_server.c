@@ -32,6 +32,11 @@ int startGameProcedure() {
 	return 0;
 }
 
+int getGDataGameConfigured() {
+
+	return cThread.localGameData.gameCreated;
+}
+
 int setCreateGameDlgValues(HWND hDlg) {
 	GameData game = cThread.localGameData;
 

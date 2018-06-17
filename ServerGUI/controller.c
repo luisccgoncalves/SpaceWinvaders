@@ -22,7 +22,7 @@ int startServer() {
 	return 1;
 }
 
-int startGame() {
+int startGameProcedure() {
 
 	startLobby(&cThread);
 

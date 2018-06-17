@@ -7,6 +7,7 @@
 #include "data_server.h"
 
 int startServer();
+int startGameProcedure();
 
 int setCreateGameDlgValues(HWND hDlg);
 int validateCreateGameDlgValues(HWND hDlg);

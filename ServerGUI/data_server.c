@@ -12,10 +12,6 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 	HANDLE			htPacketListener;							//Handle to the Packet Listener thread
 	DWORD			tPacketListenerID;							//Stores the ID of the Gateway Message thread
 
-																//Start Lobby thread HANDLE/ID (uses cThread as parameter)
-	//HANDLE			htStartLobby;								//Handle to the Start Lobby thread
-	//DWORD			tStartLobbyID;								//Stores the ID of the Start Lobby thread;
-
 	HANDLE			hCanBootNow;								//Handle to event. Warns the gateway the shared memory is mapped
 
 	SYSTEM_INFO		SysInfo;									//System info structure; Needed to extract dwAllocationGranularity
@@ -138,17 +134,6 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 	if (htPacketListener == NULL) {
 		_tprintf(TEXT("[Error] Creating thread GReadMsg (%d) at Server\n"), GetLastError());
 	}
-
-	//htStartLobby = CreateThread(
-	//	NULL,													//Thread security attributes
-	//	0,														//Stack size (0 for default)
-	//	StartLobby,												//Thread function name
-	//	(LPVOID)&cThread,										//Thread parameter struct
-	//	0,														//Creation flags
-	//	&tStartLobbyID);										//gets thread ID 
-	//if (htStartLobby == NULL) {
-	//	_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
-	//}
 
 	/* If this gets bigger we should maybe move all handles into an array and waitformultipleobjects instead */
 	WaitForSingleObject(htGTick, INFINITE);						//Waits for thread to exit

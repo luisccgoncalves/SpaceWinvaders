@@ -22,6 +22,27 @@ int startClient(){
 	return 1;
 }
 
+int LogPlayer(HWND hDlg, BOOL remote) {
+	TCHAR username[SMALL_BUFF];
+
+	TCHAR userlogin[SMALL_BUFF];
+	TCHAR password[SMALL_BUFF];
+	TCHAR domain[SMALL_BUFF];
+
+	UINT result = 0;
+
+	*username = GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF);
+		//set Login name
+	if (remote == TRUE) {
+		*userlogin = GetDlgItemText(hDlg, IDC_LOGIN_ULOGIN, userlogin, SMALL_BUFF);
+		*password = GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF);
+		*domain = GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
+	}
+
+	return 0;
+
+}
+
 
 int loadTop10(HWND hDlg) {
 	//Fills in timestamps

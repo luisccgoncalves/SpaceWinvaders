@@ -4,6 +4,7 @@
 #include "data_client.h"
 
 int startClient();
+int LogPlayer();
 
 int loadTop10(HWND hDlg);
 int validateLoginValues(HWND hDlg, BOOL remote);

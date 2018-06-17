@@ -26,13 +26,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="client_main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="client_view_logic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="client_controller.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main_client.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

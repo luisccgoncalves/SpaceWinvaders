@@ -1,7 +1,7 @@
-#ifndef ALGORITHMS_H
-#define ALGORITHMS_H
+#ifndef DATA_ALGORITHMS_H
+#define DATA_ALGORITHMS_H
 
-#include "localStructs.h"
+#include "data_structs.h"
 
 DWORD WINAPI PowerUpTimer(LPVOID tParam);
 DWORD WINAPI PowerUps(LPVOID tParam);
@@ -40,4 +40,4 @@ int GetRegularLargerXPosition(GameData *game);
 int UpdateCoords(GameData * game, int *y);
 int BombLauncher(BombMoves *bombMoves);
 
-#endif /* ALGORITHMS_H */
+#endif /* DATA_ALGORITHMS_H */

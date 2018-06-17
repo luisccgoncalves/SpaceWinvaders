@@ -24,19 +24,19 @@
     <ClInclude Include="controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="server_data.h">
+    <ClInclude Include="data_algorithms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="localStructs.h">
+    <ClInclude Include="data_level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="score.h">
+    <ClInclude Include="data_structs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="algorithms.h">
+    <ClInclude Include="data_score.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="level.h">
+    <ClInclude Include="data_server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -46,25 +46,25 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="server_main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="view_logic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="controller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server_data.c">
+    <ClCompile Include="main_server.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="score.c">
+    <ClCompile Include="data_server.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="algorithms.c">
+    <ClCompile Include="data_score.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="level.c">
+    <ClCompile Include="data_level.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="data_algorithms.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

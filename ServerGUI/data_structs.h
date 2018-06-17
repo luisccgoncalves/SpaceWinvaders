@@ -1,5 +1,5 @@
-#ifndef LOCALSTRUCTS_H
-#define LOCALSTRUCTS_H
+#ifndef DATA_STRUCTS_H
+#define DATA_STRUCTS_H
 
 #include <windows.h>
 #include <tchar.h>
@@ -41,4 +41,4 @@ typedef struct {
 	HANDLE		mhStructSync;						//Pointer to cThread's structSync mutex
 }BombMoves;
 
-#endif /* LOCALSTRUCTS_H */
+#endif /* DATA_STRUCTS_H */

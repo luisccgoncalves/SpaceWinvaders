@@ -1,4 +1,4 @@
-#include "score.h"
+#include "data_score.h"
 
 
 int sortTop10(HighScore *top10) {

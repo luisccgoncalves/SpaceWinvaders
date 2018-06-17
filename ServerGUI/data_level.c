@@ -1,4 +1,4 @@
-#include "level.h"
+#include "data_level.h"
 
 int DefineInvadersType(GameData *game, int *ThreadMustGoOn) { //Gives every invader a Path flag according to setup values
 	int i;

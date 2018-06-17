@@ -4,7 +4,7 @@
 //#include <windows.h>
 //#include <tchar.h>
 #include "resource.h"
-#include "server_data.h"
+#include "data_server.h"
 
 int startServer(SMCtrl *cThread);
 

@@ -1,5 +1,25 @@
 #include "controller.h"
 
+int startServer(SMCtrl *cThread) {
+
+	//Start server thread HANDLE/ID (uses cThread as parameter)
+	HANDLE			htStartLobby;								//Handle to the Start server thread
+	DWORD			tStartLobbyID;								//Stores the ID of the Start server thread;
+
+	htStartLobby = CreateThread(
+		NULL,													//Thread security attributes
+		0,														//Stack size (0 for default)
+		LaunchServer,												//Thread function name
+		cThread,										//Thread parameter struct
+		0,														//Creation flags
+		&tStartLobbyID);										//gets thread ID 
+	if (htStartLobby == NULL) {
+		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
+		return 0;
+	}
+	return 1;
+}
+
 setCreateGameDlgValues(HWND hDlg) {
 	//get define values and set them here
 	SetDlgItemText(hDlg, IDC_EDIT1, TEXT("1"));
@@ -81,3 +101,5 @@ centerDialogWnd(HWND hDlg) {
 			SWP_NOSIZE);
 		return 1;
 }
+
+

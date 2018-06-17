@@ -1,4 +1,4 @@
-#include "view_logic.h"
+#include "view_server.h"
 
 #ifdef _UNICODE									//Sets windows to unicode
 #define _tWinMain wWinMain

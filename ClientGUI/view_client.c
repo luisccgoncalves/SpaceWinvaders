@@ -1,4 +1,4 @@
-#include "client_view_logic.h"
+#include "view_client.h"
 #include "resource.h"
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
@@ -102,6 +102,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		centerDialogWnd(hDlg);
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:
@@ -122,12 +123,13 @@ INT_PTR CALLBACK Login(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		centerDialogWnd(hDlg);
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			switch (validateLoginValues(hDlg)) {
+			switch (validateLoginValues(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0))) {
 			case 1:
 				MessageBox(hDlg, TEXT("Please fill in the username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
@@ -138,6 +140,7 @@ INT_PTR CALLBACK Login(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				MessageBox(hDlg, TEXT("Please fill in the IP/domain!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			case 0:
+				MessageBox(hDlg, TEXT("Login successfull"), TEXT("Message"), MB_OK);
 				//login procedure()
 				EndDialog(hDlg, LOWORD(wParam));
 				return (INT_PTR)TRUE;
@@ -160,6 +163,7 @@ INT_PTR CALLBACK Logout(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message) {
 	case WM_INITDIALOG:
+		centerDialogWnd(hDlg);
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:
@@ -179,6 +183,7 @@ INT_PTR CALLBACK HighScores(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 
 	switch (message) {
 	case WM_INITDIALOG:
+		centerDialogWnd(hDlg);
 		loadTop10(hDlg);
 		
 		return (INT_PTR)TRUE;
@@ -203,6 +208,7 @@ INT_PTR CALLBACK ConfigureKeys(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		centerDialogWnd(hDlg);
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:

@@ -18,21 +18,36 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="client_view_logic.h">
+    <ClInclude Include="view_client.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="client_controller.h">
+    <ClInclude Include="controller_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data_structs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data_comm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="client_view_logic.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="client_controller.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="controller_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="data_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="data_comm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

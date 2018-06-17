@@ -1,4 +1,4 @@
-#include "controller.h"
+#include "controller_server.h"
 
 
 SMCtrl		cThread;

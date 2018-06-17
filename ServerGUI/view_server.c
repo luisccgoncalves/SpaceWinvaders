@@ -85,7 +85,6 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT:
 	{
-		InvalidateRect(hWnd,NULL,TRUE);
 		hdc = BeginPaint(hWnd, &ps);
 		//getLoggedClients
 		TextOut(hdc, 100, 100, TEXT("Clients logged: "), 20);
@@ -99,6 +98,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 		//getStartedGames
 		TextOut(hdc, 100, 250, TEXT("Games started:    "), 20);
 		TextOut(hdc, 225, 250, text4, wcslen(text4));
+		ReleaseDC(hWnd, hdc);
 		EndPaint(hWnd, &ps);
 	}
 	break;
@@ -172,6 +172,7 @@ LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lP
 			switch (result) {
 			case 0:
 				sendCreateGameValuesToServer(hDlg);
+				InvalidateRect(GetParent(hDlg), NULL, TRUE);
 				EndDialog(hDlg, LOWORD(wParam));
 				return TRUE;
 				break;

@@ -12,3 +12,26 @@ int loadTop10(HWND hDlg) {
 
 	return 0;
 }
+
+int validateLoginValues(HWND hDlg, BOOL remote) {
+
+	TCHAR username[SMALL_BUFF];
+
+	TCHAR userlogin[SMALL_BUFF];
+	TCHAR password[SMALL_BUFF];
+	TCHAR domain[SMALL_BUFF];
+
+	UINT result = 0;
+
+	if(GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF)==0)
+		return 1;	
+	else if (remote == TRUE) {
+		if(GetDlgItemText(hDlg, IDC_LOGIN_ULOGIN, userlogin, SMALL_BUFF)==0)
+			return 2;
+		if (GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF) == 0)
+			return 3;
+		GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
+	}
+
+	return 0;
+}

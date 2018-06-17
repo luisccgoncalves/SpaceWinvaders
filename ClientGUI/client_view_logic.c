@@ -150,10 +150,29 @@ INT_PTR CALLBACK Login(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
+		switch (LOWORD(wParam)) {
+		case IDOK:
+			switch (validateLoginValues(hDlg, SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0))) {
+			case 1:
+				MessageBox(hDlg, TEXT("Please fill in the username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 2:
+				MessageBox(hDlg, TEXT("Please fill in the host login username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 3:
+				MessageBox(hDlg, TEXT("Please fill in the IP/domain!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 0:
+				//login procedure()
+				EndDialog(hDlg, LOWORD(wParam));
+				return (INT_PTR)TRUE;
+				break;
+			}
+			break;
+		case IDCANCEL:
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
+			break;
 		}
 		break;
 	}

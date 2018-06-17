@@ -1,20 +1,22 @@
 #include "controller.h"
 
-int startServer(SMCtrl *cThread) {
+SMCtrl		cThread;
+
+int startServer() {
 
 	//Start server thread HANDLE/ID (uses cThread as parameter)
-	HANDLE			htStartLobby;								//Handle to the Start server thread
-	DWORD			tStartLobbyID;								//Stores the ID of the Start server thread;
+	HANDLE			htStartServer;								//Handle to the Start server thread
+	DWORD			tStartServerID;								//Stores the ID of the Start server thread;
 
-	htStartLobby = CreateThread(
+	htStartServer = CreateThread(
 		NULL,													//Thread security attributes
 		0,														//Stack size (0 for default)
-		LaunchServer,												//Thread function name
-		cThread,										//Thread parameter struct
+		LaunchServer,											//Thread function name
+		(LPVOID)&cThread,										//Thread parameter struct
 		0,														//Creation flags
-		&tStartLobbyID);										//gets thread ID 
-	if (htStartLobby == NULL) {
-		_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
+		&tStartServerID);										//gets thread ID 
+	if (htStartServer == NULL) {
+		_tprintf(TEXT("[Error] Creating thread Server (%d) at Server\n"), GetLastError());
 		return 0;
 	}
 	return 1;

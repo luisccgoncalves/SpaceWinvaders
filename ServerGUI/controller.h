@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "data_server.h"
 
-int startServer(SMCtrl *cThread);
+int startServer();
 
 int setCreateGameDlgValues(HWND hDlg);
 int validateCreateGameDlgValues(HWND hDlg);

@@ -32,7 +32,7 @@ int startGameProcedure() {
 	return 0;
 }
 
-setCreateGameDlgValues(HWND hDlg) {
+int setCreateGameDlgValues(HWND hDlg) {
 	GameData game = cThread.localGameData;
 
 	SetDlgItemInt(hDlg, IDC_EDIT1, game.num_players, TRUE);
@@ -43,11 +43,11 @@ setCreateGameDlgValues(HWND hDlg) {
 	SetDlgItemInt(hDlg, IDC_EDIT6, game.bombRate, TRUE);
 	SetDlgItemInt(hDlg, IDC_EDIT7, game.shotRate, TRUE);
 	SetDlgItemInt(hDlg, IDC_EDIT8, game.moveRate, TRUE);
-	SetDlgItemInt(hDlg, IDC_EDIT9, game.pup_duration, TRUE);
+	SetDlgItemInt(hDlg, IDC_EDIT9, game.pup_duration/1000, TRUE);
 	return 1;
 }
 
-validateCreateGameDlgValues(HWND hDlg) {
+int validateCreateGameDlgValues(HWND hDlg) {
 	BOOL fError;
 	int players, maxInvaders, hardInvaders;
 	int invadersSpeed, projectileSpeed, pUpDuration;
@@ -88,7 +88,7 @@ validateCreateGameDlgValues(HWND hDlg) {
 	}
 }
 
-centerDialogWnd(HWND hDlg) {
+int centerDialogWnd(HWND hDlg) {
 
 	HWND		hwndOwner;
 	RECT		rc, rcDlg, rcOwner;
@@ -115,7 +115,7 @@ centerDialogWnd(HWND hDlg) {
 		return 1;
 }
 
-sendCreateGameValuesToServer(HWND hDlg) {
+int sendCreateGameValuesToServer(HWND hDlg) {
 	BOOL				fError;
 	ConfigurableVars	vars;
 
@@ -127,7 +127,7 @@ sendCreateGameValuesToServer(HWND hDlg) {
 	vars.bombRate = GetDlgItemInt(hDlg, IDC_EDIT6, &fError, TRUE);
 	vars.shotRate = GetDlgItemInt(hDlg, IDC_EDIT7, &fError, TRUE);
 	vars.moveRate = GetDlgItemInt(hDlg, IDC_EDIT8, &fError, TRUE);
-	vars.pUpDuration = GetDlgItemInt(hDlg, IDC_EDIT9, &fError, TRUE);
+	vars.pUpDuration = 1000*GetDlgItemInt(hDlg, IDC_EDIT9, &fError, TRUE);
 
 	if(updateConfigGameValues(vars, &cThread.localGameData, cThread.mhStructSync))
 		return 1;

@@ -154,8 +154,6 @@ int StartLobby(SMCtrl * cThread) {
 	HANDLE		htGame;										//Handle to the game thread
 	DWORD		tGameID;									//stores the ID of the game thread
 
-	cThread->localGameData.num_players = 1;
-
 	WaitForSingleObject(cThread->mhStructSync, INFINITE);
 	loadShips(cThread->localGameData.ship, cThread->localGameData.logged);
 	ReleaseMutex(cThread->mhStructSync);

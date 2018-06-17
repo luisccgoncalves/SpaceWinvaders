@@ -73,7 +73,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 				break;
 			}
 			else {
-				
+				MessageBox(hWnd, TEXT("Game started"), TEXT("Message"), MB_OK);
 				startGameProcedure();
 			}
 			break;
@@ -86,7 +86,6 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT:
 	{
-		EnableMenuItem(GetSystemMenu(hWnd, FALSE), ID_SETTINGS_STARTGAME, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 		hdc = BeginPaint(hWnd, &ps);
 		//getLoggedClients
 		TextOut(hdc, 100, 100, TEXT("Clients logged: "), 20);

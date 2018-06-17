@@ -289,7 +289,7 @@ int updateConfigGameValues(ConfigurableVars vars, GameData *game, HANDLE mhStruc
 	game->shotRate = vars.shotRate;
 	game->moveRate = vars.moveRate;
 	game->pup_duration = vars.pUpDuration;
-	
+	game->gameCreated = 1;
 	ReleaseMutex(mhStructSync);
 	
 	return 1;

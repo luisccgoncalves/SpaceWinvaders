@@ -640,21 +640,22 @@ int LoadGDataDefaults(GameData *game) {
 	game->ysize = YSIZE;
 
 	game->invaders_speed = INVADER_SPEED;				// Base speed for invader
-	game->max_bombs = MAX_BOMBS;					// Base max num of bombs at same time
-	game->max_invaders = MAX_INVADER;				// Base num of invaders in the field
+	game->max_bombs = MAX_BOMBS;						// Base max num of bombs at same time
+	game->max_invaders = MAX_INVADER;					// Base num of invaders in the field
 	game->max_rand_invaders = RAND_INVADER;				// Base num of invaders in the field
-														//game->num_players =			MAX_PLAYERS;				// Base num of players
+	game->num_players = 1;								// Base num of players
 	game->ship_shot_speed = PROJECTL_SPEED;				// Base speed for defender shot
-	game->projectiles_speed = PROJECTL_SPEED;				// Base speed for Powerups and invader bombs
-	game->pup_duration = POWERUP_DUR;				// Base power up duration
-	game->bombRate = BOM_BRATE;					// Base steps until bomb launch
+	game->projectiles_speed = PROJECTL_SPEED;			// Base speed for Powerups and invader bombs
+	game->pup_duration = POWERUP_DUR;					// Base power up duration
+	game->bombRate = BOM_BRATE;							// Base steps until bomb launch
 	game->shotRate = SHOT_RATE;
 	game->moveRate = MOVE_RATE;
 
 	game->plusSpeed = 1;
 	game->ice = 1;
 	game->battery = 1;
-	game->gameRunning = 1;
+	game->gameCreated = 0;
+	game->gameRunning = 0;
 
 	/*Bombs*/
 	for (i = 0; i < game->max_invaders; i++) {				//Instantiates all bombs outside of game and updates the status

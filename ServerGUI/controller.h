@@ -13,6 +13,6 @@ int setCreateGameDlgValues(HWND hDlg);
 int validateCreateGameDlgValues(HWND hDlg);
 int centerDialogWnd(HWND hDlg);
 
-
+int sendCreateGameValuesToServer(HWND hDlg);
 
 #endif // CONTROLLER_H

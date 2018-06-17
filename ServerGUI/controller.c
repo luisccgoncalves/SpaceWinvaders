@@ -126,7 +126,7 @@ sendCreateGameValuesToServer(HWND hDlg) {
 	vars.moveRate = GetDlgItemInt(hDlg, IDC_EDIT8, &fError, TRUE);
 	vars.pUpDuration = GetDlgItemInt(hDlg, IDC_EDIT9, &fError, TRUE);
 
-	if(updateConfigGameValues(vars, &cThread.localGameData, &cThread.ThreadMustGoOn ))
+	if(updateConfigGameValues(vars, &cThread.localGameData, cThread.mhStructSync))
 		return 1;
 	return 0;
 }

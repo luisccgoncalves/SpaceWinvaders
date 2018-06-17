@@ -174,10 +174,12 @@ DWORD WINAPI StartLobby(LPVOID tParam) {
 	int			shipsLogged;
 
 	while (*ThreadMustGoOn) {
+		///* THIS HERE*/
+		//_tprintf(TEXT("Insert number of players (0 to quit):"));
+		//_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
+		//_gettchar();			//ignored because the \n in buffer
 
-		_tprintf(TEXT("Insert number of players (0 to quit):"));
-		_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
-		_gettchar();			//ignored because the \n in buffer
+		cThread->localGameData.num_players = 1;
 
 		if (cThread->localGameData.num_players == 0)
 			break;
@@ -186,8 +188,8 @@ DWORD WINAPI StartLobby(LPVOID tParam) {
 
 			shipsLogged = 0;
 
-			_tprintf(TEXT("Press ENTER to start game.\n"));
-			_gettchar();
+			//_tprintf(TEXT("Press ENTER to start game.\n"));
+			//_gettchar();
 
 			WaitForSingleObject(cThread->mhStructSync, INFINITE);
 			shipsLogged = loadShips(cThread->localGameData.ship, cThread->localGameData.logged);

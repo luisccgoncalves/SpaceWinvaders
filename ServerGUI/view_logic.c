@@ -1,7 +1,6 @@
 ﻿#include "view_logic.h"
 
 HINSTANCE	hInst;
-BOOL		gameConfigured = 0;
 
 ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
 	WNDCLASSEX  wndClass;
@@ -42,13 +41,13 @@ HWND winCreation(HINSTANCE hInstance, TCHAR * szAppName) {
 LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC         hdc;
-
+	
 	/*this needs to be outside of here*/
-	TCHAR text[3];
+	TCHAR text_gameConfigured[3];
 	TCHAR text2[3];
 	TCHAR text3[3];
 	TCHAR text4[3];
-	swprintf_s(text, 3, TEXT(" %d"), gameConfigured);
+	swprintf_s(text_gameConfigured, 3, TEXT(" %d"), getGDataGameConfigured());
 	swprintf_s(text2, 3, TEXT(" %d"), 1);
 	swprintf_s(text3, 3, TEXT(" %d"), 2);
 	swprintf_s(text4, 3, TEXT(" %d"), 3);
@@ -63,7 +62,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutDlg);
 			break;
 		case ID_SETTINGS_STARTGAME:
-			if (!gameConfigured) {
+			if (!getGDataGameConfigured()) {
 				MessageBox(hWnd, TEXT("You need to configure a Game first!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			}
@@ -86,16 +85,17 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT:
 	{
+		InvalidateRect(hWnd,NULL,TRUE);
 		hdc = BeginPaint(hWnd, &ps);
 		//getLoggedClients
 		TextOut(hdc, 100, 100, TEXT("Clients logged: "), 20);
-		TextOut(hdc, 225, 100, text, wcslen(text));
+		TextOut(hdc, 225, 100, text3, wcslen(text3));
 		//getGameReadyPlayers
 		TextOut(hdc, 100, 150, TEXT("Ready to play:  "), 20);
 		TextOut(hdc, 225, 150, text2, wcslen(text2));
 		//getConfigGames
 		TextOut(hdc, 100, 200, TEXT("Configured games:  "), 20);
-		TextOut(hdc, 225, 200, text3, wcslen(text3));
+		TextOut(hdc, 225, 200, text_gameConfigured, wcslen(text_gameConfigured));
 		//getStartedGames
 		TextOut(hdc, 100, 250, TEXT("Games started:    "), 20);
 		TextOut(hdc, 225, 250, text4, wcslen(text4));
@@ -172,7 +172,6 @@ LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lP
 			switch (result) {
 			case 0:
 				sendCreateGameValuesToServer(hDlg);
-				gameConfigured = 1;
 				EndDialog(hDlg, LOWORD(wParam));
 				return TRUE;
 				break;

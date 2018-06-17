@@ -8,11 +8,13 @@
 
 int startServer();
 int startGameProcedure();
+int getGDataGameConfigured();
 
 int setCreateGameDlgValues(HWND hDlg);
 int validateCreateGameDlgValues(HWND hDlg);
 int centerDialogWnd(HWND hDlg);
 
 int sendCreateGameValuesToServer(HWND hDlg);
+int getPlayersReady();
 
 #endif // CONTROLLER_H

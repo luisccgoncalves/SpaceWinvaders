@@ -1,7 +1,7 @@
 ﻿#include "view_logic.h"
-#include "resource.h"
 
 HINSTANCE	hInst;
+SMCtrl		cThread;
 BOOL		gameConfigured = 0;
 
 ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
@@ -44,6 +44,10 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT ps;
 	HDC         hdc;
 
+	startServer(&cThread);
+
+
+	/*this needs to be outside of here*/
 	TCHAR text[3];
 	TCHAR text2[3];
 	TCHAR text3[3];
@@ -67,11 +71,11 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 				MessageBox(hWnd, TEXT("You need to configure a Game first!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			}
-			else if(gameConfigured){
-				//change the flag to getPlayersReady
-				MessageBox(hWnd, TEXT("There are no players ready!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-				break;
-			}
+			//else if(getPlayersReady==0){
+			//	//change the flag to getPlayersReady
+			//	MessageBox(hWnd, TEXT("There are no players ready!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+			//	break;
+			//}
 			else {
 				//setGameToStart
 			}

@@ -217,11 +217,11 @@ int StartPipeListener(HANDLE *hPipe) {
 	BOOL log;
 
 	//LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
-	LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
+	LPCTSTR		lpFileName = TEXT("\\\\.\\pipe\\SpaceWPipe");
 
 	log = LogonUser(
-		TEXT("Potato"),
-		TEXT("ENIAC"),
+		TEXT("blacksmith"),
+		TEXT("."),
 		NULL,
 		//TEXT("blacksmith"),
 		//TEXT("local"),

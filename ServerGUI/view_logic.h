@@ -15,6 +15,4 @@ LRESULT CALLBACK winManager(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK winAboutDlg(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
 
-int CloseServerMessageBox(HWND hWnd);
-
 #endif // VIEW_LOGIC_H

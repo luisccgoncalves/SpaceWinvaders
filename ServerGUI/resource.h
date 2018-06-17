@@ -19,13 +19,14 @@
 #define ID_SETTINGS_CREATEGAME          40001
 #define ID_SETTINGS_CLOSESERVER         40005
 #define ID_HELP_ABOUT                   40006
+#define ID_SETTINGS_STARTGAME           40007
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        108
-#define _APS_NEXT_COMMAND_VALUE         40007
+#define _APS_NEXT_COMMAND_VALUE         40008
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

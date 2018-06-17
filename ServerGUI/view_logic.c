@@ -1,7 +1,8 @@
 ﻿#include "view_logic.h"
 #include "resource.h"
 
-HINSTANCE hInst;
+HINSTANCE	hInst;
+BOOL		gameConfigured = 0;
 
 ATOM regClass(HINSTANCE hInstance, TCHAR * szAppName) {
 	WNDCLASSEX  wndClass;
@@ -39,14 +40,20 @@ HWND winCreation(HINSTANCE hInstance, TCHAR * szAppName) {
 		NULL);
 }
 
-
-
 LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC         hdc;
 
-	switch (iMsg) {
+	TCHAR text[3];
+	TCHAR text2[3];
+	TCHAR text3[3];
+	TCHAR text4[3];
+	swprintf_s(text, 3, TEXT(" %d"), gameConfigured);
+	swprintf_s(text2, 3, TEXT(" %d"), 1);
+	swprintf_s(text3, 3, TEXT(" %d"), 2);
+	swprintf_s(text4, 3, TEXT(" %d"), 3);
 
+	switch (iMsg) {
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case ID_SETTINGS_CREATEGAME:
@@ -54,6 +61,20 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 			break;
 		case ID_HELP_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutDlg);
+			break;
+		case ID_SETTINGS_STARTGAME:
+			if (!gameConfigured) {
+				MessageBox(hWnd, TEXT("You need to configure a Game first!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			}
+			else if(gameConfigured){
+				//change the flag to getPlayersReady
+				MessageBox(hWnd, TEXT("There are no players ready!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			}
+			else {
+				//setGameToStart
+			}
 			break;
 		case ID_SETTINGS_CLOSESERVER:
 			SendMessage(hWnd, WM_CLOSE,wParam,lParam);
@@ -64,9 +85,20 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_PAINT:
 	{
+		EnableMenuItem(GetSystemMenu(hWnd, FALSE), ID_SETTINGS_STARTGAME, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 		hdc = BeginPaint(hWnd, &ps);
-		TextOut(hdc, 100, 100, TEXT("Luís & Simão!"), 13);
-		//Here get logged clients
+		//getLoggedClients
+		TextOut(hdc, 100, 100, TEXT("Clients logged: "), 20);
+		TextOut(hdc, 225, 100, text, wcslen(text));
+		//getGameReadyPlayers
+		TextOut(hdc, 100, 150, TEXT("Ready to play:  "), 20);
+		TextOut(hdc, 225, 150, text2, wcslen(text2));
+		//getConfigGames
+		TextOut(hdc, 100, 200, TEXT("Configured games:  "), 20);
+		TextOut(hdc, 225, 200, text3, wcslen(text3));
+		//getStartedGames
+		TextOut(hdc, 100, 250, TEXT("Games started:    "), 20);
+		TextOut(hdc, 225, 250, text4, wcslen(text4));
 		EndPaint(hWnd, &ps);
 	}
 	break;
@@ -140,6 +172,9 @@ LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lP
 			switch (result) {
 			case 0:
 				//do something like send values
+				gameConfigured = 1;
+				EndDialog(hDlg, LOWORD(wParam));
+				return TRUE;
 				break;
 			case 1:
 				MessageBox(hDlg, TEXT("Invalid number of players!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);

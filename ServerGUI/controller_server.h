@@ -1,5 +1,5 @@
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+#ifndef CONTROLLER_SERVER_H
+#define CONTROLLER_SERVER_H
 
 //#include <windows.h>
 //#include <tchar.h>
@@ -17,4 +17,4 @@ int centerDialogWnd(HWND hDlg);
 int sendCreateGameValuesToServer(HWND hDlg);
 int getPlayersReady();
 
-#endif // CONTROLLER_H
+#endif // CONTROLLER_SERVER_H

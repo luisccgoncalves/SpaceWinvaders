@@ -1,4 +1,4 @@
-﻿#include "view_logic.h"
+﻿#include "view_server.h"
 
 HINSTANCE	hInst;
 

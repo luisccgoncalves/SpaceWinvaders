@@ -1,7 +1,7 @@
-#ifndef CLIENT_VIEW_LOGIC_H
-#define CLIENT_VIEW_LOGIC_H
+#ifndef VIEW_CLIENT_H
+#define VIEW_CLIENT_H
 
-#include "client_controller.h"
+#include "controller_client.h"
 
 #define MAX_LOADSTRING 100
 
@@ -19,4 +19,4 @@ INT_PTR CALLBACK    Logout(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    HighScores(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    ConfigureKeys(HWND, UINT, WPARAM, LPARAM);
 
-#endif // CLIENT_VIEW_LOGIC_H
+#endif // VIEW_CLIENT_H

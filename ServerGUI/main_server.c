@@ -1,4 +1,4 @@
-#include "view_logic.h"
+#include "view_server.h"
 
 #ifdef _UNICODE									//Sets windows to unicode
 #define _tWinMain wWinMain
@@ -7,6 +7,9 @@
 #endif
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) { //some warning here about  LPSTR lpCmdLine
+
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	TCHAR		*szAppName = TEXT("SpaceWinvaders");
 	HINSTANCE	hInste = hInstance;
@@ -18,12 +21,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 	startServer();
 
 	if (!regClass(hInstance, szAppName)) {
-		_tprintf(TEXT("[Error] in regClass"));			//does this appear? :s
 		return 0;
 	}
 	hWnd = winCreation(hInstance, szAppName);
 	if (hWnd == NULL) {
-		_tprintf(TEXT("[Error] in winCreation"));		//does this appear? :s
 		return 0;
 	}
 

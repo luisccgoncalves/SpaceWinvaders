@@ -120,6 +120,8 @@ typedef struct {									//structure to use on regestry
 
 typedef struct {									//Game data to use in communication
 	int				gameRunning;			
+	int				gameCreated;
+
 	Invader			invad[MAX_INVADER];				//Array of maximum number invaders at one time
 	Ship			ship[MAX_PLAYERS];				//number of ships in game
 	Player			logged[MAX_PLAYERS];			//Numer of players logged on server (playing or not)

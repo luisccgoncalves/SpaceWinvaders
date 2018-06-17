@@ -139,7 +139,7 @@ int getPlayersReady() {
 	int i;
 
 	for (i = 0; i < cThread.localGameData.num_players; i++) {
-		if (cThread.localGameData.logged[i].isReady)
+		if (cThread.localGameData.logged[i].isReady==1)
 			return 1;
 	}
 	

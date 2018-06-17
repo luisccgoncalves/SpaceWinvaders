@@ -220,7 +220,7 @@ int StartPipeListener(HANDLE *hPipe) {
 	LPCTSTR		lpFileName = TEXT("\\\\.\\pipe\\SpaceWPipe");
 
 	log = LogonUser(
-		TEXT("blacksmith"),
+		TEXT("potato"),
 		TEXT("."),
 		NULL,
 		//TEXT("blacksmith"),

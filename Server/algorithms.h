@@ -3,21 +3,30 @@
 
 #include "localStructs.h"
 
-DWORD WINAPI InvadersBomb(LPVOID tParam);
+DWORD WINAPI PowerUpTimer(LPVOID tParam);
+DWORD WINAPI PowerUps(LPVOID tParam);
 DWORD WINAPI RegPathInvaders(LPVOID tParam);
 DWORD WINAPI RandPathInvaders(LPVOID tParam);
-DWORD WINAPI ShipInstruction(LPVOID tParam);
+DWORD WINAPI PacketListener(LPVOID tParam);
 DWORD WINAPI BombMovement(LPVOID tParam);
 DWORD WINAPI ShotMovement(LPVOID tParam);
 
+int markPlayerReady(ClientMoves *ps);
+int handShakeClient(ClientMoves *ps);
+void PowerUpShip(GameData *game, Ship *ship, PowerUp *pUp, HANDLE mutex);
+PowerUp GeneratePowerUp(int x_max, int duration);
+int DefenderShipsCollision(GameData *game, int x, int y, int index);
 int UpdateLocalShip(ClientMoves *move);
+void GetDrunk(ClientMoves *moves);
 int InstantiateGame(GameData *game);
 
-int ShipCollision(GameData *game, Ship *ship);
+int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync);
 int ShotCollision(GameData *game, ShipShot *shot);
 int InvaderCollision(GameData *game, Invader *invader);
 int BombCollision(GameData *game, InvaderBomb *bomb);;
 
+int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE mhStructSync);
+int ShipPowerUpCollision(GameData * game, Ship * ship, PowerUp *pUp, HANDLE mhStructSync);
 int DamageShip(Ship *in);
 int DamageInvader(Invader *in);
 
@@ -29,11 +38,6 @@ int ResetBomb(InvaderBomb *in);
 int ValidateInvaderPosition(GameData *game, int x, int y, int index);
 int GetRegularLargerXPosition(GameData *game);
 int UpdateCoords(GameData * game, int *y);
-
-int writeTop10ToReg(HighScore *top10);
-int readTop10FromReg(HighScore * top10);
-int SystemTimeString(TCHAR * timeString);
-int addScoretoTop10(int score, HighScore * top10);
-int sortTop10(HighScore *top10);
+int BombLauncher(BombMoves *bombMoves);
 
 #endif /* ALGORITHMS_H */

@@ -1,63 +1,128 @@
 #include "game.h"
 #include "..\Client\debug.h"
+#pragma warning(disable:4996)
 
+int loadShips(Ship *ship, Player *player) {
+
+	int shipsLogged = 0;
+
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		if (player[i].isReady) {
+			ship[shipsLogged].id = player[i].Id;
+			_tcscpy_s(ship[shipsLogged].username, SMALL_BUFF, player[i].username);
+			shipsLogged++;
+		}
+	}
+
+	return shipsLogged;
+}
+
+DWORD WINAPI StartLobby(LPVOID tParam) {
+
+	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
+	SMCtrl		*cThread = (SMCtrl*)tParam;
+
+	HANDLE		htGame;										//Handle to the game thread
+	DWORD		tGameID;									//stores the ID of the game thread
+
+	int			shipsLogged;
+
+	while (*ThreadMustGoOn) {
+
+		_tprintf(TEXT("Insert number of players (0 to quit):"));
+		_tscanf(TEXT(" %d"), &cThread->localGameData.num_players);
+		_gettchar();			//ignored because the \n in buffer
+
+		if (cThread->localGameData.num_players == 0)
+			break;
+
+		do {
+
+			shipsLogged = 0;
+
+			_tprintf(TEXT("Press ENTER to start game.\n"));
+			_gettchar();
+
+			WaitForSingleObject(cThread->mhStructSync, INFINITE);
+			shipsLogged=loadShips(cThread->localGameData.ship, cThread->localGameData.logged);
+			ReleaseMutex(cThread->mhStructSync);
+
+			if(shipsLogged == 0)
+				_tprintf(TEXT("No players ready to start a game.\n"));
+
+		} while (shipsLogged==0);
+
+
+		htGame = CreateThread(
+			NULL,													//Thread security attributes
+			0,														//Stack size (0 for default)
+			StartGame,												//Thread function name
+			tParam,													//Thread parameter struct
+			0,														//Creation flags
+			&tGameID);												//gets thread ID 
+		if (htGame == NULL) {
+			_tprintf(TEXT("[Error] Creating thread GAME (%d) at Server\n"), GetLastError());
+		}
+
+		WaitForSingleObject(htGame, INFINITE);
+	}
+
+	return 0;
+}
 DWORD WINAPI StartGame(LPVOID tParam) {
 
 	int			*ThreadMustGoOn = &((SMCtrl *)tParam)->ThreadMustGoOn;
 	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
-
-	InstantiateGame(baseGame);
-
+	
+	/*Thread Management*/
 	DWORD			tRegPathInvaderID;
 	HANDLE			htRegPathInvader;
+
 	DWORD			tRandPathInvaderID;
 	HANDLE			htRandPathInvader;
-	DWORD			tInvadersBombID;
-	HANDLE			htInvadersBomb;
 
-	int i;
+	DWORD			tPowerUpsID;
+	HANDLE			htPowerUps;
 
-	//Defines invader path
-	for (i = 0; (i < baseGame->max_invaders) && *ThreadMustGoOn; i++) {
-		if (i < (baseGame->max_invaders - baseGame->max_rand_invaders))
-			baseGame->invad[i].rand_path = 0;
-		else
-			baseGame->invad[i].rand_path = 1;
+	InstantiateGame(baseGame); /*Needs work*/ /*Move into level later*/
+	
+	if (!DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path
+		_tprintf(TEXT("[Error] Defining invaders path! \n"));
 	}
 
+	if (!GiveInvadersHP(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+		_tprintf(TEXT("[Error] Giving invaders HP! \n"));
+	}
+
+	if (!PlaceDefenders(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+		_tprintf(TEXT("[Error] placing defender ships ! \n"));
+	}
+
+	if (!OriginalPosition(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+		_tprintf(TEXT("[Error] placing invaders ships ! \n"));
+	}
+
+	/*This needs thought and atomization*/
 	//Populates invaders with coords
-	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
+	//for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
 
-		if (!(baseGame->invad[i].rand_path)) {			//If regular path
+	//	if (!(baseGame->invad[i].rand_path)) {			//If regular path
 
-													//deploys INVADER_BY_ROW invaders per line with a spacing of 2
-			baseGame->invad[i].x = baseGame->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
+	//												//deploys INVADER_BY_ROW invaders per line with a spacing of 2
+	//		baseGame->invad[i].x = baseGame->invad[i].x_init = (i % INVADER_BY_ROW) * 2;
 
-			//Deploys 5 lines of invaders (MAX_INVADER/11=5)
-			baseGame->invad[i].y = baseGame->invad[i].y_init = i / INVADER_BY_ROW;
-		}
-		else {
-			do {
-				baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue((baseGame->xsize / 2)) + (baseGame->xsize / 3);
-				baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
-				baseGame->invad[i].direction = RandomValue(3);
+	//		//Deploys 5 lines of invaders (MAX_INVADER/11=5)
+	//		baseGame->invad[i].y = baseGame->invad[i].y_init = i / INVADER_BY_ROW;
+	//	}
+	//	else {
+	//		do {
+	//			baseGame->invad[i].x = baseGame->invad[i].x_init = RandomValue((baseGame->xsize / 2)) + (baseGame->xsize / 3);
+	//			baseGame->invad[i].y = baseGame->invad[i].y_init = RandomValue(baseGame->ysize);
+	//			baseGame->invad[i].direction = RandomValue(3);
 
-			} while (ValidateInvaderPosition(baseGame, baseGame->invad[i].x, baseGame->invad[i].y, i));
-		}
-	}
-
-	//Populates invaders with HP
-	for (i = 0; ((i < baseGame->max_invaders) && *ThreadMustGoOn); i++) {
-		baseGame->invad[i].hp = 1;
-	}
-
-	//Populates ships ######## NEEDS TO BE UPDATED TO MULTIPLAYER #########
-	for (i = 0; i < baseGame->num_players; i++) {
-
-		baseGame->ship[i].x = i+RandomValue(baseGame->xsize/4);
-		baseGame->ship[i].y = 23;
-		baseGame->ship[i].lives = 0;
-	}
+	//		} while (ValidateInvaderPosition(baseGame, baseGame->invad[i].x, baseGame->invad[i].y, i));
+	//	}
+	//}
 
 	htRegPathInvader = CreateThread(
 		NULL,										//Thread security attributes
@@ -65,7 +130,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		RegPathInvaders,							//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tRegPathInvaderID);						//gets thread ID to close it afterwards
+		&tRegPathInvaderID);						//gets thread ID 
 
 	htRandPathInvader = CreateThread(
 		NULL,										//Thread security attributes
@@ -73,47 +138,57 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		RandPathInvaders,							//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tRandPathInvaderID);						//gets thread ID to close it afterwards
+		&tRandPathInvaderID);						//gets thread ID 
 
-	htInvadersBomb = CreateThread(
+	htPowerUps = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size
-		InvadersBomb,								//Thread function name
+		PowerUps,									//Thread function name
 		tParam,										//Thread parameter struct
 		0,											//Creation flags
-		&tInvadersBombID);							//gets thread ID to close it afterwards
+		&tPowerUpsID);							//gets thread ID 
 
 	WaitForSingleObject(htRegPathInvader, INFINITE);
 	WaitForSingleObject(htRandPathInvader, INFINITE);
-	WaitForSingleObject(htInvadersBomb, INFINITE);
+	WaitForSingleObject(htPowerUps, INFINITE);
 
 	return 0;
 }
-void spinnerSlash() {
-	POINT			pt;
-	static int		i = 0;
-	char			spiner[8] = { '/','-','\\','|','/','-','\\','|' };
-
-	GetCursorPos(&pt);
-	gotoxy(79, 0);
-
-	_tprintf(TEXT("%c"), spiner[i++]);
-	gotoxy((int)pt.x, (int)pt.y);
-	i = i% 8;
-
-}
+//void spinnerSlash() {
+//	POINT			pt;
+//	static int		i = 0;
+//	char			spiner[8] = { '/','-','\\','|','/','-','\\','|' };
+//
+//	GetCursorPos(&pt);
+//	gotoxy(79, 0);
+//
+//	_tprintf(TEXT("%c"), spiner[i++]);
+//	gotoxy((int)pt.x, (int)pt.y);
+//	i = i% 8;
+//
+//}
 DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 
 	GTickStruct		*sGTick = (GTickStruct*)tParam;
+	int i;
 
 	while (sGTick->ThreadMustGoOn) {
 
 		Sleep(50);
-		spinnerSlash();
+		//spinnerSlash();
 
 		writeGameData(sGTick->smGameData, sGTick->localGameData, sGTick->mhGameData);
 
 		SetEvent(sGTick->hTick);
+
+		if (sGTick->localGameData->gameRunning) {
+			for (i = 0; i < sGTick->localGameData->num_players; i++) {
+				if (sGTick->localGameData->ship[i].lives >= 0)
+					break;
+			}
+			if (i == sGTick->localGameData->num_players)
+				sGTick->localGameData->gameRunning = 0;
+		}
 	}
 	return 0;
 }

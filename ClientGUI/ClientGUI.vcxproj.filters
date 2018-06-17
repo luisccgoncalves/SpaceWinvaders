@@ -15,37 +15,41 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="srv_main.c">
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="client_view_logic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="client_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="client_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="algorithms.c">
+    <ClCompile Include="client_view_logic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="score.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="level.c">
+    <ClCompile Include="client_controller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="localStructs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="algorithms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="score.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="level.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ResourceCompile Include="ClientGUI.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ClientGUI.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="invader.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

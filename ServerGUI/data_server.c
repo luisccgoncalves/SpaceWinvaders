@@ -293,3 +293,21 @@ int loadShips(Ship *ship, Player *player) {
 
 	return shipsLogged;
 }
+
+int updateConfigGameValues(ConfigurableVars vars, GameData *game, HANDLE mhStructSync) {
+	WaitForSingleObject(mhStructSync, INFINITE);
+
+	game->num_players = vars.players;
+	game->max_invaders = vars.maxInvaders;
+	game->max_rand_invaders = vars.hardInvaders;
+	game->invaders_speed = vars.invadersSpeed;
+	game->projectiles_speed = vars.projectileSpeed;
+	game->bombRate = vars.bombRate;
+	game->shotRate = vars.shotRate;
+	game->moveRate = vars.moveRate;
+	game->pup_duration = vars.pUpDuration;
+	
+	ReleaseMutex(mhStructSync);
+	
+	return 1;
+}

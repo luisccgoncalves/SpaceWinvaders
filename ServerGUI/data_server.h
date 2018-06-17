@@ -12,4 +12,6 @@ DWORD WINAPI GameTick(LPVOID tParam);
 int StartLobby(SMCtrl * cThread);
 int loadShips(Ship *ship, Player *player);
 
+int updateConfigGameValues(ConfigurableVars vars, GameData *game, HANDLE mhStructSync);
+
 #endif /* DATA_SERVER_H */

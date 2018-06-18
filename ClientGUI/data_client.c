@@ -8,7 +8,7 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 	createProdConsEvents(cThreadRdGame);
 
 	//Connect to gateway
-	if (StartPipeListener(cThreadRdGame->hPipe, cThreadRdGame) != 0) {
+	if (StartPipeListener(&cThreadRdGame->hPipe, cThreadRdGame) != 0) {
 		_tprintf(TEXT("[Error] launching pipe listener...\n"));
 		return -1;
 	}
@@ -233,7 +233,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 //	return 0;
 //}
 
-int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
+int StartPipeListener(HANDLE hPipe, ThreadCtrl *cThread) {
 
 	DWORD		dwPipeMode;					//Stores pipe mode
 
@@ -323,7 +323,7 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 
 	} while (bRunning);
 
-	_tprintf(TEXT("[DEBUG] Pipe connected.\nChanging pipe mode...\n"));
+	//_tprintf(TEXT("[DEBUG] Pipe connected.\nChanging pipe mode...\n"));
 
 	dwPipeMode = PIPE_READMODE_MESSAGE;
 	bSuccess = SetNamedPipeHandleState(

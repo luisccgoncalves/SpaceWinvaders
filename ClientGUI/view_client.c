@@ -137,23 +137,28 @@ INT_PTR CALLBACK Login(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			switch (validateLoginValues(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0))) {
-			case 1:
-				MessageBox(hDlg, TEXT("Please fill in the username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-				break;
-			case 2:
-				MessageBox(hDlg, TEXT("Please fill in the host login username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-				break;
-			case 3:
-				MessageBox(hDlg, TEXT("Please fill in the IP/domain!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-				break;
-			case 0:
-				MessageBox(hDlg, TEXT("Login successfull"), TEXT("Message"), MB_OK);
-				LogPlayer(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0));
-				//login procedure()
-				EndDialog(hDlg, LOWORD(wParam));
-				return (INT_PTR)TRUE;
-				break;
+			if (!PlayerLogged()) {
+				switch (validateLoginValues(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0))) {
+				case 1:
+					MessageBox(hDlg, TEXT("Please fill in the username! 1-20 letters!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+					break;
+				case 2:
+					MessageBox(hDlg, TEXT("Please fill in the host login username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+					break;
+				case 3:
+					MessageBox(hDlg, TEXT("Please fill in the IP/domain!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+					break;
+				case 0:
+					MessageBox(hDlg, TEXT("Login successfull"), TEXT("Message"), MB_OK);
+					LogPlayer(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0));
+					//login procedure()
+					EndDialog(hDlg, LOWORD(wParam));
+					return (INT_PTR)TRUE;
+					break;
+				}
+			}
+			else {
+				MessageBox(hDlg, TEXT("You are already logged!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 			}
 			break;
 		case IDCANCEL:

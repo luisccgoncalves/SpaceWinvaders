@@ -31,6 +31,12 @@ typedef struct {
 
 	int		owner;					//Stores the client's ship position in the ship array
 
+	TCHAR	username[SMALL_BUFF];
+	TCHAR	userlogin[SMALL_BUFF];
+	TCHAR	password[SMALL_BUFF];
+	TCHAR	domain[SMALL_BUFF];
+	int		remoteLogin;
+
 }ThreadCtrl;
 
 void printGame(GameData msg);
@@ -42,6 +48,6 @@ int markPlayerReady(ThreadCtrl * ps, Packet token);
 Packet handShakeServer(ThreadCtrl * ps);
 
 DWORD WINAPI ReadGame(LPVOID tParam);
-DWORD WINAPI GetKey(LPVOID tParam);
+//DWORD WINAPI GetKey(LPVOID tParam);
 
 #endif /* LOCALSTRUCTS_H */

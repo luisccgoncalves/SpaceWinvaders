@@ -10,24 +10,23 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 
 	Packet		token;
 
-	cThreadRdGame->ThreadMustGoOn = 1;
+	//cThreadRdGame->ThreadMustGoOn = 1;
 
 	createProdConsEvents(cThreadRdGame);
 
 	//Connect to gateway
-	if (StartPipeListener(cThreadRdGame->hPipe) != 0) {
+	if (StartPipeListener(cThreadRdGame->hPipe, cThreadRdGame) != 0) {
 		_tprintf(TEXT("[Error] launching pipe listener...\n"));
 		return -1;
 	}
 
 	//Connect to Server (through gateway)
-	token = handShakeServer(cThreadRdGame);
+	/*token = handShakeServer(cThreadRdGame);*/
 
-	do {
+	while (cThreadRdGame->ThreadMustGoOn) {
 
-		cThreadRdGame->ThreadMustGoOn = 1;
 
-		markPlayerReady(cThreadRdGame, token);
+		//markPlayerReady(cThreadRdGame, token); //MISSING ON VIEW
 
 		htReadGame = CreateThread(
 			NULL,										//Thread security attributes
@@ -42,30 +41,8 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 			return -1;
 		}
 
-		htGetKey = CreateThread(
-			NULL,										//Thread security attributes
-			0,											//Stack size (0 for default)
-			GetKey,										//Thread function name
-			(LPVOID)&cThreadRdGame,						//Thread parameter struct
-			0,											//Creation flags
-			&tGetKeyID);								//gets thread ID 
-
-		if (htGetKey == NULL) {
-			_tprintf(TEXT("[Error] launching GetKey thread. (%d)\n"), GetLastError());
-			return -1;
-		}
-
 		WaitForSingleObject(htReadGame, INFINITE);
-
-		cThreadRdGame->ThreadMustGoOn = 0;
-		WaitForSingleObject(htGetKey, INFINITE);
-
-		//cls(GetStdHandle(STD_OUTPUT_HANDLE));
-		//gotoxy(0, 0);
-
-	} while (1); //this will be changed with the GUI
-
-
+	}
 	CloseHandle(cThreadRdGame->hPipe);
 
 	return 0;
@@ -207,63 +184,63 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	return 0;
 }
 
-DWORD WINAPI GetKey(LPVOID tParam) {
+//DWORD WINAPI GetKey(LPVOID tParam) {
+//
+//	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
+//	wint_t		k_stroke;
+//
+//	Packet	localpacket = { 0 };
+//
+//	int		packetUpd = 0;
+//
+//	localpacket.owner = cThread->owner;
+//
+//	while (cThread->ThreadMustGoOn) {
+//		k_stroke = _gettch();
+//
+//		switch (k_stroke) {
+//		case 'w':
+//			localpacket.instruction = 3;
+//			packetUpd = 1;
+//			break;
+//		case 's':
+//			localpacket.instruction = 1;
+//			packetUpd = 1;
+//			break;
+//		case 'a':
+//			localpacket.instruction = 2;
+//			packetUpd = 1;
+//			break;
+//		case 'd':
+//			localpacket.instruction = 0;
+//			packetUpd = 1;
+//			break;
+//		case 27://esc
+//				//deauth packet?
+//			cThread->ThreadMustGoOn = 0;
+//			packetUpd = 1;
+//			break;
+//		case 32://space
+//				//PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC | SND_FILENAME);		//needs better aproach
+//			localpacket.instruction = 4;
+//			packetUpd = 1;
+//			break;
+//		case 224://extended
+//			_gettch();//ignore extended
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		if (packetUpd) {
+//			writePipeMsg(cThread->hPipe, cThread->heWriteReady, localpacket);
+//			packetUpd = 0;
+//		}
+//	}
+//	return 0;
+//}
 
-	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
-	wint_t		k_stroke;
-
-	Packet	localpacket = { 0 };
-
-	int		packetUpd = 0;
-
-	localpacket.owner = cThread->owner;
-
-	while (cThread->ThreadMustGoOn) {
-		k_stroke = _gettch();
-
-		switch (k_stroke) {
-		case 'w':
-			localpacket.instruction = 3;
-			packetUpd = 1;
-			break;
-		case 's':
-			localpacket.instruction = 1;
-			packetUpd = 1;
-			break;
-		case 'a':
-			localpacket.instruction = 2;
-			packetUpd = 1;
-			break;
-		case 'd':
-			localpacket.instruction = 0;
-			packetUpd = 1;
-			break;
-		case 27://esc
-				//deauth packet?
-			cThread->ThreadMustGoOn = 0;
-			packetUpd = 1;
-			break;
-		case 32://space
-				//PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC | SND_FILENAME);		//needs better aproach
-			localpacket.instruction = 4;
-			packetUpd = 1;
-			break;
-		case 224://extended
-			_gettch();//ignore extended
-			break;
-		default:
-			break;
-		}
-
-		if (packetUpd) {
-			writePipeMsg(cThread->hPipe, cThread->heWriteReady, localpacket);
-			packetUpd = 0;
-		}
-	}
-	return 0;
-}
-
-int StartPipeListener(HANDLE *hPipe) {
+int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 
 	DWORD		dwPipeMode;					//Stores pipe mode
 
@@ -275,16 +252,12 @@ int StartPipeListener(HANDLE *hPipe) {
 	HANDLE		hUserToken = NULL;
 	BOOL log;
 
-	//LPCTSTR		lpFileName = TEXT("\\\\ENIAC\\pipe\\SpaceWPipe");
 	LPCTSTR		lpFileName = TEXT("\\\\.\\pipe\\SpaceWPipe");
 
 	log = LogonUser(
-		TEXT("blacksmith"),
-		TEXT("."),
-		NULL,
-		//TEXT("blacksmith"),
-		//TEXT("local"),
-		//NULL,
+		cThread->userlogin,
+		cThread->domain,
+		cThread->password,
 		LOGON32_LOGON_NEW_CREDENTIALS,
 		LOGON32_PROVIDER_DEFAULT,
 		&hUserToken);
@@ -400,21 +373,21 @@ int markPlayerReady(ThreadCtrl * ps, Packet token) {
 	return 0;
 }
 
-Packet handShakeServer(ThreadCtrl * ps) {
+Packet handShakeServer(ThreadCtrl * ps, TCHAR *username) {
 
 	Packet		lPacket;
 	GameData	localGame;
 	BOOL		isLogged = FALSE;
 
 	do {
-		_tprintf(TEXT("Username:"));
+		//_tprintf(TEXT("Username:"));
 		_tscanf_s(TEXT("%s"), lPacket.username, (unsigned int)_countof(lPacket.username));
 
 		lPacket.Id = GetCurrentProcessId() + (DWORD)time(NULL);
 		lPacket.owner = -1;
 		lPacket.instruction = 5;
 
-		_tprintf(TEXT("Hello %s! Trying to login with the ID=%d\n"), lPacket.username, lPacket.Id);
+		//_tprintf(TEXT("Hello %s! Trying to login with the ID=%d\n"), lPacket.username, lPacket.Id);
 
 		writePipeMsg(ps->hPipe, ps->heWriteReady, lPacket);
 

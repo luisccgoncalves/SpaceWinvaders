@@ -1,6 +1,7 @@
 #include "controller_client.h"
 
 ThreadCtrl		cThread;
+Packet			token;
 
 int startClient(){
 
@@ -31,13 +32,23 @@ int LogPlayer(HWND hDlg, BOOL remote) {
 
 	UINT result = 0;
 
-	*username = GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF);
-		//set Login name
+	GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF);
+	token = handShakeServer(&cThread,username);
+	_tcscpy(&cThread.username, username);
+
 	if (remote == TRUE) {
-		*userlogin = GetDlgItemText(hDlg, IDC_LOGIN_ULOGIN, userlogin, SMALL_BUFF);
-		*password = GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF);
-		*domain = GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
+		cThread.remoteLogin = 1;
+		GetDlgItemText(hDlg, IDC_LOGIN_ULOGIN, userlogin, SMALL_BUFF);
+		_tcscpy(&cThread.userlogin, userlogin);
+
+		GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF);
+		_tcscpy(&cThread.domain, domain);
+
+		GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
+		_tcscpy(&cThread.password, password);
 	}
+
+	startClient();
 
 	return 0;
 

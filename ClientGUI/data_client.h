@@ -12,9 +12,9 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady, GameData * msg);
 int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg);
 DWORD WINAPI ReadGame(LPVOID tParam);
 DWORD WINAPI GetKey(LPVOID tParam);
-int StartPipeListener(HANDLE *hPipe);
+int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread);
 int createProdConsEvents(ThreadCtrl * ps);
 int markPlayerReady(ThreadCtrl * ps, Packet token);
-Packet handShakeServer(ThreadCtrl * ps);
+Packet handShakeServer(ThreadCtrl * ps, TCHAR *username);
 
 #endif /* DATA_CLIENT_H */

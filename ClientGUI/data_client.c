@@ -396,7 +396,7 @@ int markPlayerReady(ThreadCtrl * ps) {
 		return -1;
 	}
 
-	WaitForSingleObject(htReadGame, INFINITE);
+	//WaitForSingleObject(htReadGame, INFINITE);
 
 	return 0;
 }

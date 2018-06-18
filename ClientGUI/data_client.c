@@ -233,7 +233,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 //	return 0;
 //}
 
-int StartPipeListener(HANDLE hPipe, ThreadCtrl *cThread) {
+int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 
 	DWORD		dwPipeMode;					//Stores pipe mode
 
@@ -291,7 +291,7 @@ int StartPipeListener(HANDLE hPipe, ThreadCtrl *cThread) {
 
 	do {
 
-		hPipe = CreateFile(
+		*hPipe = CreateFile(
 			lpFileName,
 			GENERIC_READ |
 			GENERIC_WRITE,
@@ -313,7 +313,7 @@ int StartPipeListener(HANDLE hPipe, ThreadCtrl *cThread) {
 				return -1;
 
 		}
-		else if (hPipe == INVALID_HANDLE_VALUE) {
+		else if (*hPipe == INVALID_HANDLE_VALUE) {
 
 			_tprintf(TEXT("[Error] opening pipe. (%d)\n"), GetLastError());
 			return -1;
@@ -327,7 +327,7 @@ int StartPipeListener(HANDLE hPipe, ThreadCtrl *cThread) {
 
 	dwPipeMode = PIPE_READMODE_MESSAGE;
 	bSuccess = SetNamedPipeHandleState(
-		hPipe,
+		*hPipe,
 		&dwPipeMode,
 		NULL,
 		NULL);

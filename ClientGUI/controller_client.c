@@ -76,7 +76,7 @@ int validateLoginValues(HWND hDlg, BOOL remote) {
 
 	UINT result = 0;
 
-	if(GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF)==0 || GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF) > SMALL_BUFF)
+	if(GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF)==0)
 		return 1;	
 	else if (remote == TRUE) {
 		if(GetDlgItemText(hDlg, IDC_LOGIN_ULOGIN, userlogin, SMALL_BUFF)==0)

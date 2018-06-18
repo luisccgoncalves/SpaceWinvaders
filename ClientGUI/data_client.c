@@ -16,13 +16,14 @@ DWORD WINAPI LaunchClient(LPVOID tParam) {
 	}
 
 	//Connect to Server (through gateway)
+	cThreadRdGame->ThreadMustGoOn = 1;
 	cThreadRdGame->token = handShakeServer(cThreadRdGame, cThreadRdGame->username);
 
 	htReadGame = CreateThread(
 		NULL,										//Thread security attributes
 		0,											//Stack size (0 for default)
 		ReadGame,									//Thread function name
-		(LPVOID)&cThreadRdGame,						//Thread parameter struct
+		cThreadRdGame,						//Thread parameter struct
 		0,											//Creation flags
 		&tReadGameID);								//gets thread ID 
 

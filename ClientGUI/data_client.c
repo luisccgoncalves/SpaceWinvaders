@@ -4,8 +4,8 @@ DWORD WINAPI LaunchClient(LPVOID tParam) {
 
 	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
 
-	HANDLE		htReadGame;					//Game thread
-	DWORD		tReadGameID;				//Game thread ID
+	//HANDLE		htReadGame;					//Game thread
+	//DWORD		tReadGameID;				//Game thread ID
 
 	createProdConsEvents(cThreadRdGame);
 
@@ -19,20 +19,20 @@ DWORD WINAPI LaunchClient(LPVOID tParam) {
 	cThreadRdGame->ThreadMustGoOn = 1;
 	cThreadRdGame->token = handShakeServer(cThreadRdGame, cThreadRdGame->username);
 
-	htReadGame = CreateThread(
-		NULL,										//Thread security attributes
-		0,											//Stack size (0 for default)
-		ReadGame,									//Thread function name
-		cThreadRdGame,						//Thread parameter struct
-		0,											//Creation flags
-		&tReadGameID);								//gets thread ID 
+	//htReadGame = CreateThread(
+	//	NULL,										//Thread security attributes
+	//	0,											//Stack size (0 for default)
+	//	ReadGame,									//Thread function name
+	//	cThreadRdGame,								//Thread parameter struct
+	//	0,											//Creation flags
+	//	&tReadGameID);								//gets thread ID 
 
-	if (htReadGame == NULL) {
-		_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
-		return -1;
-	}
+	//if (htReadGame == NULL) {
+	//	_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
+	//	return -1;
+	//}
 
-	WaitForSingleObject(htReadGame, INFINITE);
+	//WaitForSingleObject(htReadGame, INFINITE);
 	//CloseHandle(cThreadRdGame->hPipe);
 
 	return 0;
@@ -163,11 +163,11 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 		return -1;
 	}
 
-	do {
+	while (cThreadRdGame->ThreadMustGoOn){
 
 		readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame);
 		//printGame(localGame);
-	} while (cThreadRdGame->ThreadMustGoOn && localGame.gameRunning);
+	} 
 
 	return 0;
 }
@@ -363,6 +363,8 @@ int createProdConsEvents(ThreadCtrl * ps) {
 int markPlayerReady(ThreadCtrl * ps) {
 
 	GameData	localGame;
+	HANDLE		htReadGame;					//Game thread
+	DWORD		tReadGameID;				//Game thread ID
 
 	//_tprintf(TEXT("Press ENTER when ready\n"));
 	//_gettch();
@@ -380,6 +382,21 @@ int markPlayerReady(ThreadCtrl * ps) {
 			break;
 		}
 	}
+
+	htReadGame = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size (0 for default)
+		ReadGame,									//Thread function name
+		ps,											//Thread parameter struct
+		0,											//Creation flags
+		&tReadGameID);								//gets thread ID 
+
+	if (htReadGame == NULL) {
+		_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	WaitForSingleObject(htReadGame, INFINITE);
 
 	return 0;
 }

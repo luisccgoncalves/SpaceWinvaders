@@ -4,7 +4,7 @@
 #include "data_structs.h"
 
 
-DWORD WINAPI LaunchClient(ThreadCtrl *cThread);
+DWORD WINAPI LaunchClient(LPVOID tParam);
 
 
 //void printGame(GameData msg);

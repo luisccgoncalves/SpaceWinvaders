@@ -1,6 +1,8 @@
 #include "data_client.h"
 
-DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
+DWORD WINAPI LaunchClient(LPVOID tParam) {
+
+	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
 
 	HANDLE		htReadGame;					//Game thread
 	DWORD		tReadGameID;				//Game thread ID
@@ -15,10 +17,6 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 
 	//Connect to Server (through gateway)
 	cThreadRdGame->token = handShakeServer(cThreadRdGame, cThreadRdGame->username);
-
-
-
-	//markPlayerReady(cThreadRdGame, token); //MISSING ON VIEW
 
 	htReadGame = CreateThread(
 		NULL,										//Thread security attributes
@@ -166,7 +164,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	do {
 
-		readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame);
+		readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame);
 		//printGame(localGame);
 	} while (cThreadRdGame->ThreadMustGoOn && localGame.gameRunning);
 

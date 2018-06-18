@@ -140,7 +140,7 @@ INT_PTR CALLBACK Login(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 			case 0:
 				MessageBox(hDlg, TEXT("Login successfull"), TEXT("Message"), MB_OK);
-				LogPlayer();
+				LogPlayer(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0));
 				//login procedure()
 				EndDialog(hDlg, LOWORD(wParam));
 				return (INT_PTR)TRUE;

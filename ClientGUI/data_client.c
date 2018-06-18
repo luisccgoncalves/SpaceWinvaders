@@ -252,26 +252,49 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 	HANDLE		hUserToken = NULL;
 	BOOL log;
 
-	LPCTSTR		lpFileName = TEXT("\\\\.\\pipe\\SpaceWPipe");
+	LPCTSTR		lpFileName = TEXT("\0");
 
-	log = LogonUser(
-		cThread->userlogin,
-		cThread->domain,
-		cThread->password,
-		LOGON32_LOGON_NEW_CREDENTIALS,
-		LOGON32_PROVIDER_DEFAULT,
-		&hUserToken);
-	if (log == 0) {
-		_tprintf(TEXT("[Error] Logging on user (%d)\n"), GetLastError());
-		return -1;
+	if (cThread->remoteLogin) {
+
+		_tcscpy_s(lpFileName, SMALL_BUFF, TEXT("\\\\"));
+		_tcscat_s(lpFileName, SMALL_BUFF, cThread->domain);
+		_tcscat_s(lpFileName, SMALL_BUFF, TEXT("\\pipe\\SpaceWPipe"));
+
+		if (_tcscmp(cThread->password, TEXT("\0"))) {
+			log = LogonUser(
+				cThread->userlogin,
+				cThread->domain,
+				NULL,
+				LOGON32_LOGON_NEW_CREDENTIALS,
+				LOGON32_PROVIDER_DEFAULT,
+				&hUserToken);
+		}
+		else {
+			log = LogonUser(
+				cThread->userlogin,
+				cThread->domain,
+				cThread->password,
+				LOGON32_LOGON_NEW_CREDENTIALS,
+				LOGON32_PROVIDER_DEFAULT,
+				&hUserToken);
+		}
+	
+		if (log == 0) {
+			_tprintf(TEXT("[Error] Logging on user (%d)\n"), GetLastError());
+			return -1;
+		}
+
+		log = ImpersonateLoggedOnUser(hUserToken);
+
+		if (log == 0) {
+			_tprintf(TEXT("[Error] Logging on user (%d)\n"), GetLastError());
+			return -1;
+		}
+	}
+	else {
+		lpFileName = PIPE_NAME;
 	}
 
-	log = ImpersonateLoggedOnUser(hUserToken);
-
-	if (log == 0) {
-		_tprintf(TEXT("[Error] Logging on user (%d)\n"), GetLastError());
-		return -1;
-	}
 
 	do {
 
@@ -380,9 +403,7 @@ Packet handShakeServer(ThreadCtrl * ps, TCHAR *username) {
 	BOOL		isLogged = FALSE;
 
 	do {
-		//_tprintf(TEXT("Username:"));
-		_tscanf_s(TEXT("%s"), lPacket.username, (unsigned int)_countof(lPacket.username));
-
+		_tcscpy_s(lPacket.username, SMALL_BUFF, username);
 		lPacket.Id = GetCurrentProcessId() + (DWORD)time(NULL);
 		lPacket.owner = -1;
 		lPacket.instruction = 5;

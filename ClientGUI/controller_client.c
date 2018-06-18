@@ -34,18 +34,18 @@ int LogPlayer(HWND hDlg, BOOL remote) {
 
 	GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF);
 	token = handShakeServer(&cThread,username);
-	_tcscpy(&cThread.username, username);
+	_tcscpy_s(&cThread.username, SMALL_BUFF, username);
 
 	if (remote == TRUE) {
 		cThread.remoteLogin = 1;
 		GetDlgItemText(hDlg, IDC_LOGIN_ULOGIN, userlogin, SMALL_BUFF);
-		_tcscpy(&cThread.userlogin, userlogin);
+		_tcscpy_s(&cThread.userlogin, SMALL_BUFF, userlogin);
 
 		GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF);
-		_tcscpy(&cThread.domain, domain);
+		_tcscpy_s(&cThread.domain, SMALL_BUFF, domain);
 
 		GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
-		_tcscpy(&cThread.password, password);
+		_tcscpy_s(&cThread.password, SMALL_BUFF, password);
 	}
 
 	startClient();
@@ -84,7 +84,8 @@ int validateLoginValues(HWND hDlg, BOOL remote) {
 			return 2;
 		if (GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF) == 0)
 			return 3;
-		GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
+		if(GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF)==0)
+			_tcscpy_s(password, SMALL_BUFF, TEXT("\0"));
 	}
 
 	return 0;

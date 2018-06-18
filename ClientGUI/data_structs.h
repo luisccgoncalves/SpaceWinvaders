@@ -1,5 +1,5 @@
-#ifndef LOCALSTRUCTS_H
-#define LOCALSTRUCTS_H
+#ifndef DATA_STRUCTS_H
+#define DATA_STRUCTS_H
 
 #define _WIN32_WINNT 0x0500
 
@@ -50,4 +50,4 @@ Packet handShakeServer(ThreadCtrl * ps);
 DWORD WINAPI ReadGame(LPVOID tParam);
 //DWORD WINAPI GetKey(LPVOID tParam);
 
-#endif /* LOCALSTRUCTS_H */
+#endif /* DATA_STRUCTS_H */

@@ -16,27 +16,25 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 	//Connect to Server (through gateway)
 	cThreadRdGame->token = handShakeServer(cThreadRdGame, cThreadRdGame->username);
 
-	while (cThreadRdGame->ThreadMustGoOn) {
 
 
-		//markPlayerReady(cThreadRdGame, token); //MISSING ON VIEW
+	//markPlayerReady(cThreadRdGame, token); //MISSING ON VIEW
 
-		htReadGame = CreateThread(
-			NULL,										//Thread security attributes
-			0,											//Stack size (0 for default)
-			ReadGame,									//Thread function name
-			(LPVOID)&cThreadRdGame,						//Thread parameter struct
-			0,											//Creation flags
-			&tReadGameID);								//gets thread ID 
+	htReadGame = CreateThread(
+		NULL,										//Thread security attributes
+		0,											//Stack size (0 for default)
+		ReadGame,									//Thread function name
+		(LPVOID)&cThreadRdGame,						//Thread parameter struct
+		0,											//Creation flags
+		&tReadGameID);								//gets thread ID 
 
-		if (htReadGame == NULL) {
-			_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
-			return -1;
-		}
-
-		WaitForSingleObject(htReadGame, INFINITE);
+	if (htReadGame == NULL) {
+		_tprintf(TEXT("[Error] launching ReadGame thread. (%d)\n"), GetLastError());
+		return -1;
 	}
-	CloseHandle(cThreadRdGame->hPipe);
+
+	WaitForSingleObject(htReadGame, INFINITE);
+	//CloseHandle(cThreadRdGame->hPipe);
 
 	return 0;
 }
@@ -162,17 +160,15 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	GameData	localGame;
 
 	if (cThreadRdGame->hPipe == NULL) {
-		_tprintf(TEXT("[Error] casting pipe. (%d)\n"), GetLastError());
+		//_tprintf(TEXT("[Error] casting pipe. (%d)\n"), GetLastError());
 		return -1;
 	}
 
-	localGame.gameRunning = 1;				//Needed to enter the loop
-
-	while (cThreadRdGame->ThreadMustGoOn && localGame.gameRunning) {
+	do {
 
 		readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame);
 		//printGame(localGame);
-	}
+	} while (cThreadRdGame->ThreadMustGoOn && localGame.gameRunning);
 
 	return 0;
 }

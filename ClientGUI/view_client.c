@@ -59,7 +59,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_LOGOUT), hWnd, Logout);
 			break;
 		case ID_FILE_LOGIN:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_LOGIN), hWnd, Login);
+			if (!PlayerLogged()) {
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_LOGIN), hWnd, Login);
+			}
+			else {
+				MessageBox(hWnd, TEXT("You are already logged!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+			}
 			break;
 		case IDM_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
@@ -137,28 +142,23 @@ INT_PTR CALLBACK Login(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			if (!PlayerLogged()) {
-				switch (validateLoginValues(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0))) {
-				case 1:
-					MessageBox(hDlg, TEXT("Please fill in the username! 1-20 letters!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-					break;
-				case 2:
-					MessageBox(hDlg, TEXT("Please fill in the host login username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-					break;
-				case 3:
-					MessageBox(hDlg, TEXT("Please fill in the IP/domain!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
-					break;
-				case 0:
+			switch (validateLoginValues(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0))) {
+			case 1:
+				MessageBox(hDlg, TEXT("Please fill in the username! 1-20 letters!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 2:
+				MessageBox(hDlg, TEXT("Please fill in the host login username!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 3:
+				MessageBox(hDlg, TEXT("Please fill in the IP/domain!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			case 0:
+				if(LogPlayer(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0)))
 					MessageBox(hDlg, TEXT("Login successfull"), TEXT("Message"), MB_OK);
-					LogPlayer(hDlg, (BOOL)SendDlgItemMessage(hDlg, IDC_LOGIN_REMOTE, BM_GETCHECK, 0, 0));
-					//login procedure()
-					EndDialog(hDlg, LOWORD(wParam));
-					return (INT_PTR)TRUE;
-					break;
-				}
-			}
-			else {
-				MessageBox(hDlg, TEXT("You are already logged!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+
+				EndDialog(hDlg, LOWORD(wParam));
+				return (INT_PTR)TRUE;
+				break;
 			}
 			break;
 		case IDCANCEL:

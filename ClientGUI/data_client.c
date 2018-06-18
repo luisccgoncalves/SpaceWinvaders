@@ -5,10 +5,6 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 	HANDLE		htReadGame;					//Game thread
 	DWORD		tReadGameID;				//Game thread ID
 
-	//Packet		token;
-
-	//cThreadRdGame->ThreadMustGoOn = 1;
-
 	createProdConsEvents(cThreadRdGame);
 
 	//Connect to gateway
@@ -18,7 +14,7 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 	}
 
 	//Connect to Server (through gateway)
-	/*token = handShakeServer(cThreadRdGame);*/
+	cThreadRdGame->token = handShakeServer(cThreadRdGame, cThreadRdGame->username);
 
 	while (cThreadRdGame->ThreadMustGoOn) {
 
@@ -295,7 +291,7 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 
 	do {
 
-		*hPipe = CreateFile(
+		hPipe = CreateFile(
 			lpFileName,
 			GENERIC_READ |
 			GENERIC_WRITE,
@@ -317,7 +313,7 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 				return -1;
 
 		}
-		else if (*hPipe == INVALID_HANDLE_VALUE) {
+		else if (hPipe == INVALID_HANDLE_VALUE) {
 
 			_tprintf(TEXT("[Error] opening pipe. (%d)\n"), GetLastError());
 			return -1;
@@ -331,7 +327,7 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 
 	dwPipeMode = PIPE_READMODE_MESSAGE;
 	bSuccess = SetNamedPipeHandleState(
-		*hPipe,
+		hPipe,
 		&dwPipeMode,
 		NULL,
 		NULL);

@@ -48,9 +48,7 @@ int LogPlayer(HWND hDlg, BOOL remote) {
 	}
 
 	startClient();
-	token = handShakeServer(&cThread, username);
-
-
+	
 	return 0;
 
 }

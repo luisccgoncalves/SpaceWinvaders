@@ -36,6 +36,7 @@ typedef struct {
 	TCHAR	password[SMALL_BUFF];
 	TCHAR	domain[SMALL_BUFF];
 	int		remoteLogin;
+	Packet	token;
 
 }ThreadCtrl;
 

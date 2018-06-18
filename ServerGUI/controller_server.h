@@ -9,6 +9,7 @@
 int startServer();
 int startGameProcedure();
 int getGDataGameConfigured();
+int gameRunning();
 
 int setCreateGameDlgValues(HWND hDlg);
 int validateCreateGameDlgValues(HWND hDlg);

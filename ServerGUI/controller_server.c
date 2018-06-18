@@ -37,6 +37,11 @@ int getGDataGameConfigured() {
 	return cThread.localGameData.gameCreated;
 }
 
+int gameRunning() {
+
+	return cThread.localGameData.gameRunning;
+}
+
 int setCreateGameDlgValues(HWND hDlg) {
 	GameData game = cThread.localGameData;
 

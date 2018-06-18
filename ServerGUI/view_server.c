@@ -72,8 +72,13 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 				break;
 			}
 			else {
-				MessageBox(hWnd, TEXT("Game started"), TEXT("Message"), MB_OK);
-				startGameProcedure();
+				if (!gameRunning()) {
+					MessageBox(hWnd, TEXT("Game started"), TEXT("Message"), MB_OK);
+					startGameProcedure();
+				}
+				else {
+					MessageBox(hWnd, TEXT("Game already started"), TEXT("Message"), MB_OK | MB_ICONEXCLAMATION);
+				}
 			}
 			break;
 		case ID_SETTINGS_CLOSESERVER:

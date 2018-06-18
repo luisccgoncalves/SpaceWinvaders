@@ -15,7 +15,7 @@ int markPlayerReady(ClientMoves *ps);
 int handShakeClient(ClientMoves *ps);
 void PowerUpShip(GameData *game, Ship *ship, PowerUp *pUp, HANDLE mutex);
 PowerUp GeneratePowerUp(int x_max, int duration);
-int DefenderShipsCollision(GameData *game, int x, int y, int index);
+int DefenderShipsCollision(GameData *game, int x, int top_y, int index);
 int UpdateLocalShip(ClientMoves *move);
 void GetDrunk(ClientMoves *moves);
 int InstantiateGame(GameData *game);
@@ -35,9 +35,9 @@ int ResetShot(ShipShot *in);
 int ResetInvader(Invader *in);
 int ResetBomb(InvaderBomb *in);
 
-int ValidateInvaderPosition(GameData *game, int x, int y, int index);
+int ValidateInvaderPosition(GameData *game, int x, int top_y, int index);
 int GetRegularLargerXPosition(GameData *game);
-int UpdateCoords(GameData * game, int *y);
+int UpdateCoords(GameData * game, int *top_y);
 int BombLauncher(BombMoves *bombMoves);
 
 #endif /* ALGORITHMS_H */

@@ -23,8 +23,15 @@
 
 #define SMALL_BUFF		20							//Used for small strings (Ex:username)
 #define	SMEM_BUFF		10
-#define XSIZE			80							//Terminal max collumn number
-#define YSIZE			25							//Terminal max row number
+
+#define XSIZE			800							//Terminal max collumn number
+#define YSIZE			600							//Terminal max row number
+
+#define INV_WIDTH		10
+#define INV_HEIGHT		6
+#define PROJ_SIZE		5
+#define SHIP_WIDTH		12
+#define SHIP_HEIGHT		6
 
 #define MAX_PLAYERS		5							//Maximum number of concurrent players
 #define MAX_INVADER		10							//Maximum invaders by level
@@ -45,6 +52,8 @@
 typedef struct {
 	int		x;										//ship x,y position
 	int		y;
+	int		width;									//ship width and height
+	int		height;
 	int		fired;									//dead or alive
 	int		speed;									//Not being used right now
 } ShipShot;
@@ -58,6 +67,8 @@ typedef struct {
 	int			lives;								//ship is a one shot kill, but has several lives
 	int			x;									//ship x,y position
 	int			y;
+	int			width;								//ship width and height
+	int			height;
 
 	ShipShot	shots[MAX_SHOTS];					//shots per ship
 	DWORD		shotTimeStamp;						//stores last shot timestamp
@@ -79,16 +90,21 @@ typedef struct {
 }Player;
 
 typedef struct {
-	int		x;										//ship x,y position
-	int		y;
-	int		fired;									//dead or alive
+	int			x;									//ship x,y position
+	int			y;
+	int			width;								//ship width and height
+	int			height;
+	int			fired;								//dead or alive
 } InvaderBomb;
 
 typedef struct {
-	int				x;								//ship x,y position
-	int				y;
-	int				x_init;							//ship x,y initial position
-	int				y_init;							//needed for relative coordinates
+	int			x;									//ship x,y position
+	int			y;
+	int			width;								//ship width and height
+	int			height;
+
+	int			x_init;								//ship x,y initial position
+	int			y_init;								//needed for relative coordinates
 
 	InvaderBomb		bomb[MAX_BOMBS];		
 	int				bombRateCounter;				//Steps into invaders path (to bomb rate)
@@ -106,11 +122,13 @@ typedef struct {
 //} Barriers;
 
 typedef struct {
-	int		x;										//ship x,y position
-	int		y;
-	int		fired;									//dead or alive
-	int		type;									//0-shield 1-drunk 2-turbo 3-laser_shot
-	int		duration;
+	int			x;									//ship x,y position
+	int			y;
+	int			width;								//ship width and height
+	int			height;
+	int			fired;								//dead or alive
+	int			type;								//0-shield 1-drunk 2-turbo 3-laser_shot
+	int			duration;
 } PowerUp;
 
 typedef struct {									//structure to use on regestry

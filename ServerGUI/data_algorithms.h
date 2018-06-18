@@ -35,7 +35,7 @@ int ResetShot(ShipShot *in);
 int ResetInvader(Invader *in);
 int ResetBomb(InvaderBomb *in);
 
-int ValidateInvaderPosition(GameData *game, int x, int y, int index);
+int ValidateInvaderPosition(GameData * game, int x, int y, int width, int height, int index);
 int GetRegularLargerXPosition(GameData *game);
 int UpdateCoords(GameData * game, int *y);
 int BombLauncher(BombMoves *bombMoves);

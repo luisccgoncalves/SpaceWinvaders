@@ -343,7 +343,8 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 	GameData	*baseGame = &((SMCtrl *)tParam)->localGameData;
 	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
-	int			i, xTemp, yTemp, invalid, count;
+	int			i, invalid, count;
+	int			xTemp, yTemp, width, height;
 	BombMoves	bombMoves;
 
 	while (*ThreadMustGoOn && baseGame->gameRunning) {						//Thread main loop
@@ -360,6 +361,8 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 					do {
 						xTemp = baseGame->invad[i].x;
 						yTemp = baseGame->invad[i].y;
+						width = baseGame->invad[i].width;
+						height = baseGame->invad[i].height;
 
 						switch (baseGame->invad[i].direction) {
 						case 0:
@@ -393,7 +396,7 @@ DWORD WINAPI RandPathInvaders(LPVOID tParam) {
 						}
 						UpdateCoords(baseGame, &yTemp);
 
-						invalid = ValidateInvaderPosition(baseGame, xTemp, yTemp, i);
+						invalid = ValidateInvaderPosition(baseGame, xTemp, yTemp, width, height, i);
 						if (invalid && count < 50) {
 							baseGame->invad[i].direction = RandomValue(3);
 							count++;
@@ -661,7 +664,11 @@ int LoadGDataDefaults(GameData *game) {
 	for (i = 0; i < game->max_invaders; i++) {				//Instantiates all bombs outside of game and updates the status
 		for (j = 0; j < game->max_bombs; j++) {
 			ResetBomb(&game->invad[i].bomb[j]);
+			game->invad[i].bomb[j].width = PROJ_SIZE;
+			game->invad[i].bomb[j].height = PROJ_SIZE;
 		}
+		game->invad[i].width = INV_WIDTH;
+		game->invad[i].height = INV_HEIGHT;
 		game->invad[i].bombRateCounter = RandomValue(10);
 	}
 	/*Ships & shots*/
@@ -669,6 +676,8 @@ int LoadGDataDefaults(GameData *game) {
 		game->ship[i].lives = 1; //represents 2 lives, 0 and 1
 		game->ship[i].x = 0;
 		game->ship[i].y = 0;
+		game->ship[i].width = SHIP_WIDTH;
+		game->ship[i].height = SHIP_HEIGHT;
 		game->ship[i].shotTimeStamp = 0;
 
 		game->ship[i].laser_shots = 1;
@@ -676,6 +685,8 @@ int LoadGDataDefaults(GameData *game) {
 		game->ship[i].drunk = 0;
 		game->ship[i].turbo = 1;
 		for (j = 0; j < MAX_SHOTS; j++) {				//Instantiates all shots outside of game and updates the status
+			game->ship[i].shots[j].width = PROJ_SIZE;
+			game->ship[i].shots[j].height = PROJ_SIZE;
 			ResetShot(&game->ship[i].shots[j]);
 		}
 	}
@@ -691,27 +702,39 @@ int ShipCollision(GameData *game, Ship *ship, HANDLE mhStructSync) {
 
 		//Check for collision with invaders
 		for (i = 0; i < game->max_invaders; i++) {
-			if (game->invad[i].x == ship->x && game->invad[i].y == ship->y && game->invad[i].hp > 0) {
-				DamageInvader(&game->invad[i]);
-				DamageShip(ship);
-				return 1;
-			}
+			if(game->invad[i].hp > 0)
+				if (game->invad[i].x < (ship->x + ship->width) && 
+					(game->invad[i].x + game->invad[i].width) > ship->x &&
+						game->invad[i].y < (ship->y + ship->height) &&
+							(game->invad[i].y + game->invad[i].height) > ship->y ) {
+					DamageInvader(&game->invad[i]);
+					DamageShip(ship);
+					return 1;
+				}
 		}
 
 		//Check for collisions with bombs
 		for (i = 0; i < game->max_invaders; i++) {
 			for (j = 0; j < game->max_bombs; j++) {
-				if (game->invad[i].bomb[j].x == ship->x && game->invad[i].bomb[j].y == ship->y && game->invad[i].bomb[j].fired) { //ERROR?
-					ResetBomb(&game->invad[i].bomb[j]);
-					if (!ship->shield)
-						DamageShip(ship);
-					return 1;
-				}
+				if(game->invad[i].bomb[j].fired)
+					if (game->invad[i].bomb[j].x < (ship->x + ship->width) &&
+						(game->invad[i].bomb[j].x + game->invad[i].bomb[j].width) > ship->x &&
+							game->invad[i].bomb[j].y < (ship->y + ship->height) &&
+								(game->invad[i].bomb[j].y + game->invad[i].bomb[j].height) > ship->y) { //ERROR?
+						ResetBomb(&game->invad[i].bomb[j]);
+						if (!ship->shield)
+							DamageShip(ship);
+						return 1;
+					}
 			}
 		}
 
 		//Check for collisions with powerups
-		if (game->pUp.x == ship->x && game->pUp.y == ship->y && game->pUp.fired == 1) {
+		if(game->pUp.fired == 1)
+		if (game->pUp.x < (ship->x + ship->width) &&
+			(game->pUp.x + game->pUp.width) > ship->x &&
+				game->pUp.y < (ship->y + ship->height) &&
+					(game->pUp.y + game->pUp.height) > ship->y) {
 			ShipPowerUpCollision(game, ship, &game->pUp, mhStructSync);
 			return 1;
 		}
@@ -728,26 +751,30 @@ int ShotCollision(GameData *game, ShipShot *shot) {
 		//Tests shot collision with invaders
 		for (i = 0; i < game->max_invaders; i++) {
 
-			if (game->invad[i].hp > 0 &&
-				game->invad[i].x == shot->x &&
-				game->invad[i].y == shot->y) {
+			if (game->invad[i].hp > 0 )
+				if (game->invad[i].x < (shot->x + shot->width) &&
+					(game->invad[i].x + game->invad[i].width) > shot->x &&
+						game->invad[i].y < (shot->y + shot->height) &&
+						(game->invad[i].y + game->invad[i].height) > shot->y) {
 
-				DamageInvader(&game->invad[i]);
-				ResetShot(shot);
-				return 1;
-			}
+					DamageInvader(&game->invad[i]);
+					ResetShot(shot);
+					return 1;
+				}
 
 			//Tests shot collision with bombs
 			for (j = 0; j < game->max_bombs; j++) {
 
-				if (game->invad[i].bomb[j].fired &&
-					game->invad[i].bomb[j].x == shot->x &&
-					game->invad[i].bomb[j].y == shot->y) {
+				if (game->invad[i].bomb[j].fired)
+					if (game->invad[i].bomb[j].x < (shot->x + shot->width) &&
+						(game->invad[i].bomb[j].x + game->invad[i].bomb[j].width) > shot->x &&
+							game->invad[i].bomb[j].y < (shot->y + shot->height) &&
+								(game->invad[i].bomb[j].y + game->invad[i].bomb[j].height) > shot->y) {
 
-					ResetBomb(&game->invad[i].bomb[j]);
-					ResetShot(shot);
-					return 1;
-				}
+						ResetBomb(&game->invad[i].bomb[j]);
+						ResetShot(shot);
+						return 1;
+					}
 			}
 		}
 	}
@@ -759,19 +786,29 @@ int InvaderCollision(GameData * game, Invader * invader)
 	int i, j;
 	if (invader->hp > 0) {
 		for (i = 0; i < game->num_players; i++) {
-			if (game->ship[i].x == invader->x && game->ship[i].y == invader->y && game->ship[i].lives >= 0) {
-				DamageShip(&game->ship[i]);
-				DamageInvader(invader);
-				return 1;
-			}
-		}
-		for (i = 0; i < game->num_players; i++) {
-			for (j = 0; j < MAX_SHOTS; j++) {
-				if (game->ship[i].shots[j].x == invader->x && game->ship[i].shots[j].y == invader->y && game->ship[i].shots[j].fired) {
-					ResetShot(&game->ship[i].shots[j]);
+			if(game->ship[i].lives >= 0)
+				if (game->ship[i].x < (invader->x + invader->width) &&
+					(game->ship[i].x + game->ship[i].width) > invader->x &&
+						game->ship[i].y < (invader->y + invader->height) &&
+						(game->ship[i].x + game->ship[i].height) > invader->y) {
+
+					DamageShip(&game->ship[i]);
 					DamageInvader(invader);
 					return 1;
 				}
+		}
+		for (i = 0; i < game->num_players; i++) {
+			for (j = 0; j < MAX_SHOTS; j++) {
+				if(game->ship[i].shots[j].fired)
+					if (game->ship[i].shots[j].x < (invader->x + invader->width) &&
+						(game->ship[i].shots[j].x + game->ship[i].shots[j].width) > invader->x &&
+							game->ship[i].shots[j].y  < (invader->y + invader->height) &&
+							(game->ship[i].shots[j].y + game->ship[i].shots[j].height) > invader->y) {
+
+						ResetShot(&game->ship[i].shots[j]);
+						DamageInvader(invader);
+						return 1;
+					}
 			}
 		}
 	}
@@ -783,21 +820,31 @@ int BombCollision(GameData * game, InvaderBomb * bomb)
 	int i, j;
 	if (bomb->fired) {
 		for (i = 0; i < game->num_players; i++) {
-			if (game->ship[i].x == bomb->x && game->ship[i].y == bomb->y && game->ship[i].lives >= 0) {
-				if (!game->ship[i].shield) {
-					DamageShip(&game->ship[i]);
-					ResetBomb(bomb);
-					return 1;
+			if (game->ship[i].lives >= 0)
+				if (game->ship[i].x < (bomb->x + bomb->width) &&
+					(game->ship[i].x + game->ship[i].width) > bomb->x &&
+						game->ship[i].y < (bomb->y + bomb->height) &&
+							(game->ship[i].y + game->ship[i].height) > bomb->y) {
+
+					if (!game->ship[i].shield) {
+						DamageShip(&game->ship[i]);
+						ResetBomb(bomb);
+						return 1;
+					}
 				}
-			}
 		}
 		for (i = 0; i < game->num_players; i++) {
 			for (j = 0; j < MAX_SHOTS; j++) {
-				if (game->ship[i].shots[j].x == bomb->x && game->ship[i].shots[j].y == bomb->y && game->ship[i].shots[j].fired) {
-					ResetShot(&game->ship[i].shots[j]);
-					ResetBomb(bomb);
-					return 1;
-				}
+				if(game->ship[i].shots[j].fired)
+					if (game->ship[i].shots[j].x < (bomb->x + bomb->width) &&
+						(game->ship[i].shots[j].x + game->ship[i].shots[j].width) > bomb->x &&
+							game->ship[i].shots[j].y < (bomb->y + bomb->height) &&
+								(game->ship[i].shots[j].y + game->ship[i].shots[j].height) > bomb->y) {
+
+						ResetShot(&game->ship[i].shots[j]);
+						ResetBomb(bomb);
+						return 1;
+					}
 			}
 		}
 	}
@@ -808,7 +855,10 @@ int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE mhStructSync) {
 	int j;
 	if (pUp->y>(game->ysize*0.2)) {
 		for (j = 0; j < game->num_players && pUp->fired; j++) {
-			if (pUp->x == game->ship[j].x && pUp->y == game->ship[j].y) {
+			if (game->ship[j].x < (pUp->x + pUp->width) &&
+				(game->ship[j].x + game->ship[j].width) > pUp->x &&
+					game->ship[j].y < (pUp->y + pUp->height) &&
+					(game->ship[j].y + game->ship[j].height) > pUp->y) {
 
 				PowerUpShip(game, &game->ship[j], pUp, mhStructSync);
 				pUp->fired = 0;
@@ -823,7 +873,10 @@ int ShipPowerUpCollision(GameData * game, Ship * ship, PowerUp *pUp, HANDLE mhSt
 	int j;
 	if (pUp->y>(game->ysize*0.2)) {
 		for (j = 0; j < game->num_players && pUp->fired; j++) {
-			if (pUp->x == ship->x && pUp->y == ship->y) {
+			if (ship->x < (pUp->x + pUp->width) &&
+				(ship->x + ship->width) > pUp->x &&
+					ship->y < (pUp->y + pUp->height) &&
+					(ship->y + ship->height) > pUp->y) {
 
 				PowerUpShip(game, ship, pUp, mhStructSync);
 				pUp->fired = 0;
@@ -854,34 +907,34 @@ int DamageInvader(Invader *in) {		//Removes 1 HP point to the invader
 
 int ResetShip(Ship *in) {
 	in->lives = -1;
-	in->x = -1;
-	in->y = -1;
+	in->x = -50;
+	in->y = -50;
 	return 1;
 }
 
 int ResetShot(ShipShot *in) {
 
 	in->fired = 0;
-	in->x = -1;
-	in->y = -1;
+	in->x = -50;
+	in->y = -50;
 	return 1;
 }
 int ResetInvader(Invader *in) {
 
 	in->hp = 0;
-	in->x = -1;
-	in->y = -1;
+	in->x = -50;
+	in->y = -50;
 	return 1;
 }
 
 int ResetBomb(InvaderBomb *in) {
 	in->fired = 0;
-	in->x = -1;
-	in->y = -1;
+	in->x = -50;
+	in->y = -50;
 	return 1;
 }
 
-int ValidateInvaderPosition(GameData * game, int x, int y, int index)
+int ValidateInvaderPosition(GameData * game, int x, int y, int width, int height, int index)
 {
 	int i;
 	int largerCoord = GetRegularLargerXPosition(game);
@@ -889,14 +942,21 @@ int ValidateInvaderPosition(GameData * game, int x, int y, int index)
 	for (i = 0; i < game->max_invaders; i++) {
 		if (i != index) {
 			if (!game->invad[i].rand_path) {
-				if (abs(game->invad[i].x - x) < 2 && abs(game->invad[i].y - y) < 2 && game->invad[i].hp > 0) {
-					return 1;
-				}
+				if(game->invad[i].hp > 0)
+					if (abs(game->invad[i].x - x) <= (2*width) && 
+						abs(game->invad[i].y - y) <= (2*height)) {
+						return 1;
+					}
 			}
 			else {
-				if (game->invad[i].x == x && game->invad[i].y == y && game->invad[i].hp > 0) {
-					return 1;
-				}
+				if(game->invad[i].hp > 0)
+					if (game->invad[i].x < (x + width) &&
+						(game->invad[i].x + game->invad[i].width) > x &&
+							game->invad[i].y < (y + height) &&
+								(game->invad[i].y + game->invad[i].height) > y) {
+
+						return 1;
+					}
 				if (x >= game->xsize) {
 					return 1;
 				}
@@ -915,8 +975,8 @@ int GetRegularLargerXPosition(GameData *game) {
 
 	for (i = 0; i < game->max_invaders; i++) {
 		if (!game->invad[i].rand_path) {
-			if (x < game->invad[i].x)
-				x = game->invad[i].x;
+			if (x < (game->invad[i].x + game->invad[i].width))
+				x = (game->invad[i].x + game->invad[i].width);
 		}
 	}
 	return x;
@@ -949,6 +1009,7 @@ int BombLauncher(BombMoves *bombMoves) {
 	}
 	return 1;
 }
+
 
 
 

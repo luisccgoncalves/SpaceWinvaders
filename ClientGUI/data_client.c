@@ -375,7 +375,7 @@ int createProdConsEvents(ThreadCtrl * ps) {
 
 int markPlayerReady(ThreadCtrl * ps) {
 
-	GameData	localGame;
+	//GameData	localGame;
 	HANDLE		htReadGame;					//Game thread
 	DWORD		tReadGameID;				//Game thread ID
 

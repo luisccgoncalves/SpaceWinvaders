@@ -39,15 +39,4 @@ typedef struct {
 
 }ThreadCtrl;
 
-void printGame(GameData msg);
-int readPipeMsg(HANDLE hPipe, HANDLE readReady, GameData * msg);
-int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg);
-int StartPipeListener(HANDLE *hPipe);
-int createProdConsEvents(ThreadCtrl * ps);
-int markPlayerReady(ThreadCtrl * ps, Packet token);
-Packet handShakeServer(ThreadCtrl * ps);
-
-DWORD WINAPI ReadGame(LPVOID tParam);
-//DWORD WINAPI GetKey(LPVOID tParam);
-
 #endif /* DATA_STRUCTS_H */

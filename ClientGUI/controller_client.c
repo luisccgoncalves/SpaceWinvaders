@@ -33,22 +33,23 @@ int LogPlayer(HWND hDlg, BOOL remote) {
 	UINT result = 0;
 
 	GetDlgItemText(hDlg, IDC_LOGIN_USER, username, SMALL_BUFF);
-	token = handShakeServer(&cThread,username);
-	_tcscpy_s(&cThread.username, SMALL_BUFF, username);
+	_tcscpy_s(cThread.username, SMALL_BUFF, username);
 
 	if (remote == TRUE) {
 		cThread.remoteLogin = 1;
 		GetDlgItemText(hDlg, IDC_LOGIN_ULOGIN, userlogin, SMALL_BUFF);
-		_tcscpy_s(&cThread.userlogin, SMALL_BUFF, userlogin);
+		_tcscpy_s(cThread.userlogin, SMALL_BUFF, userlogin);
 
 		GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF);
-		_tcscpy_s(&cThread.domain, SMALL_BUFF, domain);
+		_tcscpy_s(cThread.domain, SMALL_BUFF, domain);
 
 		GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
-		_tcscpy_s(&cThread.password, SMALL_BUFF, password);
+		_tcscpy_s(cThread.password, SMALL_BUFF, password);
 	}
 
 	startClient();
+	token = handShakeServer(&cThread, username);
+
 
 	return 0;
 

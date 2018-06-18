@@ -5,10 +5,7 @@ DWORD WINAPI LaunchClient(ThreadCtrl *cThreadRdGame) {
 	HANDLE		htReadGame;					//Game thread
 	DWORD		tReadGameID;				//Game thread ID
 
-	HANDLE		htGetKey;
-	DWORD		tGetKeyID;
-
-	Packet		token;
+	//Packet		token;
 
 	//cThreadRdGame->ThreadMustGoOn = 1;
 
@@ -256,9 +253,9 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 
 	if (cThread->remoteLogin) {
 
-		_tcscpy_s(lpFileName, SMALL_BUFF, TEXT("\\\\"));
-		_tcscat_s(lpFileName, SMALL_BUFF, cThread->domain);
-		_tcscat_s(lpFileName, SMALL_BUFF, TEXT("\\pipe\\SpaceWPipe"));
+		_tcscpy_s(lpFileName, _countof(lpFileName), TEXT("\\\\"));
+		_tcscat_s(lpFileName, _countof(lpFileName), cThread->domain);
+		_tcscat_s(lpFileName, _countof(lpFileName), TEXT("\\pipe\\SpaceWPipe"));
 
 		if (_tcscmp(cThread->password, TEXT("\0"))) {
 			log = LogonUser(

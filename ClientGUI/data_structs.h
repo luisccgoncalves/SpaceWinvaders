@@ -30,6 +30,7 @@ typedef struct {
 	HANDLE	heReadReady;			//Handle for Overlaped I/O
 
 	int		owner;					//Stores the client's ship position in the ship array
+	int		logged;
 
 	TCHAR	username[SMALL_BUFF];
 	TCHAR	userlogin[SMALL_BUFF];

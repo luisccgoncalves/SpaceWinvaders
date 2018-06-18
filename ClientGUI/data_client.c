@@ -365,21 +365,21 @@ int createProdConsEvents(ThreadCtrl * ps) {
 	return 0;
 }
 
-int markPlayerReady(ThreadCtrl * ps, Packet token) {
+int markPlayerReady(ThreadCtrl * ps) {
 
 	GameData	localGame;
 
-	_tprintf(TEXT("Press ENTER when ready\n"));
-	_gettch();
+	//_tprintf(TEXT("Press ENTER when ready\n"));
+	//_gettch();
 
-	token.instruction = 7;
-	writePipeMsg(ps->hPipe, ps->heWriteReady, token);
-	_tprintf(TEXT("READY TO PLAY\n"));
+	ps->token.instruction = 7;
+	writePipeMsg(ps->hPipe, ps->heWriteReady, ps->token);
+	//_tprintf(TEXT("READY TO PLAY\n"));
 
 	while (!readPipeMsg(ps->hPipe, ps->heReadReady, &localGame)) {
 		if (localGame.gameRunning == 1) {
 			for (int i = 0; i < MAX_PLAYERS; i++) {
-				if (localGame.ship[i].id == token.Id)
+				if (localGame.ship[i].id == ps->token.Id)
 					ps->owner = i;
 			}
 			break;
@@ -393,10 +393,8 @@ Packet handShakeServer(ThreadCtrl * ps, TCHAR *username) {
 
 	Packet		lPacket;
 	GameData	localGame;
-	BOOL		isLogged = FALSE;
 
-	do {
-		_tcscpy_s(lPacket.username, SMALL_BUFF, username);
+	_tcscpy_s(lPacket.username, SMALL_BUFF, username);
 		lPacket.Id = GetCurrentProcessId() + (DWORD)time(NULL);
 		lPacket.owner = -1;
 		lPacket.instruction = 5;
@@ -409,19 +407,11 @@ Packet handShakeServer(ThreadCtrl * ps, TCHAR *username) {
 			readPipeMsg(ps->hPipe, ps->heReadReady, &localGame);
 			for (int j = 0; j < MAX_PLAYERS; j++) {
 				if (localGame.logged[j].Id == lPacket.Id) {
-					isLogged = TRUE;
+					ps->logged = 1;
 					break;
 				}
 			}
 		}
-
-		if (isLogged == FALSE)
-			_tprintf(TEXT("Login Failed. Try again.\n"));
-		else
-			_tprintf(TEXT("Logged in!.\n"));
-
-	} while (isLogged == FALSE);
-
 
 	return lPacket;
 }

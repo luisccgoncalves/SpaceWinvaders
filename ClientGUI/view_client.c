@@ -64,6 +64,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
+		case ID_GAME_CONNECTGAME:
+			if (PlayerLogged()) {
+				if (MessageBox(hWnd, TEXT("Do you confirm you want to connecta game?"), TEXT("Connect"), MB_YESNO ) == IDYES)
+					ConnectGame();
+			}
+			else {
+				MessageBox(hWnd, TEXT("Please login first!"), TEXT("Connect"), MB_YESNO | MB_ICONEXCLAMATION);
+			}
+			break;
 		case IDM_EXIT:
 			//Replicates WM_CLOSE
 			SendMessage(hWnd, WM_CLOSE, 0, 0);

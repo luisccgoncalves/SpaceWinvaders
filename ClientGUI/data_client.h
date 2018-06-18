@@ -14,7 +14,7 @@ DWORD WINAPI ReadGame(LPVOID tParam);
 DWORD WINAPI GetKey(LPVOID tParam);
 int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread);
 int createProdConsEvents(ThreadCtrl * ps);
-int markPlayerReady(ThreadCtrl * ps, Packet token);
+int markPlayerReady(ThreadCtrl * ps);
 Packet handShakeServer(ThreadCtrl * ps, TCHAR *username);
 
 #endif /* DATA_CLIENT_H */

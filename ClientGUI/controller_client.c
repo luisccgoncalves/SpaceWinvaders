@@ -49,7 +49,7 @@ int LogPlayer(HWND hDlg, BOOL remote) {
 
 	startClient();
 	
-	return 0;
+	return 1;
 
 }
 
@@ -115,4 +115,16 @@ int centerDialogWnd(HWND hDlg) {
 		0, 0,          // Ignores size arguments. 
 		SWP_NOSIZE);
 	return 1;
+}
+
+int ConnectGame() {
+	markPlayerReady(&cThread);
+	return 1;
+}
+
+int PlayerLogged() {
+	if (cThread.logged) {
+		return 1;
+	}
+	return 0;
 }

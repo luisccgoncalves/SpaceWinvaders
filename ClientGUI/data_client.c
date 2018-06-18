@@ -163,6 +163,19 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 		return -1;
 	}
 
+	cThreadRdGame->token.instruction = 7;
+	writePipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heWriteReady, cThreadRdGame->token);
+
+	while (!readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame)&& cThreadRdGame->ThreadMustGoOn) {
+		if (localGame.gameRunning == 1) {
+			for (int i = 0; i < MAX_PLAYERS; i++) {
+				if (localGame.ship[i].id == cThreadRdGame->token.Id)
+					cThreadRdGame->owner = i;
+			}
+			break;
+		}
+	}
+
 	while (cThreadRdGame->ThreadMustGoOn){
 
 		readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame);
@@ -369,19 +382,10 @@ int markPlayerReady(ThreadCtrl * ps) {
 	//_tprintf(TEXT("Press ENTER when ready\n"));
 	//_gettch();
 
-	ps->token.instruction = 7;
-	writePipeMsg(ps->hPipe, ps->heWriteReady, ps->token);
+	//ps->token.instruction = 7;
+	//writePipeMsg(ps->hPipe, ps->heWriteReady, ps->token);
 	//_tprintf(TEXT("READY TO PLAY\n"));
 
-	while (!readPipeMsg(ps->hPipe, ps->heReadReady, &localGame)) {
-		if (localGame.gameRunning == 1) {
-			for (int i = 0; i < MAX_PLAYERS; i++) {
-				if (localGame.ship[i].id == ps->token.Id)
-					ps->owner = i;
-			}
-			break;
-		}
-	}
 
 	htReadGame = CreateThread(
 		NULL,										//Thread security attributes
@@ -420,7 +424,7 @@ Packet handShakeServer(ThreadCtrl * ps, TCHAR *username) {
 			for (int j = 0; j < MAX_PLAYERS; j++) {
 				if (localGame.logged[j].Id == lPacket.Id) {
 					ps->logged = 1;
-					break;
+					return lPacket;
 				}
 			}
 		}

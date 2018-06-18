@@ -245,13 +245,13 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 	HANDLE		hUserToken = NULL;
 	BOOL log;
 
-	LPCTSTR		lpFileName = TEXT("\0");
+	TCHAR		lpFileName[_MAX_PATH];
 
 	if (cThread->remoteLogin) {
 
-		_tcscpy_s(lpFileName, _countof(lpFileName), TEXT("\\\\"));
-		_tcscat_s(lpFileName, _countof(lpFileName), cThread->domain);
-		_tcscat_s(lpFileName, _countof(lpFileName), TEXT("\\pipe\\SpaceWPipe"));
+		_tcscpy_s(lpFileName, _MAX_PATH, TEXT("\\\\"));
+		_tcscat_s(lpFileName, _MAX_PATH, cThread->domain);
+		_tcscat_s(lpFileName, _MAX_PATH, TEXT("\\pipe\\SpaceWPipe"));
 
 		if (_tcscmp(cThread->password, TEXT("\0"))) {
 			log = LogonUser(
@@ -285,7 +285,7 @@ int StartPipeListener(HANDLE *hPipe, ThreadCtrl *cThread) {
 		}
 	}
 	else {
-		lpFileName = PIPE_NAME;
+		_tcscpy_s(lpFileName, _MAX_PATH, PIPE_NAME);
 	}
 
 

@@ -281,7 +281,7 @@ DWORD WINAPI RegPathInvaders(LPVOID tParam) {
 	HANDLE		mhStructSync = ((SMCtrl *)tParam)->mhStructSync;
 
 	int i, j, index;
-	int sidestep = 4;				//hardcoded
+	int sidestep = XSIZE/20;				//hardcoded
 	int totalsteps = (baseGame->ysize - (baseGame->max_invaders / INVADER_BY_ROW)) * sidestep;
 	int regInvaderNr = (baseGame->max_invaders - baseGame->max_rand_invaders);
 

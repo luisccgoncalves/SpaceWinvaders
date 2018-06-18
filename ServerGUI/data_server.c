@@ -191,7 +191,7 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 
 	baseGame->gameRunning = 1;
 
-	if (!DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path
+	if (!DefineInvadersType(baseGame, ThreadMustGoOn)) {				//Defines invader path type
 		_tprintf(TEXT("[Error] Defining invaders path! \n"));
 	}
 
@@ -199,11 +199,11 @@ DWORD WINAPI StartGame(LPVOID tParam) {
 		_tprintf(TEXT("[Error] Giving invaders HP! \n"));
 	}
 
-	if (!PlaceDefenders(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+	if (!PlaceDefenders(baseGame, ThreadMustGoOn)) {					//places the defender ships
 		_tprintf(TEXT("[Error] placing defender ships ! \n"));
 	}
 
-	if (!OriginalPosition(baseGame, ThreadMustGoOn)) {					//Gives invaders HP
+	if (!OriginalPosition(baseGame, ThreadMustGoOn)) {					//Gives invaders original position
 		_tprintf(TEXT("[Error] placing invaders ships ! \n"));
 	}
 

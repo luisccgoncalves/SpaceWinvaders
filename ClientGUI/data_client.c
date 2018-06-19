@@ -178,20 +178,24 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	cThreadRdGame->token.instruction = 7;
 	writePipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heWriteReady, cThreadRdGame->token);
 
-	while (!readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame)&& cThreadRdGame->ThreadMustGoOn) {
+	int waiting=1;
+	while (waiting && cThreadRdGame->ThreadMustGoOn) {
+		readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame);
+
 		if (cThreadRdGame->localGame.gameRunning == 1) {
-			for (int i = 0; i < MAX_PLAYERS; i++) {
-				if (cThreadRdGame->localGame.ship[i].id == cThreadRdGame->token.Id)
+			for (int i = 0; i < MAX_PLAYERS && waiting; i++) {
+				if (cThreadRdGame->localGame.ship[i].id == cThreadRdGame->token.Id) {
 					cThreadRdGame->owner = i;
+					waiting = 0;
+				}
 			}
-			break;
 		}
 	}
 
 	while (cThreadRdGame->ThreadMustGoOn){
 
-		if(readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame))
-			SetEvent(rectEvent);
+		readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame);
+		SetEvent(rectEvent);
 
 	} 
 

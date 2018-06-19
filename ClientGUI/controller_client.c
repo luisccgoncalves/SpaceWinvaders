@@ -140,11 +140,34 @@ DWORD WINAPI UpdateView(LPVOID tParam) {
 	return 1;
 }
 
-int paintMap() {
-	//Rectangle(auxDC, x, y, x + 50, y + 30);
+int paintMap(HDC hdc) {
 
+	int i, j;
 
-	return 1;
+	if (cThread.localGame.gameRunning) {
+
+		for (i = 0; i < cThread.localGame.max_invaders; i++) {
+			if (cThread.localGame.invad[i].hp) {
+				if (cThread.localGame.invad[i].rand_path)
+					Rectangle(hdc,							//rand invader bitmap
+						cThread.localGame.invad[i].x,
+						cThread.localGame.invad[i].y,
+						cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
+						cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
+
+				else
+					Rectangle(hdc,							 //Regular invader bitmap
+						cThread.localGame.invad[i].x,
+						cThread.localGame.invad[i].y,
+						cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
+						cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
+
+			}
+		}
+		return 1;
+	}
+
+	return 0;
 }
 
 /* TO DO*/

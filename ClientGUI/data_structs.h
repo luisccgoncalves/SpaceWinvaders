@@ -39,6 +39,7 @@ typedef struct {
 	int		remoteLogin;
 	Packet	token;
 
+	GameData localGame;
 }ThreadCtrl;
 
 HANDLE		rectEvent;				//Handle to event to update main window

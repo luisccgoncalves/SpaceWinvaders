@@ -139,6 +139,9 @@ DWORD WINAPI UpdateView(LPVOID tParam) {
 	}
 }
 
+int paintMap() {
+	Rectangle(auxDC, x, y, x + 50, y + 30);
+}
 
 /* TO DO*/
 int GetScore();

@@ -1,7 +1,8 @@
 #include "controller_client.h"
 
 ThreadCtrl		cThread;
-Packet			token;
+//Packet			token;
+//int		packetUpd = 0;
 
 int startClient(){
 
@@ -119,6 +120,13 @@ int centerDialogWnd(HWND hDlg) {
 
 int ConnectGame() {
 	markPlayerReady(&cThread);
+	CreateThread(
+		NULL,													//Thread security attributes
+		0,														//Stack size (0 for default)
+		SendKeyPacket,												//Thread function name
+		(LPVOID)&cThread,										//Thread parameter struct
+		0,														//Creation flags
+		NULL);													//gets thread ID 
 	return 1;
 }
 
@@ -212,6 +220,47 @@ int paintMap(HDC hdc) {
 	}
 
 	return 0;
+}
+
+int SendKey(int num) {
+	switch (num) {
+	case 3:
+		cThread.token.instruction = 3;
+		cThread.packetUpd = 1;
+		break;
+	case 1:
+		cThread.token.instruction = 1;
+		cThread.packetUpd = 1;
+		break;
+	case 2:
+		cThread.token.instruction = 2;
+		cThread.packetUpd = 1;
+		break;
+	case 0:
+		cThread.token.instruction = 0;
+		cThread.packetUpd = 1;
+		break;
+	case 4:
+		cThread.token.instruction = 4;
+		cThread.packetUpd = 1;
+		break;
+	//case 27://esc
+	//		//deauth packet?
+	//	cThread.token.instruction = 0;
+	//	//packetUpd = 1;
+	//	break;
+	//case 32://space
+	//		//PlaySound(TEXT("shoot.wav"), NULL, SND_ASYNC | SND_FILENAME);		//needs better aproach
+	//	localpacket.instruction = 4;
+	//	packetUpd = 1;
+	//	break;
+	//case 224://extended
+	//	_gettch();//ignore extended
+	//	break;
+	default:
+		break;
+	}
+	return 1;
 }
 
 /* TO DO*/

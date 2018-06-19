@@ -17,7 +17,7 @@ int PlayerIsGameBound();
 DWORD WINAPI UpdateView(LPVOID tParam);
 
 int paintMap(HDC hdc);
-
+int SendKey(int num);
 int GetScore();
 int GetLives();
 

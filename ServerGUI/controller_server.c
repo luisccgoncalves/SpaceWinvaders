@@ -87,9 +87,9 @@ int validateCreateGameDlgValues(HWND hDlg) {
 		return 11;
 	else if (bombRate < 100 || bombRate >500)
 		return 6;
-	else if (shotRate < 200 || shotRate >1000)
+	else if (shotRate < 500 || shotRate >1000)
 		return 7;
-	else if (moveRate < 50 || moveRate >200)
+	else if (moveRate < 4 || moveRate >10)
 		return 8;
 	else if (pUpDuration < 5 || pUpDuration >20)
 		return 9;

@@ -192,7 +192,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	return 0;
 }
 
-//DWORD WINAPI GetKey(LPVOID tParam) {
+//DWORD WINAPI SendKeyPacket(LPVOID tParam) {
 //
 //	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
 //	wint_t		k_stroke;
@@ -437,4 +437,19 @@ Packet handShakeServer(ThreadCtrl * ps, TCHAR *username) {
 		}
 
 	return lPacket;
+}
+
+DWORD WINAPI SendKeyPacket(LPVOID tParam) {
+
+	ThreadCtrl	*cThread = (ThreadCtrl*)tParam;
+	cThread->owner;
+
+	while (cThread->ThreadMustGoOn) {
+	
+		if (cThread->packetUpd) {
+			writePipeMsg(cThread->hPipe, cThread->heWriteReady, cThread->token);
+			cThread->packetUpd = 0;
+		}
+	}
+	return 0;
 }

@@ -647,7 +647,7 @@ int LoadGDataDefaults(GameData *game) {
 	game->max_invaders = MAX_INVADER;					// Base num of invaders in the field
 	game->max_rand_invaders = RAND_INVADER;				// Base num of invaders in the field
 	game->num_players = 1;								// Base num of players
-	game->ship_shot_speed = PROJECTL_SPEED;				// Base speed for defender shot
+	game->ship_shot_speed = PROJECTL_SPEED/2;				// Base speed for defender shot
 	game->projectiles_speed = PROJECTL_SPEED;			// Base speed for Powerups and invader bombs
 	game->pup_duration = POWERUP_DUR;					// Base power up duration
 	game->bombRate = BOMB_RATE;							// Base steps until bomb launch

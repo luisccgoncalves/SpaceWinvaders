@@ -650,7 +650,7 @@ int LoadGDataDefaults(GameData *game) {
 	game->ship_shot_speed = PROJECTL_SPEED;				// Base speed for defender shot
 	game->projectiles_speed = PROJECTL_SPEED;			// Base speed for Powerups and invader bombs
 	game->pup_duration = POWERUP_DUR;					// Base power up duration
-	game->bombRate = BOM_BRATE;							// Base steps until bomb launch
+	game->bombRate = BOMB_RATE;							// Base steps until bomb launch
 	game->shotRate = SHOT_RATE;
 	game->moveRate = MOVE_RATE;
 
@@ -669,7 +669,7 @@ int LoadGDataDefaults(GameData *game) {
 		}
 		game->invad[i].width = INV_WIDTH;
 		game->invad[i].height = INV_HEIGHT;
-		game->invad[i].bombRateCounter = RandomValue(10);
+		game->invad[i].bombRateCounter = RandomValue(BOMB_RATE);
 	}
 	/*Ships & shots*/
 	for (i = 0; i < game->num_players; i++) {
@@ -943,8 +943,8 @@ int ValidateInvaderPosition(GameData * game, int x, int y, int width, int height
 		if (i != index) {
 			if (!game->invad[i].rand_path) {
 				if(game->invad[i].hp > 0)
-					if (abs(game->invad[i].x - x) <= (2*width) && 
-						abs(game->invad[i].y - y) <= (2*height)) {
+					if (abs(game->invad[i].x - x) < (3*width) && 
+						abs(game->invad[i].y - y) < (3*height)) {
 						return 1;
 					}
 			}

@@ -647,7 +647,7 @@ int InstantiateGame(GameData *game) {
 	game->ship_shot_speed =		PROJECTL_SPEED;				// Base speed for defender shot
 	game->projectiles_speed =	PROJECTL_SPEED;				// Base speed for Powerups and invader bombs
 	game->pup_duration =		POWERUP_DUR;				// Base power up duration
-	game->bombRate =			BOM_BRATE;					// Base steps until bomb launch
+	game->bombRate =			BOMB_RATE;					// Base steps until bomb launch
 	game->shotRate =			SHOT_RATE;
 	game->moveRate =			MOVE_RATE;
 

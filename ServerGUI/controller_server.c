@@ -81,11 +81,11 @@ int validateCreateGameDlgValues(HWND hDlg) {
 		return 3;
 	else if (hardInvaders > maxInvaders)
 		return 10;
-	else if (invadersSpeed < 200 || invadersSpeed >2000)
+	else if (invadersSpeed < 20 || invadersSpeed >200)
 		return 4;
-	else if (projectileSpeed < 200 || projectileSpeed >2000)
+	else if (projectileSpeed < 20 || projectileSpeed >200)
 		return 11;
-	else if (bombRate < 10 || bombRate >50)
+	else if (bombRate < 100 || bombRate >500)
 		return 6;
 	else if (shotRate < 200 || shotRate >1000)
 		return 7;

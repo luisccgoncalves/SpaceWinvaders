@@ -35,15 +35,15 @@
 
 #define MAX_PLAYERS		5							//Maximum number of concurrent players
 #define MAX_INVADER		10							//Maximum invaders by level
-#define MAX_BOMBS		3							//Maximum bombs in the screen at any time for one invader
+#define MAX_BOMBS		30							//Maximum bombs in the screen at any time for one invader
 #define MAX_SHOTS		99							//Maximum shots a defender can have on the screen at same time
 #define RAND_INVADER	5							//Number of random path invaders
 
 #define INVADER_BY_ROW	11							//Number of maximum invaders by row
 
-#define INVADER_SPEED	1000						//Regular path invader speed in miliseconds
-#define PROJECTL_SPEED	200							//Base speed for Powerups and invader bombs
-#define	BOM_BRATE		10							//Number of steps between bomb launches 
+#define INVADER_SPEED	100							//Regular path invader speed in miliseconds
+#define PROJECTL_SPEED	20							//Base speed for Powerups and invader bombs
+#define	BOMB_RATE		100							//Number of steps between bomb launches 
 #define SHOT_RATE		500							//Number that represents shots for milliseconds
 #define MOVE_RATE		50							//Number that represents defender movement for milliseconds
 

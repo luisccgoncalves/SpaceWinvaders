@@ -508,7 +508,7 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 	if (shotNum > -1) {
 		WaitForSingleObject(mhStructSync, INFINITE);
-		baseGame->ship[owner].shots[shotNum].x = baseGame->ship[owner].x;
+		baseGame->ship[owner].shots[shotNum].x = (baseGame->ship[owner].x + (baseGame->ship[owner].width/3));
 		baseGame->ship[owner].shots[shotNum].y = baseGame->ship[owner].y;
 		baseGame->ship[owner].shots[shotNum].fired = 1;
 		ReleaseMutex(mhStructSync);

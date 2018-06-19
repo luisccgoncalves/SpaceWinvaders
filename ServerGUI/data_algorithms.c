@@ -170,6 +170,8 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.type = RandomValue(7);		//Random type between 0 and 6
 
 	pUp.duration = duration;
+	pUp.width = 2 * PROJ_SIZE;
+	pUp.height = 2 * PROJ_SIZE;
 	return pUp;
 }
 

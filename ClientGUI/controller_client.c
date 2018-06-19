@@ -201,7 +201,7 @@ int paintMap(HDC hdc) {
 		}
 		for (i = 0; i < cThread.localGame.num_players; i++) {
 			if (cThread.localGame.ship[i].lives > 0) {
-					Rectangle(hdc,							//rand invader bitmap
+					Rectangle(hdc,							//ship bitmap
 						cThread.localGame.ship[i].x,
 						cThread.localGame.ship[i].y,
 						cThread.localGame.ship[i].x + cThread.localGame.ship[i].width,
@@ -215,6 +215,13 @@ int paintMap(HDC hdc) {
 								cThread.localGame.ship[i].shots[j].y + cThread.localGame.ship[i].shots[j].height);
 						}
 			}
+		}
+		if (cThread.localGame.pUp.fired == 1) {
+			Rectangle(hdc,							//rand invader bitmap
+				cThread.localGame.pUp.x,
+				cThread.localGame.pUp.y,
+				cThread.localGame.pUp.x + cThread.localGame.pUp.width,
+				cThread.localGame.pUp.y + cThread.localGame.pUp.height);
 		}
 		return 1;
 	}

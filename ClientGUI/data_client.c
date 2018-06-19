@@ -117,14 +117,16 @@ int readPipeMsg(HANDLE hPipe, HANDLE readReady, GameData * msg) {
 
 	if (dwBytesRead < sizeof(GameData)) {
 		if (GetLastError() == ERROR_BROKEN_PIPE) {
-			_tprintf(TEXT("[Error] Connection lost.\n"));
-			return -1;
+			//_tprintf(TEXT("[Error] Connection lost.\n"));
+			return 0;
 		}
-		else
-			_tprintf(TEXT("[Error] ReadFile failed. Error = %d \n"), GetLastError());
+		else {
+			//_tprintf(TEXT("[Error] ReadFile failed. Error = %d \n"), GetLastError());
+			return 0;
+		}
 	}
 
-	return 0;
+	return 1;
 }
 
 int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg) {
@@ -158,6 +160,16 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
 	GameData	localGame;
 
+	rectEvent = CreateEvent(				//Creates the event to warn client about window refresh
+		NULL,										//Event attributes
+		TRUE,										//Manual reset (TRUE for auto-reset)
+		FALSE,										//Initial state
+		NULL);										//Event name
+	if (rectEvent == NULL) {
+		_tprintf(TEXT("[Error] Event 1st pipe instance (%d)\n"), GetLastError());
+		return -1;
+	}
+
 	if (cThreadRdGame->hPipe == NULL) {
 		//_tprintf(TEXT("[Error] casting pipe. (%d)\n"), GetLastError());
 		return -1;
@@ -178,8 +190,9 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	while (cThreadRdGame->ThreadMustGoOn){
 
-		readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame);
-		//printGame(localGame);
+		if(readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame))
+			SetEvent(rectEvent);
+
 	} 
 
 	return 0;

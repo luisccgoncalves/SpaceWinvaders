@@ -41,4 +41,5 @@ typedef struct {
 
 }ThreadCtrl;
 
+HANDLE		rectEvent;				//Handle to event to update main window
 #endif /* DATA_STRUCTS_H */

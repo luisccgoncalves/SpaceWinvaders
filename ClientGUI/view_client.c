@@ -43,6 +43,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
+	case WM_CREATE:
+		CreateThread(
+			NULL,													//Thread security attributes
+			0,														//Stack size (0 for default)
+			LaunchClient,											//Thread function name
+			(LPVOID)&hWnd,											//Thread parameter struct
+			0,														//Creation flags
+			NULL);													//gets thread ID 
+
+		break;
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);

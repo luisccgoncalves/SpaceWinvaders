@@ -99,6 +99,7 @@ DWORD WINAPI instanceThreadWrite(LPVOID tParam) {
 		WaitForSingleObject(pipeStruct.hSMServerUpdate, INFINITE);
 		localGameData = consumeGameData(pipeStruct.pSMemGameData, pipeStruct.mhGameData);
 		writePipeMsg(pipeStruct.hPipe, heWriteReady, localGameData);
+		
 	}
 
 	return 0;
@@ -130,18 +131,6 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 	pipeStructWrite.pSMemGameData = cThread->pSMemGameData;
 
 	pipeStructRead.cThread = cThread;
-
-
-	/* TO DELETE */
-	h1stPipeInst = CreateEvent(				//Creates the event to warn clients that the 1st pipe instance was created
-		NULL,										//Event attributes
-		TRUE,										//Manual reset (TRUE for auto-reset)
-		FALSE,										//Initial state
-		EVE_1ST_PIPE);								//Event name
-	if (h1stPipeInst == NULL) {
-		_tprintf(TEXT("[Error] Event 1st pipe instance (%d)\n"), GetLastError());
-		return -1;
-	}
 
 	while (cThread->ThreadMustGoOn) {
 
@@ -176,9 +165,6 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 			_tprintf(TEXT("[Error] Creating NamePipe (%d)\n"), GetLastError());
 			return -1;
 		}
-
-		if (!threadn)
-			SetEvent(h1stPipeInst);
 
 		fConnected = ConnectNamedPipe(hPipe, NULL) ?
 			TRUE :

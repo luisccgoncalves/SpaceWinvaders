@@ -194,7 +194,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	while (cThreadRdGame->ThreadMustGoOn){
 
-		readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame);
+		readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame);
 		SetEvent(rectEvent);
 
 	} 

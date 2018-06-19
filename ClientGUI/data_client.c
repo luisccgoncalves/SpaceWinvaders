@@ -186,6 +186,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 			for (int i = 0; i < MAX_PLAYERS && waiting; i++) {
 				if (cThreadRdGame->localGame.ship[i].id == cThreadRdGame->token.Id) {
 					cThreadRdGame->owner = i;
+					cThreadRdGame->token.owner = i;
 					waiting = 0;
 				}
 			}

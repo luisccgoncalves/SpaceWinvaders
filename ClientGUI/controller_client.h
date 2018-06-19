@@ -12,6 +12,8 @@ int centerDialogWnd(HWND hDlg);
 
 int ConnectGame();
 int PlayerLogged();
+int PlayerIsGameBound();
+
 int paintMap();
 
 int GetScore();

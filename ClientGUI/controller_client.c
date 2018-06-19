@@ -122,6 +122,13 @@ int ConnectGame() {
 	return 1;
 }
 
+int PlayerIsGameBound() {
+	if (cThread.token.owner >= 0 && cThread.token.owner <= MAX_PLAYERS) {
+		return 1;
+	}
+	return 0;
+}
+
 int PlayerLogged() {
 	if (cThread.logged) {
 		return 1;

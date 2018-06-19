@@ -110,7 +110,6 @@ DWORD WINAPI CreatePipes(LPVOID tParam) {
 	SMCtrl		*cThread = (SMCtrl*)tParam;
 	LPTSTR		lpsPipeName = PIPE_NAME;
 
-	HANDLE		h1stPipeInst;
 	HANDLE		htPipeConnectW[40] = { NULL }; //Update this
 	HANDLE		htPipeConnectR[40] = { NULL }; //Update this
 	int			threadn = 0;

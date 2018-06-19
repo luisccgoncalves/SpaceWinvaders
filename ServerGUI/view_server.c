@@ -56,7 +56,12 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case ID_SETTINGS_CREATEGAME:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWnd, winGameCreateDlg);
+			if (!gameRunning()) {
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWnd, winGameCreateDlg);
+			}
+			else {
+				MessageBox(hWnd, TEXT("Game already started"), TEXT("Message"), MB_OK | MB_ICONEXCLAMATION);
+			}
 			break;
 		case ID_HELP_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, winAboutDlg);
@@ -66,7 +71,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 				MessageBox(hWnd, TEXT("You need to configure a Game first!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			}
-			else if(!getPlayersReady()){
+			else if (!getPlayersReady()) {
 				//change the flag to getPlayersReady
 				MessageBox(hWnd, TEXT("There are no players ready!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				break;

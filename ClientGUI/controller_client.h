@@ -12,7 +12,10 @@ int centerDialogWnd(HWND hDlg);
 
 int ConnectGame();
 int PlayerLogged();
-int paintMap();
+
+DWORD WINAPI UpdateView(LPVOID tParam);
+
+int paintMap(HDC hdc);
 
 int GetScore();
 int GetLives();

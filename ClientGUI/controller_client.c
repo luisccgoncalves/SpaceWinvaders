@@ -131,11 +131,23 @@ int PlayerLogged() {
 
 DWORD WINAPI UpdateView(LPVOID tParam) {
 
+	rectEvent = CreateEvent(				//Creates the event to warn client about window refresh
+		NULL,										//Event attributes
+		FALSE,										//Manual reset (TRUE for auto-reset)
+		FALSE,										//Initial state
+		NULL);										//Event name
+	if (rectEvent == NULL) {
+		_tprintf(TEXT("[Error] Event 1st pipe instance (%d)\n"), GetLastError());
+		return -1;
+	}
+
+	cThread.ThreadMustGoOn = 1;
+
 	while (cThread.ThreadMustGoOn) {
+
+		InvalidateRect(tParam, NULL, TRUE);
+
 		WaitForSingleObject(rectEvent, INFINITE);
-
-		InvalidateRect(tParam, NULL, FALSE);
-
 	}
 	return 1;
 }

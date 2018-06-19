@@ -166,7 +166,7 @@ int paintMap(HDC hdc) {
 	if (cThread.localGame.gameRunning) {
 
 		for (i = 0; i < cThread.localGame.max_invaders; i++) {
-			if (cThread.localGame.invad[i].hp) {
+			if (cThread.localGame.invad[i].hp>0) {
 				if (cThread.localGame.invad[i].rand_path)
 					Rectangle(hdc,							//rand invader bitmap
 						cThread.localGame.invad[i].x,
@@ -181,6 +181,31 @@ int paintMap(HDC hdc) {
 						cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
 						cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
 
+			}
+			for (j = 0; j < MAX_SHOTS; j++) {
+				if (cThread.localGame.invad[i].bomb[j].fired == 1)
+					Rectangle(hdc,
+						cThread.localGame.invad[i].bomb[j].x,
+						cThread.localGame.invad[i].bomb[j].y,
+						cThread.localGame.invad[i].bomb[j].x + cThread.localGame.invad[i].bomb[j].width,
+						cThread.localGame.invad[i].bomb[j].y + cThread.localGame.invad[i].bomb[j].height);
+			}
+		}
+		for (i = 0; i < cThread.localGame.num_players; i++) {
+			if (cThread.localGame.ship[i].lives > 0) {
+					Rectangle(hdc,							//rand invader bitmap
+						cThread.localGame.ship[i].x,
+						cThread.localGame.ship[i].y,
+						cThread.localGame.ship[i].x + cThread.localGame.ship[i].width,
+						cThread.localGame.ship[i].y + cThread.localGame.ship[i].height);
+					if(cThread.localGame.ship[i].shots[j].fired == 1)
+						for (j = 0; j < MAX_BOMBS; j++) {
+							Rectangle(hdc,
+								cThread.localGame.ship[i].shots[j].x,
+								cThread.localGame.ship[i].shots[j].y,
+								cThread.localGame.ship[i].shots[j].x + cThread.localGame.ship[i].shots[j].width,
+								cThread.localGame.ship[i].shots[j].y + cThread.localGame.ship[i].shots[j].height);
+						}
 			}
 		}
 		return 1;

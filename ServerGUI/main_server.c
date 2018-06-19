@@ -28,7 +28,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		return 0;
 	}
 
-	SetWindowPos(hWnd, HWND_BOTTOM, 0, 0, 1300, 700, NULL);
+	SetWindowPos(hWnd, HWND_BOTTOM, 0, 0, 1300, 700, 0);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 

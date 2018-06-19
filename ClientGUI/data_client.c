@@ -158,7 +158,7 @@ int writePipeMsg(HANDLE hPipe, HANDLE writeReady, Packet msg) {
 DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	ThreadCtrl	*cThreadRdGame = (ThreadCtrl*)tParam;
-	GameData	localGame;
+	//GameData	localGame;
 
 	rectEvent = CreateEvent(				//Creates the event to warn client about window refresh
 		NULL,										//Event attributes
@@ -178,10 +178,10 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	cThreadRdGame->token.instruction = 7;
 	writePipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heWriteReady, cThreadRdGame->token);
 
-	while (!readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame)&& cThreadRdGame->ThreadMustGoOn) {
-		if (localGame.gameRunning == 1) {
+	while (!readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, cThreadRdGame->localGame)&& cThreadRdGame->ThreadMustGoOn) {
+		if (cThreadRdGame->localGame.gameRunning == 1) {
 			for (int i = 0; i < MAX_PLAYERS; i++) {
-				if (localGame.ship[i].id == cThreadRdGame->token.Id)
+				if (cThreadRdGame->localGame.ship[i].id == cThreadRdGame->token.Id)
 					cThreadRdGame->owner = i;
 			}
 			break;
@@ -190,7 +190,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 
 	while (cThreadRdGame->ThreadMustGoOn){
 
-		if(readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &localGame))
+		if(readPipeMsg(&cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame))
 			SetEvent(rectEvent);
 
 	} 

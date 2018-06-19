@@ -12,4 +12,7 @@ int centerDialogWnd(HWND hDlg);
 int ConnectGame();
 int PlayerLogged();
 
+int GetScore();
+int GetLives();
+
 #endif	//CONTROLLER_CLIENT_H

@@ -178,7 +178,7 @@ DWORD WINAPI ReadGame(LPVOID tParam) {
 	cThreadRdGame->token.instruction = 7;
 	writePipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heWriteReady, cThreadRdGame->token);
 
-	while (!readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, cThreadRdGame->localGame)&& cThreadRdGame->ThreadMustGoOn) {
+	while (!readPipeMsg(cThreadRdGame->hPipe, cThreadRdGame->heReadReady, &cThreadRdGame->localGame)&& cThreadRdGame->ThreadMustGoOn) {
 		if (cThreadRdGame->localGame.gameRunning == 1) {
 			for (int i = 0; i < MAX_PLAYERS; i++) {
 				if (cThreadRdGame->localGame.ship[i].id == cThreadRdGame->token.Id)

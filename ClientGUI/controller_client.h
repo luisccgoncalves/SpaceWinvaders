@@ -9,8 +9,10 @@ int LogPlayer(HWND hDlg, BOOL remote);
 int loadTop10(HWND hDlg);
 int validateLoginValues(HWND hDlg, BOOL remote);
 int centerDialogWnd(HWND hDlg);
+
 int ConnectGame();
 int PlayerLogged();
+int paintMap();
 
 int GetScore();
 int GetLives();

@@ -137,10 +137,14 @@ DWORD WINAPI UpdateView(LPVOID tParam) {
 		InvalidateRect(tParam, NULL, FALSE);
 
 	}
+	return 1;
 }
 
 int paintMap() {
-	Rectangle(auxDC, x, y, x + 50, y + 30);
+	//Rectangle(auxDC, x, y, x + 50, y + 30);
+
+
+	return 1;
 }
 
 /* TO DO*/

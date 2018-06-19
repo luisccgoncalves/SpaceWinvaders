@@ -128,3 +128,18 @@ int PlayerLogged() {
 	}
 	return 0;
 }
+
+DWORD WINAPI UpdateView(LPVOID tParam) {
+
+	while (cThread.ThreadMustGoOn) {
+		WaitForSingleObject(rectEvent, INFINITE);
+
+		InvalidateRect(tParam, NULL, FALSE);
+
+	}
+}
+
+
+/* TO DO*/
+int GetScore();
+int GetLives();

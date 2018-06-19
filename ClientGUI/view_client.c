@@ -80,12 +80,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 		case ID_GAME_CONNECTGAME:
-			if (PlayerLogged()) {
-				if (MessageBox(hWnd, TEXT("Do you confirm you want to connecta game?"), TEXT("Connect"), MB_YESNO ) == IDYES)
-					ConnectGame();
+			if (!PlayerIsGameBound()) {
+				if (PlayerLogged()) {
+					if (MessageBox(hWnd, TEXT("Do you confirm you want to connecta game?"), TEXT("Connect"), MB_YESNO) == IDYES)
+						ConnectGame();
+				}
+				else {
+					MessageBox(hWnd, TEXT("Please login first!"), TEXT("Connect"), MB_OK | MB_ICONEXCLAMATION);
+				}
 			}
 			else {
-				MessageBox(hWnd, TEXT("Please login first!"), TEXT("Connect"), MB_YESNO | MB_ICONEXCLAMATION);
+				MessageBox(hWnd, TEXT("You are already game bound!"), TEXT("Connect"), MB_OK | MB_ICONEXCLAMATION);
 			}
 			break;
 		case IDM_EXIT:

@@ -12,6 +12,7 @@ int centerDialogWnd(HWND hDlg);
 
 int ConnectGame();
 int PlayerLogged();
+int PlayerIsGameBound();
 
 DWORD WINAPI UpdateView(LPVOID tParam);
 

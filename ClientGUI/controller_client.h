@@ -18,6 +18,7 @@ DWORD WINAPI UpdateView(LPVOID tParam);
 
 int paintMap(HDC hdc);
 int SendKey(int num);
+int SendChar(WPARAM wParam);
 int GetScore();
 int GetLives();
 

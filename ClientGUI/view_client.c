@@ -112,27 +112,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 	}
 	break;
-	case WM_KEYDOWN:
+	//case WM_KEYDOWN:
+	//	SendKey(wParam);
+	//	/* Can i send the pressed key down?*/
+	//	switch (wParam) {
+	//	case VK_UP:
+	//		SendKey(3);
+	//		break;
+	//	case VK_RIGHT:
+	//		SendKey(0);
+	//		break;
+	//	case VK_LEFT:
+	//		SendKey(2);
+	//		break;
+	//	case VK_DOWN:
+	//		SendKey(1);
+	//		break;
+	//	case  VK_SPACE:
+	//		SendKey(4);
+	//		break;
+	//	default: 
+	//		break;
+	//	}
+	//	break;
+	case WM_CHAR:
+		SendChar(wParam);
 		/* Can i send the pressed key down?*/
-		switch (wParam) {
-		case VK_UP:
-			SendKey(3);
-			break;
-		case VK_RIGHT:
-			SendKey(0);
-			break;
-		case VK_LEFT:
-			SendKey(2);
-			break;
-		case VK_DOWN:
-			SendKey(1);
-			break;
-		case  VK_SPACE:
-			SendKey(4);
-			break;
-		default: 
-			break;
-		}
 		break;
 	case WM_CLOSE:
 		if (MessageBox(hWnd, TEXT("Are you sure?"), TEXT("Quit"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES)

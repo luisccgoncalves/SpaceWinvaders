@@ -44,5 +44,9 @@ typedef struct {
 	GameData localGame;
 }ThreadCtrl;
 
+typedef struct {
+	TCHAR up, down, right, left, fire;
+};
+
 HANDLE		rectEvent;				//Handle to event to update main window
 #endif /* DATA_STRUCTS_H */

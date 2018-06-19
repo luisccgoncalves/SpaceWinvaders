@@ -270,6 +270,37 @@ int SendKey(int num) {
 	return 1;
 }
 
+int SendChar(WPARAM wParam) {
+	TCHAR up, down, right, left;
+	up = 'w';
+	down = 's';
+	right = 'd';
+	left = 'a';
+	space = ' ';
+
+	if (wParam == up) {
+		cThread.token.instruction = 3;
+		cThread.packetUpd = 1;
+	}
+	else if (wParam == down) {
+		cThread.token.instruction = 1;
+		cThread.packetUpd = 1;
+	}
+	else if (wParam == left) {
+		cThread.token.instruction = 2;
+		cThread.packetUpd = 1;
+	}
+	else if (wParam == right) {
+		cThread.token.instruction = 0;
+		cThread.packetUpd = 1;
+	}
+	else if(wParam == space){
+		cThread.token.instruction = 4;
+		cThread.packetUpd = 1;
+	}
+	return 1;
+}
+
 /* TO DO*/
 int GetScore();
 int GetLives();

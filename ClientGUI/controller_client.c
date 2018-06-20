@@ -272,7 +272,7 @@ int SendKey(int num) {
 }
 
 int SendChar(WPARAM wParam) {
-	TCHAR up, down, right, left, space;
+	//TCHAR up, down, right, left, space;
 
 	/*delete after recordKeys is working */
 	//up = 'w';

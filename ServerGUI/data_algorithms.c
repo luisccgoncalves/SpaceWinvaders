@@ -945,17 +945,17 @@ int ValidateInvaderPosition(GameData * game, int x, int y, int width, int height
 		if (i != index) {
 			if (!game->invad[i].rand_path) {
 				if(game->invad[i].hp > 0)
-					if (abs(game->invad[i].x - x) < (3*width) && 
-						abs(game->invad[i].y - y) < (3*height)) {
+					if (abs(game->invad[i].x - x) < (game->invad[i].width + width) &&
+						abs(game->invad[i].y - y) < (game->invad[i].height +height)) {
 						return 1;
 					}
 			}
 			else {
 				if(game->invad[i].hp > 0)
-					if (game->invad[i].x < (x + width) &&
-						(game->invad[i].x + game->invad[i].width) > x &&
-							game->invad[i].y < (y + height) &&
-								(game->invad[i].y + game->invad[i].height) > y) {
+					if (game->invad[i].x < (x + width + game->invad[i].width) &&
+						(game->invad[i].x + game->invad[i].width + width) > x &&
+							game->invad[i].y < (y + height + game->invad[i].height) &&
+								(game->invad[i].y + game->invad[i].height + height) > y) {
 
 						return 1;
 					}

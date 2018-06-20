@@ -575,8 +575,8 @@ int UpdateLocalShip(ClientMoves *move) {
 		if ((timeNow - moveTimeStamp) >= moveRate) {
 			move->game->ship[index].moveTimeStamp = timeNow;
 			if (move->game->ship[index].x < (move->game->xsize - 1) && move->game->ship[index].lives >= 0)
-				if (DefenderShipsCollision(move->game, ++xTemp, yTemp, index)) {
-					move->game->ship[index].x++;
+				if (DefenderShipsCollision(move->game, xTemp+2, yTemp, index)) {
+					move->game->ship[index].x+=2;
 				}
 		}
 		break;
@@ -595,8 +595,8 @@ int UpdateLocalShip(ClientMoves *move) {
 		if ((timeNow - moveTimeStamp) >= moveRate) {
 			move->game->ship[index].moveTimeStamp = timeNow;
 			if (move->game->ship[index].x > 0 && move->game->ship[index].lives >= 0)
-				if (DefenderShipsCollision(move->game, --xTemp, yTemp, index)) {
-					move->game->ship[index].x--;
+				if (DefenderShipsCollision(move->game, xTemp-2, yTemp, index)) {
+					move->game->ship[index].x-=2;
 				}
 		}
 		break;

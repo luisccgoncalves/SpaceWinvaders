@@ -48,7 +48,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
-		LoadBitmaps();
+		LoadBitmaps(hWnd);
 
 		CreateThread(
 			NULL,													//Thread security attributes

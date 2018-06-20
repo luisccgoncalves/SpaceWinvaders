@@ -172,8 +172,8 @@ DWORD WINAPI UpdateView(LPVOID tParam) {
 	}
 	return 1;
 }
-int LoadBitmaps() {
-	//bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+int LoadBitmaps(hWnd) {
+	bmpExercising[0] = LoadBitmap(GetModuleHandle(hWnd), MAKEINTRESOURCE(IDB_BITMAP1));
 	return 1;
 }
 

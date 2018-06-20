@@ -16,7 +16,7 @@ int PlayerIsGameBound();
 
 DWORD WINAPI UpdateView(LPVOID tParam);
 
-int LoadBitmaps();
+int LoadBitmaps(HWND hWnd );
 int paintMap(HDC hdc);
 int SendKey(int num);
 int SendChar(WPARAM wParam);

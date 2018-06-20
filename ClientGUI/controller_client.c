@@ -2,6 +2,11 @@
 
 ThreadCtrl		cThread;
 GameKeys		keys;
+HBITMAP bmpExercising[10];
+
+//HDC MemDCExercising;
+//HBITMAP bmpExercising;
+
 //Packet			token;
 //int		packetUpd = 0;
 
@@ -167,8 +172,28 @@ DWORD WINAPI UpdateView(LPVOID tParam) {
 	}
 	return 1;
 }
+int LoadBitmaps() {
+	//bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+	return 1;
+}
 
-int paintMap(HDC hdc) {
+int paintMap(HDC hDC) {
+	HDC MemDCExercising;
+	//HBITMAP bmpExercising[10];
+
+	bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+	// Create a memory device compatible with the above DC variable
+	MemDCExercising = CreateCompatibleDC(hDC);
+	// Select the new bitmap
+	SelectObject(MemDCExercising, bmpExercising[0]);
+
+	// Copy the bits from the memory DC into the current dc
+	//BitBlt(hDC, 10, 10, 10, 6, MemDCExercising, 0, 0, SRCCOPY);
+
+	// Restore the old bitmap
+	//DeleteDC(MemDCExercising);
+	//DeleteObject(bmpExercising);
+
 
 	int i, j;
 
@@ -177,14 +202,23 @@ int paintMap(HDC hdc) {
 		for (i = 0; i < cThread.localGame.max_invaders; i++) {
 			if (cThread.localGame.invad[i].hp>0) {
 				if (cThread.localGame.invad[i].rand_path)
-					Rectangle(hdc,							//rand invader bitmap
-						cThread.localGame.invad[i].x,
-						cThread.localGame.invad[i].y,
-						cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
-						cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
+					BitBlt(hDC, 
+						cThread.localGame.invad[i].x, 
+						cThread.localGame.invad[i].y, 
+						cThread.localGame.invad[i].width, 
+						cThread.localGame.invad[i].height, 
+						MemDCExercising, 
+						0, 
+						0, 
+						SRCCOPY);
+					//Rectangle(hDC,							//rand invader bitmap
+					//	cThread.localGame.invad[i].x,
+					//	cThread.localGame.invad[i].y,
+					//	cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
+					//	cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
 
 				else
-					Rectangle(hdc,							 //Regular invader bitmap
+					Rectangle(hDC,							 //Regular invader bitmap
 						cThread.localGame.invad[i].x,
 						cThread.localGame.invad[i].y,
 						cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
@@ -193,7 +227,7 @@ int paintMap(HDC hdc) {
 			}
 			for (j = 0; j < MAX_SHOTS; j++) {
 				if (cThread.localGame.invad[i].bomb[j].fired == 1)
-					Rectangle(hdc,
+					Rectangle(hDC,
 						cThread.localGame.invad[i].bomb[j].x,
 						cThread.localGame.invad[i].bomb[j].y,
 						cThread.localGame.invad[i].bomb[j].x + cThread.localGame.invad[i].bomb[j].width,
@@ -202,14 +236,14 @@ int paintMap(HDC hdc) {
 		}
 		for (i = 0; i < cThread.localGame.num_players; i++) {
 			if (cThread.localGame.ship[i].lives >= 0) {
-					Rectangle(hdc,							//ship bitmap
+					Rectangle(hDC,							//ship bitmap
 						cThread.localGame.ship[i].x,
 						cThread.localGame.ship[i].y,
 						cThread.localGame.ship[i].x + cThread.localGame.ship[i].width,
 						cThread.localGame.ship[i].y + cThread.localGame.ship[i].height);
 					if(cThread.localGame.ship[i].shots[j].fired == 1)
 						for (j = 0; j < MAX_BOMBS; j++) {
-							Rectangle(hdc,
+							Rectangle(hDC,
 								cThread.localGame.ship[i].shots[j].x,
 								cThread.localGame.ship[i].shots[j].y,
 								cThread.localGame.ship[i].shots[j].x + cThread.localGame.ship[i].shots[j].width,
@@ -218,14 +252,17 @@ int paintMap(HDC hdc) {
 			}
 		}
 		if (cThread.localGame.pUp.fired == 1) {
-			Rectangle(hdc,							//rand invader bitmap
+			Rectangle(hDC,							//rand invader bitmap
 				cThread.localGame.pUp.x,
 				cThread.localGame.pUp.y,
 				cThread.localGame.pUp.x + cThread.localGame.pUp.width,
 				cThread.localGame.pUp.y + cThread.localGame.pUp.height);
 		}
 		return 1;
+		DeleteDC(MemDCExercising);
+		DeleteObject(bmpExercising);
 	}
+
 
 	return 0;
 }

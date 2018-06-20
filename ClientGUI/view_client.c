@@ -42,9 +42,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	HDC hDC;
+	PAINTSTRUCT Ps;
+
 	switch (message)
 	{
 	case WM_CREATE:
+		LoadBitmaps();
+
 		CreateThread(
 			NULL,													//Thread security attributes
 			0,														//Stack size (0 for default)
@@ -112,11 +117,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_PAINT:
 	{
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
-		paintMap( hdc); //hdc
-		// TODO: Add any drawing code that uses hdc here...
-		EndPaint(hWnd, &ps);
+		/*PAINT*/
+		hDC = BeginPaint(hWnd, &Ps);
+		paintMap( hDC); 
+		EndPaint(hWnd, &Ps);
+		break;
 	}
 	break;
 	case WM_KEYDOWN:

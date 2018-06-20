@@ -167,6 +167,7 @@
     <ResourceCompile Include="ClientGUI.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="bitmap1.bmp" />
     <Image Include="ClientGUI.ico" />
     <Image Include="invader.ico" />
     <Image Include="small.ico" />

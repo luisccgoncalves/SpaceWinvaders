@@ -182,6 +182,10 @@ int LoadBitmaps(hWnd) {
 int paintMap(HDC hDC) {
 	HDC MemDCExercising;
 
+	//Draw bounding boxes
+	Rectangle(hDC, 0, 0, XSIZE, YSIZE);
+	Rectangle(hDC, 0, YSIZE, XSIZE, YSIZE+100);
+
 	bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1)); //invader
 
 	bmpExercising[1] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));	//ice Power Up

@@ -2,7 +2,7 @@
 
 ThreadCtrl		cThread;
 GameKeys		keys;
-HBITMAP bmpExercising[10];
+HBITMAP			bmpExercising[BMP_NUM];
 
 //HDC MemDCExercising;
 //HBITMAP bmpExercising;
@@ -341,9 +341,12 @@ int paintMap(HDC hDC) {
 			//	cThread.localGame.pUp.x + cThread.localGame.pUp.width,
 			//	cThread.localGame.pUp.y + cThread.localGame.pUp.height);
 		}
-		return 1;
 		DeleteDC(MemDCExercising);
-		DeleteObject(bmpExercising); //?
+		for (i = 0; i < BMP_NUM; i++) {
+			DeleteObject(bmpExercising[i]);
+		}
+		return 1;
+
 	}
 
 

@@ -16,7 +16,8 @@
 
 #pragma comment(lib, "advapi32.lib")
 
-#define BUFSIZE 2048
+#define		BUFSIZE		2048
+#define		BMP_NUM		10
 
 
 

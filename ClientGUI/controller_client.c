@@ -173,26 +173,31 @@ DWORD WINAPI UpdateView(LPVOID tParam) {
 	return 1;
 }
 int LoadBitmaps(hWnd) {
-	bmpExercising[0] = LoadBitmap(GetModuleHandle(hWnd), MAKEINTRESOURCE(IDB_BITMAP1));
+	//bmpExercising[0] = LoadBitmap(GetModuleHandle(hWnd), MAKEINTRESOURCE(IDB_BITMAP1));
 	return 1;
 }
 
 int paintMap(HDC hDC) {
 	HDC MemDCExercising;
-	//HBITMAP bmpExercising[10];
 
-	bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+	bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1)); //invader
+
+	bmpExercising[1] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));	//ice Power Up
+	bmpExercising[2] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP3)); // grey
+	bmpExercising[3] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP4)); // turbo Power Up
+	bmpExercising[4] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP5)); // drunk
+	bmpExercising[5] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP6)); // shield
+
+	bmpExercising[6] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP7)); // other invader
+
+	//GetObject(bmpExercising[0], sizeof(bm), &bm);
+	//GetObject(bmpExercising[1], sizeof(bm), &bm);
 	// Create a memory device compatible with the above DC variable
 	MemDCExercising = CreateCompatibleDC(hDC);
 	// Select the new bitmap
-	SelectObject(MemDCExercising, bmpExercising[0]);
+	//SelectObject(MemDCExercising, bmpExercising[0]);
+	//SelectObject(MemDCExercising, bmpExercising[1]);
 
-	// Copy the bits from the memory DC into the current dc
-	//BitBlt(hDC, 10, 10, 10, 6, MemDCExercising, 0, 0, SRCCOPY);
-
-	// Restore the old bitmap
-	//DeleteDC(MemDCExercising);
-	//DeleteObject(bmpExercising);
 
 
 	int i, j;
@@ -201,28 +206,39 @@ int paintMap(HDC hDC) {
 
 		for (i = 0; i < cThread.localGame.max_invaders; i++) {
 			if (cThread.localGame.invad[i].hp>0) {
-				if (cThread.localGame.invad[i].rand_path)
-					BitBlt(hDC, 
-						cThread.localGame.invad[i].x, 
-						cThread.localGame.invad[i].y, 
-						cThread.localGame.invad[i].width, 
-						cThread.localGame.invad[i].height, 
-						MemDCExercising, 
-						0, 
-						0, 
+				if (cThread.localGame.invad[i].rand_path) {
+					SelectObject(MemDCExercising, bmpExercising[0]);
+					BitBlt(hDC,
+						cThread.localGame.invad[i].x,
+						cThread.localGame.invad[i].y,
+						cThread.localGame.invad[i].width,
+						cThread.localGame.invad[i].height,
+						MemDCExercising,
+						0,
+						0,
 						SRCCOPY);
 					//Rectangle(hDC,							//rand invader bitmap
 					//	cThread.localGame.invad[i].x,
 					//	cThread.localGame.invad[i].y,
 					//	cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
 					//	cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
-
+				}
 				else
-					Rectangle(hDC,							 //Regular invader bitmap
-						cThread.localGame.invad[i].x,
-						cThread.localGame.invad[i].y,
-						cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
-						cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
+					SelectObject(MemDCExercising, bmpExercising[6]);
+					BitBlt(hDC,
+					cThread.localGame.invad[i].x,
+					cThread.localGame.invad[i].y,
+					cThread.localGame.invad[i].width,
+					cThread.localGame.invad[i].height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+					//Rectangle(hDC,							 //Regular invader bitmap
+					//	cThread.localGame.invad[i].x,
+					//	cThread.localGame.invad[i].y,
+					//	cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
+					//	cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
 
 			}
 			for (j = 0; j < MAX_SHOTS; j++) {
@@ -252,11 +268,72 @@ int paintMap(HDC hDC) {
 			}
 		}
 		if (cThread.localGame.pUp.fired == 1) {
-			Rectangle(hDC,							//rand invader bitmap
-				cThread.localGame.pUp.x,
-				cThread.localGame.pUp.y,
-				cThread.localGame.pUp.x + cThread.localGame.pUp.width,
-				cThread.localGame.pUp.y + cThread.localGame.pUp.height);
+			if (cThread.localGame.pUp.type == 4) { //ice
+				SelectObject(MemDCExercising, bmpExercising[1]);
+				BitBlt(hDC,
+					cThread.localGame.pUp.x,
+					cThread.localGame.pUp.y,
+					cThread.localGame.pUp.width,
+					cThread.localGame.pUp.height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}
+			else if(cThread.localGame.pUp.type == 2) { //turbo
+				SelectObject(MemDCExercising, bmpExercising[3]);
+				BitBlt(hDC,
+					cThread.localGame.pUp.x,
+					cThread.localGame.pUp.y,
+					cThread.localGame.pUp.width,
+					cThread.localGame.pUp.height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}
+			else if(cThread.localGame.pUp.type == 1){ //drunk
+				SelectObject(MemDCExercising, bmpExercising[4]);
+				BitBlt(hDC,
+					cThread.localGame.pUp.x,
+					cThread.localGame.pUp.y,
+					cThread.localGame.pUp.width,
+					cThread.localGame.pUp.height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}
+			else if(cThread.localGame.pUp.type == 0) {
+				SelectObject(MemDCExercising, bmpExercising[5]);
+				BitBlt(hDC,
+					cThread.localGame.pUp.x,
+					cThread.localGame.pUp.y,
+					cThread.localGame.pUp.width,
+					cThread.localGame.pUp.height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}			
+			else {
+				SelectObject(MemDCExercising, bmpExercising[2]);
+				BitBlt(hDC,
+					cThread.localGame.pUp.x,
+					cThread.localGame.pUp.y,
+					cThread.localGame.pUp.width,
+					cThread.localGame.pUp.height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}
+
+			//Rectangle(hDC,							//rand invader bitmap
+			//	cThread.localGame.pUp.x,
+			//	cThread.localGame.pUp.y,
+			//	cThread.localGame.pUp.x + cThread.localGame.pUp.width,
+			//	cThread.localGame.pUp.y + cThread.localGame.pUp.height);
 		}
 		return 1;
 		DeleteDC(MemDCExercising);

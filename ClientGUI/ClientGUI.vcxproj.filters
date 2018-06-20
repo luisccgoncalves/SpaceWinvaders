@@ -63,5 +63,23 @@
     <Image Include="bitmap1.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="bitmap2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bitmap3.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bitmap4.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bitmap5.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bitmap6.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bitmap7.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

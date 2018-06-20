@@ -187,28 +187,196 @@ int paintMap(HDC hDC) {
 	Rectangle(hDC, 0, YSIZE+cThread.localGame.ship[0].height, XSIZE, YSIZE+100+ cThread.localGame.ship[0].height);
 
 	bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1)); //invader
-
 	bmpExercising[1] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));	//ice Power Up
-	bmpExercising[2] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP3)); // grey
+	bmpExercising[2] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP3)); // laser
 	bmpExercising[3] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP4)); // turbo Power Up
 	bmpExercising[4] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP5)); // drunk
 	bmpExercising[5] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP6)); // shield
-
 	bmpExercising[6] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP7)); // other invader
+	bmpExercising[7] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP8)); // bombs
+	bmpExercising[8] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP9)); // shots
+	bmpExercising[9] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP10)); // defenders
+	bmpExercising[10] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP11)); // +speed
+	bmpExercising[11] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP12)); // battery
 
-	//GetObject(bmpExercising[0], sizeof(bm), &bm);
-	//GetObject(bmpExercising[1], sizeof(bm), &bm);
-	// Create a memory device compatible with the above DC variable
 	MemDCExercising = CreateCompatibleDC(hDC);
-	// Select the new bitmap
-	//SelectObject(MemDCExercising, bmpExercising[0]);
-	//SelectObject(MemDCExercising, bmpExercising[1]);
-
-
 
 	int i, j;
 
 	if (cThread.localGame.gameRunning) {
+
+		for (i = 0; i < cThread.localGame.max_invaders; i++) {
+			if (cThread.localGame.invad[i].hp>0) {
+				if (cThread.localGame.invad[i].rand_path) {
+					SelectObject(MemDCExercising, bmpExercising[0]);
+					BitBlt(hDC,
+						cThread.localGame.invad[i].x,
+						cThread.localGame.invad[i].y,
+						cThread.localGame.invad[i].width,
+						cThread.localGame.invad[i].height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+					//Rectangle(hDC,							//rand invader bitmap
+					//	cThread.localGame.invad[i].x,
+					//	cThread.localGame.invad[i].y,
+					//	cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
+					//	cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
+				}
+				else
+					SelectObject(MemDCExercising, bmpExercising[6]);
+					BitBlt(hDC,
+					cThread.localGame.invad[i].x,
+					cThread.localGame.invad[i].y,
+					cThread.localGame.invad[i].width,
+					cThread.localGame.invad[i].height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+
+			}
+			for (j = 0; j < MAX_BOMBS; j++) {
+				if (cThread.localGame.invad[i].bomb[j].fired == 1)
+				SelectObject(MemDCExercising, bmpExercising[7]);
+				BitBlt(hDC,
+					cThread.localGame.invad[i].bomb[j].x,
+					cThread.localGame.invad[i].bomb[j].y,
+					cThread.localGame.invad[i].bomb[j].width,
+					cThread.localGame.invad[i].bomb[j].height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}
+		}
+		for (i = 0; i < cThread.localGame.num_players; i++) {
+			if (cThread.localGame.ship[i].lives >= 0) {
+				SelectObject(MemDCExercising, bmpExercising[9]);
+				BitBlt(hDC,
+					cThread.localGame.ship[i].x,
+					cThread.localGame.ship[i].y,
+					cThread.localGame.ship[i].width,
+					cThread.localGame.ship[i].height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+						for (j = 0; j < MAX_SHOTS; j++) {
+							if (cThread.localGame.ship[i].shots[j].fired == 1)
+							SelectObject(MemDCExercising, bmpExercising[8]);
+							BitBlt(hDC,
+								cThread.localGame.ship[i].shots[j].x,
+								cThread.localGame.ship[i].shots[j].y,
+								cThread.localGame.ship[i].shots[j].width,
+								cThread.localGame.ship[i].shots[j].height,
+								MemDCExercising,
+								0,
+								0,
+								SRCCOPY);
+						}
+					TextOut(hDC, 1 + (70 * i), 620, TEXT("LIVES: "), 8);
+					TextOut(hDC, 45 + (70 * i), 620, TEXT("2"), 1);
+			}
+		}
+		if (cThread.localGame.pUp.fired == 1) {
+				if (cThread.localGame.pUp.type == 4) { //ice
+					SelectObject(MemDCExercising, bmpExercising[1]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else if (cThread.localGame.pUp.type == 2) { //turbo
+					SelectObject(MemDCExercising, bmpExercising[3]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else if (cThread.localGame.pUp.type == 1) { //drunk
+					SelectObject(MemDCExercising, bmpExercising[4]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else if (cThread.localGame.pUp.type == 0) {//shield
+					SelectObject(MemDCExercising, bmpExercising[5]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else if (cThread.localGame.pUp.type == 3) {//laser
+					SelectObject(MemDCExercising, bmpExercising[2]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else if (cThread.localGame.pUp.type == 5) {//+speed
+					SelectObject(MemDCExercising, bmpExercising[10]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else if (cThread.localGame.pUp.type == 6) {//battery
+					SelectObject(MemDCExercising, bmpExercising[11]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						MemDCExercising,
+						0,
+						0,
+						SRCCOPY);
+				}
+		}
+		DeleteDC(MemDCExercising);
+		for (i = 0; i < BMP_NUM; i++) {
+			DeleteObject(bmpExercising[i]);
+			/*maybe put this below eevery usage? */
+		}
+		return 1;
+
+	}/*
+	 
+	 
+	 if (cThread.localGame.gameRunning) {
 
 		for (i = 0; i < cThread.localGame.max_invaders; i++) {
 			if (cThread.localGame.invad[i].hp>0) {
@@ -249,27 +417,57 @@ int paintMap(HDC hDC) {
 			}
 			for (j = 0; j < MAX_SHOTS; j++) {
 				if (cThread.localGame.invad[i].bomb[j].fired == 1)
-					Rectangle(hDC,
-						cThread.localGame.invad[i].bomb[j].x,
-						cThread.localGame.invad[i].bomb[j].y,
-						cThread.localGame.invad[i].bomb[j].x + cThread.localGame.invad[i].bomb[j].width,
-						cThread.localGame.invad[i].bomb[j].y + cThread.localGame.invad[i].bomb[j].height);
+					SelectObject(MemDCExercising, bmpExercising[7]);
+					BitBlt(hDC,
+					cThread.localGame.invad[i].bomb[j].x,
+					cThread.localGame.invad[i].bomb[j].y,
+					cThread.localGame.invad[i].bomb[j].width,
+					cThread.localGame.invad[i].bomb[j].height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+					//Rectangle(hDC,
+					//	cThread.localGame.invad[i].bomb[j].x,
+					//	cThread.localGame.invad[i].bomb[j].y,
+					//	cThread.localGame.invad[i].bomb[j].x + cThread.localGame.invad[i].bomb[j].width,
+					//	cThread.localGame.invad[i].bomb[j].y + cThread.localGame.invad[i].bomb[j].height);
 			}
 		}
 		for (i = 0; i < cThread.localGame.num_players; i++) {
 			if (cThread.localGame.ship[i].lives >= 0) {
-					Rectangle(hDC,							//ship bitmap
-						cThread.localGame.ship[i].x,
-						cThread.localGame.ship[i].y,
-						cThread.localGame.ship[i].x + cThread.localGame.ship[i].width,
-						cThread.localGame.ship[i].y + cThread.localGame.ship[i].height);
+				SelectObject(MemDCExercising, bmpExercising[9]);
+				BitBlt(hDC,
+					cThread.localGame.ship[i].x,
+					cThread.localGame.ship[i].y,
+					cThread.localGame.ship[i].width,
+					cThread.localGame.ship[i].height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+					//Rectangle(hDC,							//ship bitmap
+					//	cThread.localGame.ship[i].x,
+					//	cThread.localGame.ship[i].y,
+					//	cThread.localGame.ship[i].x + cThread.localGame.ship[i].width,
+					//	cThread.localGame.ship[i].y + cThread.localGame.ship[i].height);
 					if(cThread.localGame.ship[i].shots[j].fired == 1)
 						for (j = 0; j < MAX_BOMBS; j++) {
-							Rectangle(hDC,
+							SelectObject(MemDCExercising, bmpExercising[8]);
+							BitBlt(hDC,
 								cThread.localGame.ship[i].shots[j].x,
 								cThread.localGame.ship[i].shots[j].y,
-								cThread.localGame.ship[i].shots[j].x + cThread.localGame.ship[i].shots[j].width,
-								cThread.localGame.ship[i].shots[j].y + cThread.localGame.ship[i].shots[j].height);
+								cThread.localGame.ship[i].shots[j].width,
+								cThread.localGame.ship[i].shots[j].height,
+								MemDCExercising,
+								0,
+								0,
+								SRCCOPY);
+							//Rectangle(hDC,
+							//	cThread.localGame.ship[i].shots[j].x,
+							//	cThread.localGame.ship[i].shots[j].y,
+							//	cThread.localGame.ship[i].shots[j].x + cThread.localGame.ship[i].shots[j].width,
+							//	cThread.localGame.ship[i].shots[j].y + cThread.localGame.ship[i].shots[j].height);
 						}
 					TextOut(hDC, 1 + (70 * i), 620, TEXT("LIVES: "), 8);
 					TextOut(hDC, 45 + (70 * i), 620, TEXT("2"), 1);
@@ -312,7 +510,7 @@ int paintMap(HDC hDC) {
 					0,
 					SRCCOPY);
 			}
-			else if(cThread.localGame.pUp.type == 0) {
+			else if(cThread.localGame.pUp.type == 0) {//shield
 				SelectObject(MemDCExercising, bmpExercising[5]);
 				BitBlt(hDC,
 					cThread.localGame.pUp.x,
@@ -324,8 +522,32 @@ int paintMap(HDC hDC) {
 					0,
 					SRCCOPY);
 			}			
-			else {
+			else if(cThread.localGame.pUp.type == 3){//laser
 				SelectObject(MemDCExercising, bmpExercising[2]);
+				BitBlt(hDC,
+					cThread.localGame.pUp.x,
+					cThread.localGame.pUp.y,
+					cThread.localGame.pUp.width,
+					cThread.localGame.pUp.height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}			
+			else if(cThread.localGame.pUp.type == 5){//+speed
+				SelectObject(MemDCExercising, bmpExercising[10]);
+				BitBlt(hDC,
+					cThread.localGame.pUp.x,
+					cThread.localGame.pUp.y,
+					cThread.localGame.pUp.width,
+					cThread.localGame.pUp.height,
+					MemDCExercising,
+					0,
+					0,
+					SRCCOPY);
+			}
+			else if(cThread.localGame.pUp.type == 6){//battery
+				SelectObject(MemDCExercising, bmpExercising[11]);
 				BitBlt(hDC,
 					cThread.localGame.pUp.x,
 					cThread.localGame.pUp.y,
@@ -337,11 +559,6 @@ int paintMap(HDC hDC) {
 					SRCCOPY);
 			}
 
-			//Rectangle(hDC,							//rand invader bitmap
-			//	cThread.localGame.pUp.x,
-			//	cThread.localGame.pUp.y,
-			//	cThread.localGame.pUp.x + cThread.localGame.pUp.width,
-			//	cThread.localGame.pUp.y + cThread.localGame.pUp.height);
 		}
 		DeleteDC(MemDCExercising);
 		for (i = 0; i < BMP_NUM; i++) {
@@ -350,6 +567,9 @@ int paintMap(HDC hDC) {
 		return 1;
 
 	}
+	 
+	 
+	 */
 
 
 	return 0;

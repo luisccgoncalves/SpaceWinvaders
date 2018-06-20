@@ -45,8 +45,9 @@ typedef struct {
 }ThreadCtrl;
 
 typedef struct {
-	TCHAR up, down, right, left, fire;
-};
+	TCHAR	up, down, right, left, fire;
+	BOOL	defaultKeys;
+} GameKeys;
 
 HANDLE		rectEvent;				//Handle to event to update main window
 #endif /* DATA_STRUCTS_H */

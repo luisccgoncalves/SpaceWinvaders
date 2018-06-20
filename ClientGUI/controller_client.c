@@ -1,6 +1,7 @@
 #include "controller_client.h"
 
 ThreadCtrl		cThread;
+GameKeys		keys;
 //Packet			token;
 //int		packetUpd = 0;
 
@@ -271,34 +272,88 @@ int SendKey(int num) {
 }
 
 int SendChar(WPARAM wParam) {
-	TCHAR up, down, right, left;
-	up = 'w';
-	down = 's';
-	right = 'd';
-	left = 'a';
-	space = ' ';
+	TCHAR up, down, right, left, space;
 
-	if (wParam == up) {
+	/*delete after recordKeys is working */
+	//up = 'w';
+	//down = 's';
+	//right = 'd';
+	//left = 'a';
+	//space = ' ';
+
+	if (wParam == keys.up) {
 		cThread.token.instruction = 3;
 		cThread.packetUpd = 1;
 	}
-	else if (wParam == down) {
+	else if (wParam == keys.down) {
 		cThread.token.instruction = 1;
 		cThread.packetUpd = 1;
 	}
-	else if (wParam == left) {
+	else if (wParam == keys.left) {
 		cThread.token.instruction = 2;
 		cThread.packetUpd = 1;
 	}
-	else if (wParam == right) {
+	else if (wParam == keys.right) {
 		cThread.token.instruction = 0;
 		cThread.packetUpd = 1;
 	}
-	else if(wParam == space){
+	else if(wParam == keys.fire){
 		cThread.token.instruction = 4;
 		cThread.packetUpd = 1;
 	}
 	return 1;
+}
+
+int validateConfigurableKeys(HWND hDlg, BOOL defaultKey) {
+	TCHAR up[3], down[3], right[3], left[3], fire[3];
+	int lUp, lDown, lRight, lLeft, lFire;
+
+	lUp = GetWindowTextLength(GetDlgItem(hDlg, IDC_UP));
+	lDown = GetWindowTextLength(GetDlgItem(hDlg, IDC_DOWN));
+	lRight = GetWindowTextLength(GetDlgItem(hDlg, IDC_RIGHT));
+	lLeft = GetWindowTextLength(GetDlgItem(hDlg, IDC_LEFT));
+	lFire = GetWindowTextLength(GetDlgItem(hDlg, IDC_FIRE));
+
+	if (defaultKey == TRUE) {
+		return 0;
+	}
+	else{
+		if (GetDlgItemText(hDlg, IDC_UP, up, SMALL_BUFF) == 0)
+			return 1;
+		else if (GetDlgItemText(hDlg, IDC_DOWN, down, SMALL_BUFF) == 0)
+			return 1;
+		else if (GetDlgItemText(hDlg, IDC_RIGHT, right, SMALL_BUFF) == 0)
+			return 1;
+		else if (GetDlgItemText(hDlg, IDC_LEFT, left, SMALL_BUFF) == 0)
+			return 1;
+		else if (GetDlgItemText(hDlg, IDC_FIRE, fire, SMALL_BUFF) == 0)
+			return 1;
+		else if ( lUp > 1 || lDown > 1 || lRight > 1 || lLeft > 1 || lFire> 1)
+			return 1;
+	}
+
+	return 0;
+}
+int recordKeys(HWND hDlg, BOOL defaultKeys) {
+	TCHAR up[3], down[3], right[3], left[3], fire[3];
+	if (!defaultKeys) {
+		GetDlgItemText(hDlg, IDC_UP, up, SMALL_BUFF);
+		GetDlgItemText(hDlg, IDC_DOWN, down, SMALL_BUFF);
+		GetDlgItemText(hDlg, IDC_RIGHT, right, SMALL_BUFF);
+		GetDlgItemText(hDlg, IDC_LEFT, left, SMALL_BUFF);
+		GetDlgItemText(hDlg, IDC_FIRE, fire, SMALL_BUFF);
+
+		keys.up = up[0];
+		keys.down = down[0];
+		keys.right = right[0];
+		keys.left = left[0];
+		keys.fire = fire[0];
+	}
+	else {
+		//?
+	}
+
+	return 0;
 }
 
 /* TO DO*/

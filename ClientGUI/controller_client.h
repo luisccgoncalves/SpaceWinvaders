@@ -19,6 +19,10 @@ DWORD WINAPI UpdateView(LPVOID tParam);
 int paintMap(HDC hdc);
 int SendKey(int num);
 int SendChar(WPARAM wParam);
+
+int validateConfigurableKeys(HWND hDlg, BOOL defaultKey);
+int recordKeys(HWND hDlg, BOOL defaultKeys);
+
 int GetScore();
 int GetLives();
 

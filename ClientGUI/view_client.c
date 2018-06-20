@@ -61,7 +61,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case ID_GAME_CONFIGUREKEYS:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_KCONFIG), hWnd, ConfigureKeys);
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, ConfigureKeys);
 			break;
 		case ID_GAME_HIGHSCORES:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_TOP10), hWnd, HighScores);
@@ -112,32 +112,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 	}
 	break;
-	//case WM_KEYDOWN:
-	//	SendKey(wParam);
-	//	/* Can i send the pressed key down?*/
-	//	switch (wParam) {
-	//	case VK_UP:
-	//		SendKey(3);
-	//		break;
-	//	case VK_RIGHT:
-	//		SendKey(0);
-	//		break;
-	//	case VK_LEFT:
-	//		SendKey(2);
-	//		break;
-	//	case VK_DOWN:
-	//		SendKey(1);
-	//		break;
-	//	case  VK_SPACE:
-	//		SendKey(4);
-	//		break;
-	//	default: 
-	//		break;
-	//	}
-	//	break;
+	case WM_KEYDOWN:
+			/*if default?*/
+			switch (wParam) {
+			case VK_UP:
+				SendKey(3);
+				break;
+			case VK_RIGHT:
+				SendKey(0);
+				break;
+			case VK_LEFT:
+				SendKey(2);
+				break;
+			case VK_DOWN:
+				SendKey(1);
+				break;
+			case  VK_SPACE:
+				SendKey(4);
+				break;
+			default:
+				break;
+			}
+		break;
 	case WM_CHAR:
-		SendChar(wParam);
-		/* Can i send the pressed key down?*/
+			SendChar(wParam);
+			/* if not default?*/
 		break;
 	case WM_CLOSE:
 		if (MessageBox(hWnd, TEXT("Are you sure?"), TEXT("Quit"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
@@ -270,8 +269,26 @@ INT_PTR CALLBACK ConfigureKeys(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		switch (wParam) {
+		case IDOK:
 		{
+			BOOL radioActive = (BOOL)SendDlgItemMessage(hDlg, IDC_RADIO_DEFAULT, BM_GETCHECK, 0, 0);
+			int result = validateConfigurableKeys(hDlg, radioActive);
+			switch (result) {
+			case 0:
+				//MessageBox(hDlg, TEXT("allright!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				recordKeys(hDlg, radioActive);
+				break;
+			case 1:
+				MessageBox(hDlg, TEXT("Please fill the fields with one character or select default!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+				break;
+			default:
+				break;
+			}
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		case IDCANCEL:
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}

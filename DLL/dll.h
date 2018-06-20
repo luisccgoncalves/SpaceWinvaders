@@ -30,8 +30,8 @@
 #define INV_WIDTH		10
 #define INV_HEIGHT		6
 #define PROJ_SIZE		5
-#define SHIP_WIDTH		12
-#define SHIP_HEIGHT		6
+#define SHIP_WIDTH		20
+#define SHIP_HEIGHT		10
 
 #define MAX_PLAYERS		5							//Maximum number of concurrent players
 #define MAX_INVADER		20							//Maximum invaders by level

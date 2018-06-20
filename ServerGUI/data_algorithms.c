@@ -674,7 +674,7 @@ int LoadGDataDefaults(GameData *game) {
 		game->invad[i].bombRateCounter = RandomValue(BOMB_RATE);
 	}
 	/*Ships & shots*/
-	for (i = 0; i < game->num_players; i++) {
+	for (i = 0; i <= game->num_players; i++) {
 		game->ship[i].lives = 1; //represents 2 lives, 0 and 1
 		game->ship[i].x = 0;
 		game->ship[i].y = 0;

@@ -183,8 +183,8 @@ int paintMap(HDC hDC) {
 	HDC MemDCExercising;
 
 	//Draw bounding boxes
-	Rectangle(hDC, 0, 0, XSIZE, YSIZE);
-	Rectangle(hDC, 0, YSIZE, XSIZE, YSIZE+100);
+	Rectangle(hDC, 0, 0, XSIZE, YSIZE+cThread.localGame.ship[0].height);
+	Rectangle(hDC, 0, YSIZE+cThread.localGame.ship[0].height, XSIZE, YSIZE+100+ cThread.localGame.ship[0].height);
 
 	bmpExercising[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1)); //invader
 
@@ -271,6 +271,8 @@ int paintMap(HDC hDC) {
 								cThread.localGame.ship[i].shots[j].x + cThread.localGame.ship[i].shots[j].width,
 								cThread.localGame.ship[i].shots[j].y + cThread.localGame.ship[i].shots[j].height);
 						}
+					TextOut(hDC, 1 + (70 * i), 620, TEXT("LIVES: "), 8);
+					TextOut(hDC, 45 + (70 * i), 620, TEXT("2"), 1);
 			}
 		}
 		if (cThread.localGame.pUp.fired == 1) {

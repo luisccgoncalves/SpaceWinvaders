@@ -201,7 +201,7 @@ int paintMap(HDC hdc) {
 			}
 		}
 		for (i = 0; i < cThread.localGame.num_players; i++) {
-			if (cThread.localGame.ship[i].lives > 0) {
+			if (cThread.localGame.ship[i].lives >= 0) {
 					Rectangle(hdc,							//ship bitmap
 						cThread.localGame.ship[i].x,
 						cThread.localGame.ship[i].y,

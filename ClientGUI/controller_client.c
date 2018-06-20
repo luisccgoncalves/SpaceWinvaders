@@ -50,8 +50,10 @@ int LogPlayer(HWND hDlg, BOOL remote) {
 		GetDlgItemText(hDlg, IDC_LOGIN_IP, domain, SMALL_BUFF);
 		_tcscpy_s(cThread.domain, SMALL_BUFF, domain);
 
-		GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF);
-		_tcscpy_s(cThread.password, SMALL_BUFF, password);
+		if (GetDlgItemText(hDlg, IDC_LOGIN_PASS, password, SMALL_BUFF) == 0)
+			_tcscpy_s(password, SMALL_BUFF, TEXT("\0"));
+		else
+			_tcscpy_s(cThread.password, SMALL_BUFF, password);
 	}
 
 	startClient();
@@ -337,7 +339,7 @@ int paintMap(HDC hDC) {
 		}
 		return 1;
 		DeleteDC(MemDCExercising);
-		DeleteObject(bmpExercising);
+		DeleteObject(bmpExercising); //?
 	}
 
 

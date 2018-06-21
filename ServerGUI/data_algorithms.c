@@ -518,7 +518,10 @@ DWORD WINAPI ShotMovement(LPVOID tParam) {
 
 				WaitForSingleObject(mhStructSync, INFINITE);
 				baseGame->ship[owner].shots[shotNum].y--;							//update it's position, an wait for next tick 
-				ShotCollision(baseGame, &baseGame->ship[owner].shots[shotNum]);
+
+				//Test for collisions, if it hits something, add it to the score
+				baseGame->score += ShotCollision(baseGame, &baseGame->ship[owner].shots[shotNum]);
+
 				ReleaseMutex(mhStructSync);
 				Sleep((baseGame->ship_shot_speed)*(*ThreadMustGoOn));
 
@@ -761,7 +764,15 @@ int ShotCollision(GameData *game, ShipShot *shot) {
 
 					DamageInvader(&game->invad[i]);
 					ResetShot(shot);
-					return 1;
+					if (game->invad[i].hp == 0) {
+						if (game->invad[i].rand_path)
+							return RINV_KILL;
+						else
+							return INV_KILL;
+					}
+					else
+						return 0;
+					
 				}
 
 			//Tests shot collision with bombs
@@ -775,7 +786,7 @@ int ShotCollision(GameData *game, ShipShot *shot) {
 
 						ResetBomb(&game->invad[i].bomb[j]);
 						ResetShot(shot);
-						return 1;
+						return BOMB_KILL;
 					}
 			}
 		}
@@ -864,6 +875,7 @@ int PowerUpCollision(GameData * game, PowerUp *pUp, HANDLE mhStructSync) {
 
 				PowerUpShip(game, &game->ship[j], pUp, mhStructSync);
 				pUp->fired = 0;
+				game->score += PUP_KILL;	//Update game score
 				return 1;
 			}
 		}

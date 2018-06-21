@@ -104,6 +104,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 	}
 
 	//cThread.ThreadMustGoOn = 0;
+	while (1) {
+		_tprintf(TEXT(" %d"), cThread.pSMemGameData->score);
+		Sleep(1000);
+	}
 
 	WaitForSingleObject(htCreatePipes, INFINITE);
 

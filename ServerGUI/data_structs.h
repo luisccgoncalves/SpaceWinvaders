@@ -10,6 +10,11 @@
 
 #include "../DLL/dll.h"
 
+#define INV_KILL	10
+#define RINV_KILL	15
+#define BOMB_KILL	20
+#define PUP_KILL	30
+
 typedef struct {
 	HANDLE			*hTick;							//Handle to event. Warns gateway about updates in shared memory
 	int				ThreadMustGoOn;

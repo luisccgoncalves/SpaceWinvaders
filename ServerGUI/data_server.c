@@ -106,7 +106,7 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 	sGTick.mhGameData = cThread->mhStructSync;					//Copies Invader moving mutex to the GTick struct thread
 	sGTick.hTick = cThread->hSMServerUpdate;					//Copies Event to warn gateway of memory updates  
 	sGTick.localGameData = &cThread->localGameData;				//Copies gameData address to GTick
-	sGTick.smGameData = cThread->pSMemGameData;				//Copies the sharedmemory pointer to GTick
+	sGTick.smGameData = cThread->pSMemGameData;					//Copies the sharedmemory pointer to GTick
 
 	SetEvent(hCanBootNow);										//Warns gateway that Shared memory is mapped
 
@@ -140,7 +140,7 @@ DWORD WINAPI LaunchServer(SMCtrl *cThread) {
 																/* Needs to interrupt prodcons algorithm */
 	WaitForSingleObject(htPacketListener, INFINITE);			//Waits for thread to exit
 
-	UnmapViewOfFile(cThread->pSMemGameData);						//Unmaps view of shared memory
+	UnmapViewOfFile(cThread->pSMemGameData);					//Unmaps view of shared memory
 	UnmapViewOfFile(cThread->pSMemMessage);						//Unmaps view of shared memory
 	CloseHandle(&cThread->hSMem);									//Closes shared memory
 
@@ -255,8 +255,13 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 				if (sGTick->localGameData->ship[i].lives >= 0)
 					break;
 			}
-			if (i == sGTick->localGameData->num_players)
+			if (i == sGTick->localGameData->num_players) {
 				sGTick->localGameData->gameRunning = 0;
+				sGTick->localGameData->newHScore = addScoretoTop10(
+														sGTick->localGameData->score,
+														sGTick->localGameData->top10);
+			}
+				
 		}
 	}
 	return 0;

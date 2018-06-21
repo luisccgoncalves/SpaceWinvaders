@@ -254,7 +254,7 @@ DWORD WINAPI BombMovement(LPVOID tParam) {
 			invader->bomb[bombNum].fired = 1;								//update bomb status
 			ReleaseMutex(mhStructSync);
 
-			while (*ThreadMustGoOn && invader->bomb[bombNum].fired) {
+			while (*ThreadMustGoOn && invader->bomb[bombNum].fired && baseGame->gameRunning) {
 
 				if (invader->bomb[bombNum].y < baseGame->ysize - 1) {		//if bomb has not reached the end of the play area
 

@@ -115,12 +115,6 @@ typedef struct {
 
 	} Invader;
 
-//typedef struct {
-//	int		x;				//ship x,y position
-//	int		y;
-//	int		hp;
-//} Barriers;
-
 typedef struct {
 	int			x;									//ship x,y position
 	int			y;
@@ -168,8 +162,9 @@ typedef struct {									//Game data to use in communication
 	int				plusSpeed;						//PowerUp effect invaders(speeds up inv for some time)
 	int				battery;						//PowerUp effect speed up shots (all players)
 
-	int	score;										//actual score if game is happening
-	HighScore	top10[10];							//Top 10 highest scores
+	int				score;							//actual score if game is happening
+	HighScore		top10[10];						//Top 10 highest scores
+	int				newHScore;
 } GameData;
 
 typedef struct {

@@ -47,10 +47,10 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	TCHAR text2[3];
 	TCHAR text3[3];
 	TCHAR text4[3];
-	swprintf_s(text_gameConfigured, 3, TEXT(" %d"), getGDataGameConfigured());
-	swprintf_s(text2, 3, TEXT(" %d"), 1);
-	swprintf_s(text3, 3, TEXT(" %d"), 2);
-	swprintf_s(text4, 3, TEXT(" %d"), 3);
+	_stprintf_s(text_gameConfigured, 3, TEXT(" %d"), getGDataGameConfigured());
+	_stprintf_s(text2, 3, TEXT(" %d"), 1);
+	_stprintf_s(text3, 3, TEXT(" %d"), 2);
+	_stprintf_s(text4, 3, TEXT(" %d"), 3);
 
 	switch (iMsg) {
 	case WM_COMMAND:
@@ -99,16 +99,16 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 		hdc = BeginPaint(hWnd, &ps);
 		//getLoggedClients
 		TextOut(hdc, 100, 100, TEXT("Clients logged: "), 20);
-		TextOut(hdc, 225, 100, text3, wcslen(text3));
+		TextOut(hdc, 225, 100, text3, _tcslen(text3));
 		//getGameReadyPlayers
 		TextOut(hdc, 100, 150, TEXT("Ready to play:  "), 20);
-		TextOut(hdc, 225, 150, text2, wcslen(text2));
+		TextOut(hdc, 225, 150, text2, _tcslen(text2));
 		//getConfigGames
 		TextOut(hdc, 100, 200, TEXT("Configured games:  "), 20);
-		TextOut(hdc, 225, 200, text_gameConfigured, wcslen(text_gameConfigured));
+		TextOut(hdc, 225, 200, text_gameConfigured, _tcslen(text_gameConfigured));
 		//getStartedGames
 		TextOut(hdc, 100, 250, TEXT("Games started:    "), 20);
-		TextOut(hdc, 225, 250, text4, wcslen(text4));
+		TextOut(hdc, 225, 250, text4, _tcslen(text4));
 		EndPaint(hWnd, &ps);
 	}
 	break;

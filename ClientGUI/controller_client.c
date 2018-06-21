@@ -181,7 +181,8 @@ int LoadBitmaps(hWnd) {
 
 int paintMap(HDC hDC) {
 	HDC MemDCExercising;
-
+	TCHAR	tLives[3];// = { TEXT("0") };
+	TCHAR	tScore[SMALL_BUFF];
 	//Draw bounding boxes
 	Rectangle(hDC, 0, 0, XSIZE, YSIZE+cThread.localGame.ship[0].height);
 	Rectangle(hDC, 0, YSIZE+cThread.localGame.ship[0].height, XSIZE, YSIZE+100+ cThread.localGame.ship[0].height);
@@ -276,10 +277,17 @@ int paintMap(HDC hDC) {
 								0,
 								SRCCOPY);
 						}
-					TextOut(hDC, 1 + (70 * i), 620, TEXT("LIVES: "), 8);
-					TextOut(hDC, 45 + (70 * i), 620, TEXT("2"), 1);
 			}
 		}
+
+		TextOut(hDC, 1, 616, TEXT("LIVES: "), 8);
+		_stprintf_s(tLives, _countof(tLives), TEXT("%02d"), cThread.localGame.ship[cThread.token.owner].lives);
+		TextOut(hDC, 55, 616, tLives, _tcslen(tLives));
+
+		TextOut(hDC, 1, 637, TEXT("SCORE: "), 8);
+		_stprintf_s(tScore, _countof(tScore), TEXT("%05d"), cThread.localGame.score);
+		TextOut(hDC, 55, 637, tScore, _tcslen(tScore));
+
 		if (cThread.localGame.pUp.fired == 1) {
 				if (cThread.localGame.pUp.type == 4) { //ice
 					SelectObject(MemDCExercising, bmpExercising[1]);

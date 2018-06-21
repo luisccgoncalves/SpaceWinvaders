@@ -149,7 +149,7 @@ int ConnectGame() {
 }
 
 int PlayerIsGameBound() {
-	if (cThread.token.owner >= 0 && cThread.token.owner <= MAX_PLAYERS) {
+	if (cThread.token.owner >= 0 && cThread.token.owner <= MAX_PLAYERS && cThread.localGame.gameRunning) {
 		return 1;
 	}
 	return 0;

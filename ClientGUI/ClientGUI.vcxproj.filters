@@ -90,5 +90,11 @@
     <Image Include="bitmap10.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="bitmap11.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bitmap12.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

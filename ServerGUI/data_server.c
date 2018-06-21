@@ -257,6 +257,7 @@ DWORD WINAPI GameTick(LPVOID tParam) {				//Warns gateway of structure updates
 			}
 			if (i == sGTick->localGameData->num_players) {
 				sGTick->localGameData->gameRunning = 0;
+				ZeroMemory(sGTick->localGameData->logged, sizeof(Player)*10);
 				sGTick->localGameData->newHScore = addScoretoTop10(
 														sGTick->localGameData->score,
 														sGTick->localGameData->top10);

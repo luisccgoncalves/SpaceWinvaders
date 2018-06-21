@@ -559,6 +559,9 @@ int UpdateLocalShip(ClientMoves *move) {
 	DWORD			shotTimeStamp, shotRate;
 	DWORD			moveTimeStamp, moveRate;
 
+	if (move->game->ship[move->localPacket.owner].lives<0)
+		return 0;
+
 	int xTemp, yTemp;
 	int index = move->localPacket.owner;
 

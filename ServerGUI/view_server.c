@@ -48,9 +48,9 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 	TCHAR text3[3];
 	TCHAR text4[3];
 	_stprintf_s(text_gameConfigured, 3, TEXT(" %d"), getGDataGameConfigured());
-	_stprintf_s(text2, 3, TEXT(" %d"), 1);
-	_stprintf_s(text3, 3, TEXT(" %d"), 2);
-	_stprintf_s(text4, 3, TEXT(" %d"), 3);
+	_stprintf_s(text2, 3, TEXT(" %d"), 0);
+	_stprintf_s(text3, 3, TEXT(" %d"), 0);
+	_stprintf_s(text4, 3, TEXT(" %d"), 0);
 
 	switch (iMsg) {
 	case WM_COMMAND:
@@ -105,6 +105,7 @@ LRESULT CALLBACK winManager(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 		TextOut(hdc, 225, 150, text2, _tcslen(text2));
 		//getConfigGames
 		TextOut(hdc, 100, 200, TEXT("Configured games:  "), 20);
+		_stprintf_s(text_gameConfigured, 3, TEXT(" %d"), getGDataGameConfigured());
 		TextOut(hdc, 225, 200, text_gameConfigured, _tcslen(text_gameConfigured));
 		//getStartedGames
 		TextOut(hdc, 100, 250, TEXT("Games started:    "), 20);
@@ -182,6 +183,7 @@ LRESULT CALLBACK winGameCreateDlg(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lP
 			switch (result) {
 			case 0:
 				sendCreateGameValuesToServer(hDlg);
+				InvalidateRect(GetParent(hDlg), NULL, FALSE);
 				EndDialog(hDlg, LOWORD(wParam));
 				return TRUE;
 				break;

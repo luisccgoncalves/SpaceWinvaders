@@ -167,7 +167,7 @@ PowerUp GeneratePowerUp(int x_max, int duration) {
 	pUp.y = 0;
 
 	pUp.fired = 0;
-	pUp.type = RandomValue(7);		//Random type between 0 and 6
+	pUp.type = RandomValue(8);		//Random type between 0 and 7
 
 	pUp.duration = duration;
 	pUp.width = 2 * PROJ_SIZE;
@@ -844,6 +844,10 @@ int BombCollision(GameData * game, InvaderBomb * bomb)
 
 					if (!game->ship[i].shield) {
 						DamageShip(&game->ship[i]);
+						ResetBomb(bomb);
+						return 1;
+					}
+					else {
 						ResetBomb(bomb);
 						return 1;
 					}

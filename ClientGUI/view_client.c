@@ -36,7 +36,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		return FALSE;
 	}
 
-	SetWindowPos(hWnd, HWND_BOTTOM, 0, 0, XSIZE, YSIZE+115, 0);
+	SetWindowPos(hWnd, HWND_BOTTOM, 0, 0, XSIZE+40, YSIZE+115, 0);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 

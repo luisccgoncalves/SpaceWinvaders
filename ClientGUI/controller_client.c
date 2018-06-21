@@ -194,8 +194,8 @@ int paintMap(HDC hDC) {
 	TCHAR	tLives[3];// = { TEXT("0") };
 	TCHAR	tScore[SMALL_BUFF];
 	//Draw bounding boxes
-	Rectangle(hDC, 0, 0, XSIZE, YSIZE+cThread.localGame.ship[0].height);
-	Rectangle(hDC, 0, YSIZE+cThread.localGame.ship[0].height, XSIZE, YSIZE+100+ cThread.localGame.ship[0].height);
+	Rectangle(hDC, 0, 0, XSIZE+40, YSIZE+cThread.localGame.ship[0].height);
+	Rectangle(hDC, 0, YSIZE+cThread.localGame.ship[0].height, XSIZE+40, YSIZE+100+ cThread.localGame.ship[0].height);
 
 	bmpSprites[0] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1)); //invader
 	bmpSprites[1] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));	//ice Power Up
@@ -209,6 +209,8 @@ int paintMap(HDC hDC) {
 	bmpSprites[9] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP10)); // defenders
 	bmpSprites[10] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP11)); // +speed
 	bmpSprites[11] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP12)); // battery
+	bmpSprites[12] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP13)); // ship defender
+	bmpSprites[13] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP14)); // xtra life
 
 	DCSprites = CreateCompatibleDC(hDC);
 
@@ -229,11 +231,6 @@ int paintMap(HDC hDC) {
 						0,
 						0,
 						SRCCOPY);
-					//Rectangle(hDC,							//rand invader bitmap
-					//	cThread.localGame.invad[i].x,
-					//	cThread.localGame.invad[i].y,
-					//	cThread.localGame.invad[i].x + cThread.localGame.invad[i].width,
-					//	cThread.localGame.invad[i].y + cThread.localGame.invad[i].height);
 				}
 				else
 					SelectObject(DCSprites, bmpSprites[6]);
@@ -264,16 +261,30 @@ int paintMap(HDC hDC) {
 		}
 		for (i = 0; i < cThread.localGame.num_players; i++) {
 			if (cThread.localGame.ship[i].lives >= 0) {
-				SelectObject(DCSprites, bmpSprites[9]);
-				BitBlt(hDC,
-					cThread.localGame.ship[i].x,
-					cThread.localGame.ship[i].y,
-					cThread.localGame.ship[i].width,
-					cThread.localGame.ship[i].height,
-					DCSprites,
-					0,
-					0,
-					SRCCOPY);
+				if (cThread.localGame.ship[i].shield) {
+					SelectObject(DCSprites, bmpSprites[12]);
+					BitBlt(hDC,
+						cThread.localGame.ship[i].x,
+						cThread.localGame.ship[i].y,
+						cThread.localGame.ship[i].width,
+						cThread.localGame.ship[i].height,
+						DCSprites,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else {
+					SelectObject(DCSprites, bmpSprites[9]);
+					BitBlt(hDC,
+						cThread.localGame.ship[i].x,
+						cThread.localGame.ship[i].y,
+						cThread.localGame.ship[i].width,
+						cThread.localGame.ship[i].height,
+						DCSprites,
+						0,
+						0,
+						SRCCOPY);
+				}
 						for (j = 0; j < MAX_SHOTS; j++) {
 							if (cThread.localGame.ship[i].shots[j].fired == 1)
 							SelectObject(DCSprites, bmpSprites[8]);
@@ -373,6 +384,18 @@ int paintMap(HDC hDC) {
 				}
 				else if (cThread.localGame.pUp.type == 6) {//battery
 					SelectObject(DCSprites, bmpSprites[11]);
+					BitBlt(hDC,
+						cThread.localGame.pUp.x,
+						cThread.localGame.pUp.y,
+						cThread.localGame.pUp.width,
+						cThread.localGame.pUp.height,
+						DCSprites,
+						0,
+						0,
+						SRCCOPY);
+				}
+				else  {//life
+					SelectObject(DCSprites, bmpSprites[13]);
 					BitBlt(hDC,
 						cThread.localGame.pUp.x,
 						cThread.localGame.pUp.y,

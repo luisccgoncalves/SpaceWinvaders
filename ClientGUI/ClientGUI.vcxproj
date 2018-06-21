@@ -171,6 +171,8 @@
     <Image Include="bitmap10.bmp" />
     <Image Include="bitmap11.bmp" />
     <Image Include="bitmap12.bmp" />
+    <Image Include="bitmap13.bmp" />
+    <Image Include="bitmap14.bmp" />
     <Image Include="bitmap2.bmp" />
     <Image Include="bitmap3.bmp" />
     <Image Include="bitmap4.bmp" />

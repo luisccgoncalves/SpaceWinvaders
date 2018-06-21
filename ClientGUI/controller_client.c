@@ -64,13 +64,23 @@ int LogPlayer(HWND hDlg, BOOL remote) {
 
 
 int loadTop10(HWND hDlg) {
+
+	//cThread.localGame.top10[0].timestamp
 	//Fills in timestamps
+	int j = 0;
+	TCHAR	tScores[10][6];
+
+	for(int i=0;i<10;i++)
+		_stprintf_s(tScores[i], _countof(tScores[i]), TEXT("%05d"), cThread.localGame.top10[i].score);
+
 	for (int i = IDC_TIME1; i < (IDC_TIME1+10); i++)
-		SetDlgItemText(hDlg, i, TEXT("placeholder"));
+		SetDlgItemText(hDlg, i, cThread.localGame.top10[j++].timestamp);
+
+	j = 0;
 
 	//Fills in scores
 	for (int i = IDC_SCORE1; i < (IDC_SCORE1 + 10); i++)
-		SetDlgItemText(hDlg, i, TEXT("placeholder"));
+		SetDlgItemText(hDlg, i, tScores[j++]);
 
 	return 0;
 }
@@ -708,7 +718,3 @@ int recordKeys(HWND hDlg, BOOL defaultKeys) {
 
 	return 0;
 }
-
-/* TO DO*/
-int GetScore();
-int GetLives();

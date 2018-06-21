@@ -24,7 +24,4 @@ int SendChar(WPARAM wParam);
 int validateConfigurableKeys(HWND hDlg, BOOL defaultKey);
 int recordKeys(HWND hDlg, BOOL defaultKeys);
 
-int GetScore();
-int GetLives();
-
 #endif	//CONTROLLER_CLIENT_H

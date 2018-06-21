@@ -105,6 +105,10 @@ int _tmain(int argc, LPTSTR argv[]) {
 
 	//cThread.ThreadMustGoOn = 0;
 
+	//while (1) {
+	//	for(int i=0;i<10)
+	//}
+
 	WaitForSingleObject(htCreatePipes, INFINITE);
 
 	UnmapViewOfFile(cThread.pSMemGameData);		//Unmaps view of shared memory

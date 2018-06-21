@@ -45,6 +45,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
 	PAINTSTRUCT Ps;
+	static int gameConnected=0;
 
 	switch (message)
 	{
@@ -70,7 +71,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, ConfigureKeys);
 			break;
 		case ID_GAME_HIGHSCORES:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_TOP10), hWnd, HighScores);
+			if (gameConnected)
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_TOP10), hWnd, HighScores);
+			else
+				MessageBox(hWnd, TEXT("You need to be connected to a game!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+
 			break;
 		case ID_FILE_LOGOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG_LOGOUT), hWnd, Logout);
@@ -95,7 +100,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 				else {
 					if (MessageBox(hWnd, TEXT("Do you confirm you want to connect to a game?"), TEXT("Connect"), MB_YESNO) == IDYES)
-						ConnectGame();
+						gameConnected=ConnectGame();
 					break;
 				}
 			}

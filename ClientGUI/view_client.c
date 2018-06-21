@@ -1,5 +1,7 @@
 #include "view_client.h"
 
+int defKeys = 1;
+
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEXW wcex;
@@ -132,6 +134,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_KEYDOWN:
 			/*if default?*/
+		if (defKeys) {
 			switch (wParam) {
 			case VK_UP:
 				SendKey(3);
@@ -151,10 +154,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			default:
 				break;
 			}
+		}
+
 		break;
 	case WM_CHAR:
+		if (!defKeys)
 			SendChar(wParam);
-			/* if not default?*/
 		break;
 	case WM_CLOSE:
 		if (MessageBox(hWnd, TEXT("Are you sure?"), TEXT("Quit"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
@@ -296,6 +301,11 @@ INT_PTR CALLBACK ConfigureKeys(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			case 0:
 				//MessageBox(hDlg, TEXT("allright!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
 				recordKeys(hDlg, radioActive);
+				if(radioActive)
+					defKeys = 1;
+				else
+					defKeys = 0;
+
 				break;
 			case 1:
 				MessageBox(hDlg, TEXT("Please fill the fields with one character or select default!"), TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
